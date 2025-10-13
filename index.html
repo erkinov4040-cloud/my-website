@@ -549,10 +549,8 @@ body[data-theme="dark"] .phone-screen {
 </style>
 
 </head>
-
-   <body data-theme="light">
-
-      <div class="bg-anim"></div>
+<body>
+<div class="bg-anim"></div>
 <div class="wrap">
   <div class="dedication">
     📚 “CEFR reading bo‘limidagi lug‘atlar ushbu saytda joylashtirilgan.” 📚
@@ -1259,99 +1257,9 @@ document.addEventListener("keydown", function(e){
 // Close modal if ESC
 window.addEventListener('keydown', function(e){ if(e.key==="Escape") closeModal(); });
 
-
->
-<script>
-const hero = document.getElementById("hero");
-const sectionsView = document.getElementById("sectionsView");
-const galleryView = document.getElementById("galleryView");
-const sectionsGrid = document.getElementById("sectionsGrid");
-const galleryGrid = document.getElementById("galleryGrid");
-const galleryTitle = document.getElementById("galleryTitle");
-const searchWord = document.getElementById("searchWord");
-
-let currentSection = null;
-
-// 🔹 ENTER tugmasi — bo‘limlar sahifasini ochish
-document.getElementById("enterBtn").onclick = () => {
-  hero.style.display = "none";
-  sectionsView.style.display = "block";
-  renderSections();
-  window.scrollTo({ top: 0, behavior: "smooth" });
-};
-
-// 🔹 Bosh sahifaga qaytish
-function goHome() {
-  sectionsView.style.display = "none";
-  hero.style.display = "grid";
-}
-
-// 🔹 Bo‘limlar ro‘yxatini chiqarish
-function renderSections() {
-  sectionsGrid.innerHTML = "";
-  Object.keys(words).forEach(num => {
-    const div = document.createElement("div");
-    div.className = "section-card";
-    div.innerHTML = `<div class="section-title">Bo‘lim ${num}</div>
-                     <div class="section-desc">${words[num].length} ta so‘z</div>`;
-    div.onclick = () => openGallery(num);
-    sectionsGrid.appendChild(div);
-  });
-}
-
-// 🔹 Bo‘limni ochish
-function openGallery(num) {
-  currentSection = num;
-  sectionsView.style.display = "none";
-  galleryView.style.display = "block";
-  renderGallery(num);
-  searchWord.value = "";
-}
-
-// 🔹 Orqaga qaytish
-function openSections() {
-  galleryView.style.display = "none";
-  sectionsView.style.display = "block";
-}
-
-// 🔹 Lug‘atlar sahifasi
-function renderGallery(num) {
-  const arr = words[num];
-  galleryTitle.textContent = `Bo‘lim ${num}`;
-  galleryGrid.innerHTML = arr.map(w => `<div class="img-wrap">${w}</div>`).join("");
-}
-
-// 🔹 Qidiruv
-searchWord.addEventListener("input", e => {
-  const val = e.target.value.toLowerCase();
-  const arr = words[currentSection] || [];
-  const filtered = arr.filter(w => w.toLowerCase().includes(val));
-  galleryGrid.innerHTML = filtered.map(w => `<div class="img-wrap">${w}</div>`).join("");
-});
-
-// 🔹 Tema almashtirish (dark / light)
-const themeBtn = document.getElementById("themeBtn");
-const themeIcon = document.getElementById("themeIcon");
-
-themeBtn.onclick = () => {
-  const current = document.body.getAttribute("data-theme");
-  const next = current === "dark" ? "light" : "dark";
-  document.body.setAttribute("data-theme", next);
-  themeIcon.textContent = next === "dark" ? "light_mode" : "dark_mode";
-};
-
-// 🔹 About tugmasi — sahifaning yuqorisiga skroll
-function scrollToHero() {
-  window.scrollTo({ top: 0, behavior: "smooth" });
-}
 </script>
-
-   </body>
+</body>
 </html>
-
-
-
-
 
 
 
