@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="uz">
 
 <head>
@@ -83,6 +83,17 @@
   <meta name="google-site-verification" content="googleaa65d6fb45c7d483.html">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+  /* site logo styling: use currentColor so it adapts to light/dark themes */
+  .site-logo{display:inline-flex;align-items:center;gap:8px}
+  .site-logo img, .site-logo svg{width:36px;height:36px;display:block;color:var(--accent,#2b8aef)}
+  /* theme-aware header logo (works for IMG or inline SVG elements that use these classes) */
+  .logo .logo-light{display:inline-block}
+  .logo .logo-dark{display:none}
+  body[data-theme="dark"] .logo .logo-light{display:none}
+  body[data-theme="dark"] .logo .logo-dark{display:inline-block}
+  body[data-theme="dark"] .site-logo img, body[data-theme="dark"] .site-logo svg{filter: none}
+    </style>
   <style>
     /* Faqat "Orqaga" tugmasiga ta’sir qiladi */
     button.btn[onclick="openSections()"] {
@@ -153,6 +164,37 @@
       color: #e0e0e0;
       border-color: #555;
     }
+    
+    /* Video player va resource window dark mode */
+    body[data-theme="dark"] #resourceWindow,
+    body[data-theme="dark"] .video-player,
+    body[data-theme="dark"] .video-item {
+      background-color: #1c1f26;
+      color: #eaeaea;
+      border-color: #2a2a2a;
+    }
+    
+    body[data-theme="dark"] .video-item:hover {
+      background: #272b35;
+      border-color: #383f4a;
+    }
+    
+    body[data-theme="dark"] .video-title,
+    body[data-theme="dark"] #resourceWindowTitle,
+    body[data-theme="dark"] #resourceWindowStat {
+      color: #eaeaea;
+    }
+    
+    body[data-theme="dark"] .btn[data-vid] {
+      background-color: #2b313a;
+      color: #ffffff;
+      border-color: #383f4a;
+    }
+    
+    body[data-theme="dark"] .btn[data-vid]:hover {
+      background-color: #343b47;
+      border-color: #454d5b;
+    }
 
 
     :root {
@@ -173,6 +215,8 @@
       --radius-md: 13px;
       --radius-sm: 9px;
       --shadow: none;
+      --header-h: 72px;
+      --safe-bottom: env(safe-area-inset-bottom, 16px);
       /* barcha neon / blur / kuchli shadow olib tashlandi */
     }
 
@@ -185,8 +229,9 @@
     body {
       height: 100%;
       scroll-behavior: smooth;
-      overflow-y: overlay;
-      scroll-padding-top: 0;
+      overflow-y: auto;
+      /* Ensure scroll target accounts for the sticky header (set via JS) */
+      scroll-padding-top: var(--header-h, 72px);
       overscroll-behavior-y: none;
       -webkit-overflow-scrolling: touch;
     }
@@ -206,6 +251,9 @@
       background-repeat: no-repeat;
       background-attachment: fixed;
       min-height: 100vh;
+    /* ensure content isn't hidden by phone gesture/navigation bars
+      add an extra 48px so Android navigation bars are accounted for */
+    padding-bottom: calc(var(--safe-bottom) + 48px);
       display: flex;
       flex-direction: column;
       position: relative;
@@ -230,6 +278,8 @@
       max-width: 1200px;
       margin: 0 auto;
       padding: 32px 16px 0 16px;
+  /* add extra bottom padding so footer/last items aren't covered by mobile UI */
+  padding-bottom: calc(var(--safe-bottom) + 64px);
       width: 100%;
       flex: 1;
       display: flex;
@@ -471,12 +521,8 @@
         margin-bottom: 18px !important;
       }
 
-      @media (max-width: 768px) {
-        .lead {
-          font-size: 14px !important;
-          /* telefonda yanada mos */
-        }
-      }
+      /* Inner @media removed (duplicate). If you need different rules for
+         narrower widths, add another @media block outside this one. */
 
       .enter-btn {
         font-size: 15px !important;
@@ -515,61 +561,130 @@
       font-weight: 500;
     }
 
-    /* Resources (video gallery) */
+    /* Resources (video gallery) - redesigned dark-first */
     .resources {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: 1fr 260px;
+      gap: 16px;
+      align-items: start;
+      width: 100%;
     }
 
+    /* Player card */
     .video-player {
-      flex: 1 1 340px;
-      min-width: 280px;
+      background: #f7f8fa; /* light fallback */
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 6px 20px rgba(2,6,23,0.3);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .video-player .player-wrap {
+      background: #ffffff;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid #e6e6e9;
     }
 
     .video-player iframe {
       width: 100%;
-      height: 220px;
+      height: 320px;
+      display: block;
+      border: 0;
+      background: #000; /* ensures dark inside when iframe has transparent bg */
+    }
+
+    .video-meta {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .video-title {
+      font-size:16px;
+      font-weight:700;
+      color: #0f1720;
+    }
+
+    /* Nudge the resource window title slightly to the right */
+    #resourceWindowTitle {
+      margin-left: 12px;
+    }
+
+    /* Ensure the resource header (title + back button) sits outside the dark card
+       and the dark rounded panel is only the grid area below it */
+    #resourceWindow {
+      background: transparent !important;
+      padding: 0 !important;
+    }
+
+    #resourceWindow > div:first-child {
+      /* header row: keep it visually separate */
+      margin-bottom: 8px;
+    }
+
+    #resourceWindowGrid {
+      margin-top: 14px;
+      background: var(--surface);
+      padding: 18px;
       border-radius: 12px;
       border: 1px solid #e6e6e9;
     }
 
+    body[data-theme="dark"] #resourceWindowGrid {
+      background: #1c1f26 !important;
+      border-color: #2a2a2a !important;
+    }
+
+    .video-desc {
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    /* Playlist / sidebar */
     .video-list {
-      flex: 0 0 180px;
-      max-height: 260px;
-      overflow: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+      background: transparent;
+      border-radius: 12px;
+      padding: 8px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      max-height:420px;
+      overflow:auto;
     }
 
     .video-item {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      padding: 8px;
-      border-radius: 10px;
-      cursor: pointer;
-      background: transparent;
-      border: 1px solid transparent;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      padding:10px;
+      border-radius:10px;
+      cursor:pointer;
+      transition: all .14s ease;
+      background: #ffffff;
+      border: 1px solid #e9eef5;
     }
 
-    .video-item:hover {
-      background: #f6fbff;
-      border-color: #e6f0fb;
-    }
+    .video-thumb { width:84px; height:56px; border-radius:8px; object-fit:cover }
 
-    .video-thumb {
-      width: 64px;
-      height: 40px;
-      border-radius: 6px;
-      object-fit: cover;
-    }
+    .video-item .title-col { display:flex; flex-direction:column }
 
-    .video-title {
-      font-size: 13px;
-      color: var(--text);
-    }
+    .video-item .small-title { font-weight:600; color:#0f1720 }
+    .video-item .small-meta { font-size:12px; color:var(--muted) }
+
+    .video-item:hover { transform:translateY(-3px); box-shadow:0 6px 18px rgba(2,6,23,0.08) }
+
+    /* Dark mode overrides (strong, scoped) */
+    body[data-theme="dark"] .video-player { background: #1c1f26 !important; box-shadow:none }
+    body[data-theme="dark"] .player-wrap { background:#0b0e11 !important }
+    body[data-theme="dark"] .video-title, body[data-theme="dark"] .small-title { color:#eaeaea !important }
+    body[data-theme="dark"] .video-desc, body[data-theme="dark"] .small-meta { color:#bfc3c7 !important }
+    body[data-theme="dark"] .video-item { background:#17191d !important; border-color:#26282c !important }
+    body[data-theme="dark"] .video-item:hover { background:#202427 !important; box-shadow:none }
+    body[data-theme="dark"] .video-player iframe { background:#000 !important }
 
     /* preview / phone simplified */
     /* Final preview styling: transparent container, white phone box inside */
@@ -631,6 +746,29 @@
       border: 1px solid #eee;
     }
 
+    /* Resource window helper classes */
+    .resource-empty {
+      padding: 28px;
+      background: var(--surface);
+      border-radius: 12px;
+      text-align: center;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .resource-card {
+      background: var(--surface);
+      padding: 12px;
+      border-radius: 12px;
+    }
+
+    body[data-theme="dark"] .resource-empty,
+    body[data-theme="dark"] .resource-card {
+      background: #1c1f26 !important;
+      color: #eaeaea !important;
+      border-color: #2a2a2a !important;
+    }
+
     /* sections */
     .sections {
       display: grid;
@@ -639,6 +777,7 @@
   scroll-margin-top: 0;
       grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
       gap: 22px;
+      padding-bottom: calc(var(--safe-bottom) + 18px);
       margin-top: 30px;
       transform: translateZ(0);
       -webkit-transform: translateZ(0);
@@ -726,6 +865,7 @@
       grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
       gap: 14px;
       margin-top: 18px;
+      padding-bottom: calc(var(--safe-bottom) + 20px);
     }
 
     .img-wrap {
@@ -744,7 +884,6 @@
       gap: 8px;
       position: relative;
     }
-
     .img-wrap:hover,
     .img-wrap:focus {
       transform: scale(1.02);
@@ -845,7 +984,8 @@
 
     /* footer */
     footer {
-      margin: 38px 0 10px 0;
+  margin: 38px 0 10px 0;
+  padding-bottom: calc(var(--safe-bottom) + 10px);
       color: var(--muted);
       font-size: 13px;
       text-align: center;
@@ -1030,6 +1170,41 @@
       /* xira matn biroz ko‘rinadi */
     }
   </style>
+  <!-- Inline SVG symbols for logos (light/dark) -->
+  <div id="inline-svgs" style="display:none">
+    <svg xmlns="http://www.w3.org/2000/svg">
+      <symbol id="logo-light" viewBox="0 0 64 64">
+        <circle cx="32" cy="32" r="30" fill="#2bb4d9"></circle>
+        <path d="M20 34c4-8 12-12 20-10" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/>
+      </symbol>
+      <symbol id="logo-dark" viewBox="0 0 64 64">
+        <circle cx="32" cy="32" r="30" fill="#062029"></circle>
+        <path d="M20 34c4-8 12-12 20-10" stroke="#87CEEB" stroke-width="3" fill="none" stroke-linecap="round"/>
+      </symbol>
+    </svg>
+  </div>
+
+  <!-- small favicon data URL (simple glyph) -->
+  <link id="faviconLink" rel="icon" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="%232bb4d9"/></svg>'>
+  <script>
+    (function(){
+      // When theme toggles, swap favicon to a contrasting small SVG (inline data-URI)
+      function setFavicon(isDark){
+        const link = document.getElementById('faviconLink');
+        if(!link) return;
+        if(isDark){
+          link.href = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="%23062229"/></svg>';
+        } else {
+          link.href = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="%232bb4d9"/></svg>';
+        }
+      }
+      // initial
+      const dark = document.body && document.body.getAttribute('data-theme') === 'dark';
+      setFavicon(dark);
+      const obs = new MutationObserver(()=> setFavicon(document.body.getAttribute('data-theme') === 'dark'));
+      obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    })();
+  </script>
   <style>
     /* Hide hero briefly during initial hash-handling to avoid flash/scroll glitches on refresh */
     body.init-hide #hero {
@@ -1048,10 +1223,14 @@
     body[data-theme="dark"] footer,
     body[data-theme="dark"] .card,
     body[data-theme="dark"] .content,
-    body[data-theme="dark"] .container {
+    body[data-theme="dark"] .container,
+    body[data-theme="dark"] #resourceWindow,
+    body[data-theme="dark"] .video-player,
+    body[data-theme="dark"] .video-item {
       background-color: #1c1f26;
       color: #eaeaea;
       box-shadow: none;
+      border-color: #2a2a2a;
     }
 
     body[data-theme="dark"] h1,
@@ -1060,8 +1239,16 @@
     body[data-theme="dark"] p,
     body[data-theme="dark"] a,
     body[data-theme="dark"] span,
-    body[data-theme="dark"] label {
+    body[data-theme="dark"] label,
+    body[data-theme="dark"] .video-title,
+    body[data-theme="dark"] #resourceWindowTitle,
+    body[data-theme="dark"] #resourceWindowStat {
       color: #ffffff !important;
+    }
+    
+    body[data-theme="dark"] .video-item:hover {
+      background-color: #272b35;
+      border-color: #383f4a;
     }
 
     body[data-theme="dark"] a {
@@ -1196,7 +1383,42 @@
     }
   </style>
 
+  </style>
+
 </head>
+
+<style>
+  /* Overrides for dynamically-created resource elements (inline styles may apply light backgrounds) */
+  body[data-theme="dark"] #resourceWindowGrid > div,
+  body[data-theme="dark"] #resourceWindowGrid .card,
+  body[data-theme="dark"] #resourceWindowGrid .no-videos {
+    background-color: #1c1f26 !important;
+    color: #eaeaea !important;
+    border-color: #2a2a2a !important;
+  }
+
+  /* External-open banner created dynamically */
+  body[data-theme="dark"] #externalOpenBanner {
+    background: linear-gradient(90deg,#121417,#1b2025) !important;
+    color: #eaeaea !important;
+    border: 1px solid #2a2a2a !important;
+  }
+
+  /* Ensure gallery/resource titles don't stay forced to black by inline style="color:black" */
+  body[data-theme="dark"] #resourceGalleryTitle,
+  body[data-theme="dark"] #resourceWindowTitle,
+  body[data-theme="dark"] #resourceWindowStat {
+    color: #eaeaea !important;
+  }
+
+  /* Buttons inside resource window */
+  body[data-theme="dark"] #resourceWindow .btn,
+  body[data-theme="dark"] #resourceWindowGrid .btn {
+    background-color: #2b313a !important;
+    color: #ffffff !important;
+    border-color: #34383d !important;
+  }
+</style>
 
 <body>
   <div class="bg-anim"></div>
@@ -1207,8 +1429,9 @@
 
     <header>
       <div class="brand">
-        <div class="logo">
-          <img src="https://banner2.cleanpng.com/lnd/20250201/ae/37aa9a4e34fbe80da0980fc7d71031.webp" alt="Logo" />
+        <div class="logo" id="siteLogoWrap">
+          <img class="logo-light" src="./logo-chatgpt-like.svg" alt="Logo light" style="width:56px;height:56px;object-fit:contain;" />
+          <img class="logo-dark" src="./logo-chatgpt-like-inverse.svg" alt="Logo dark" style="width:56px;height:56px;object-fit:contain;" />
         </div>
 
         <div class="brand-titles">
@@ -1257,17 +1480,31 @@
           </p>
           <div style="display:flex;gap:12px;align-items:center">
             <button class="enter-btn" id="showResourcesBtn" onclick="openResources()"><span class="material-icons"
-                style="font-size:18px">arrow_forward</span> Videolarni ko‘rish 🎬</button>
+                style="font-size:18px">arrow_forward</span> Enter </button>
           </div>
 
           <!-- resources area (hidden by default) -->
           <div class="resources" id="resourcesArea" style="display:none; margin-top:18px;">
             <div class="video-player" id="videoPlayer">
-              <!-- iframe will be injected here -->
+              <div class="player-wrap" id="playerWrap">
+                <!-- iframe will be injected here by JS -->
+                <iframe id="mainPlayer" src="about:blank" frameborder="0" allowfullscreen loading="lazy"></iframe>
+              </div>
+              <div class="video-meta">
+                <div>
+                  <div class="video-title" id="currentVideoTitle">Video title</div>
+                  <div class="video-desc" id="currentVideoDesc">Qisqacha izoh yoki subtitle.</div>
+                </div>
+                <div>
+                  <button class="btn" id="playPauseBtn">▸ Play</button>
+                </div>
+              </div>
             </div>
+
             <div class="video-list" id="videoList" aria-label="Video ro'yxati">
-              <!-- thumbnails will be injected here -->
+              <!-- thumbnails will be injected here by JS -->
             </div>
+
             <div class="resource-note" id="resourceNote">Har bir video ostida qisqacha inglizcha izoh va o'qishga
               aloqador kulgili voqealar bo'ladi.</div>
           </div>
@@ -1333,7 +1570,7 @@
         <div>
           <h2 style="margin-top:18px;font-size:21px;color:var(--accent2);">📺 Video resurslar</h2>
           <p style="color:var(--muted);font-size:15px;font-weight:500;margin:0;">Ingliz tilidagi funny va interesting
-            videolar — har bir bo'limda 10 ta video.</p>
+            videolar.</p>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
           <button class="btn" id="resourcesBackBtn" onclick="goHome(false)"><span class="material-icons"
@@ -1376,7 +1613,7 @@
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:18px;">
         <div>
           <h2 id="resourceWindowTitle" style="font-size:21px;color:var(--accent2);margin:0;">Video bo'limi</h2>
-          <div id="resourceWindowStat" style="color:var(--muted);font-size:13px;">10 video</div>
+          <div id="resourceWindowStat" style="color:var(--muted);font-size:13px;">Enjoy with it</div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;">
           <button class="btn" id="resourceBackBtn"><span class="material-icons"
@@ -2924,7 +3161,50 @@
         "physical - jismoniy 🏋️"
       ],
 
-    };
+          31: [
+            "organizations - tashkilotlar",
+            "roles - rollar",
+            "opportunities - imkoniyatlar",
+            "organization - tashkilot",
+            "charity - xayriya",
+            "mentioned - tilga olingan",
+            "advertise - reklama qilish",
+            "within - ichida",
+            "approaching a potential - murojaat qilish",
+            "relevant - tegishli",
+            "clearly - aniq",
+            "dedicate - bag‘ishlamoq",
+            "terms - jihatlar",
+            "laying - joylashtirish",
+            "potential - salohiyatli",
+            "often envisaged - tasavvur qilinadi",
+            "social and personal maturing - yetilish",
+            "among - orasida",
+            "expression - ifoda",
+            "convey - yetkazmoq",
+            "compressed - siqilgan",
+            "audience engagement - ishtirok",
+            "promotion - targ‘ibot",
+            "sustaining - saqlash",
+            "innovation - yangilik",
+            "pure - sof",
+            "enrolling - ro‘yxatdan o‘tish",
+            "relocating - ko‘chish",
+            "expert-led - mutaxassis boshchiligidagi",
+            "aspiring - intilayotgan",
+            "artists - rassomlar",
+            "collaborate - hamkorlik qilmoq",
+            "diverse - xilma-xil",
+            "creative project - ijodiy loyiha",
+            "invisible - ko‘rinmas",
+            "digital - raqamli",
+            "patterns - naqshlar",
+            "prioritize - ustuvor qilish",
+            "exposure - e'tiborga tushish",
+            "redistributed - qayta taqsimlangan"
+          ],
+
+        };
 
     let favorites = JSON.parse(localStorage.getItem('favorites') || '{}');
     let currentSection = 1;
@@ -2979,10 +3259,23 @@
       }
     }
 
+    // Compute header height and expose as CSS variable so scroll-padding works on mobile
+    function updateHeaderHeightCSS() {
+      try {
+        const header = document.querySelector('header');
+        const h = header ? Math.ceil(header.getBoundingClientRect().height) : 72;
+        document.documentElement.style.setProperty('--header-h', h + 'px');
+        // also set body.scrollPaddingTop for browsers that respect it on the element
+        try { document.body.style.scrollPaddingTop = h + 'px'; } catch (e) { }
+      } catch (e) { console.error('updateHeaderHeightCSS error', e); }
+    }
+
     if (themeBtn) {
       themeBtn.addEventListener('click', () => {
         const isDark = document.body.getAttribute('data-theme') === 'dark';
         setDarkMode(!isDark);
+        // header height might change due to theme styles; update CSS var
+        try { updateHeaderHeightCSS(); } catch (e) { }
       });
     }
 
@@ -2993,6 +3286,12 @@
       } else {
         setDarkMode(false);
       }
+      // set header height CSS var after initial layout
+      try { updateHeaderHeightCSS(); } catch (e) { }
+      // update on resize/orientation change
+      try { window.addEventListener('resize', updateHeaderHeightCSS); } catch (e) { }
+      // some browsers need a short delay after fonts/images load
+      setTimeout(() => { try { updateHeaderHeightCSS(); } catch (e) { } }, 250);
     });
     // Defensive binding: ensure Enter button calls openSections even if earlier binding failed
     window.addEventListener('DOMContentLoaded', function () {
@@ -3482,9 +3781,6 @@
       handleNavigationState({type: 'load'});
     });
 
-    // Handle browser back/forward
-    window.addEventListener('popstate', handleNavigationState);
-
     // On first load respect hash like #section3 or #sections
     (function () {
       const h = (location.hash || '').replace('#', '');
@@ -3558,6 +3854,46 @@
 
     })();
 
+    // Demo fallback: populate resources list with sample videos if empty (non-destructive)
+    (function(){
+      try{
+        const videoList = document.getElementById('videoList');
+        const player = document.getElementById('videoPlayer');
+        const resourceNote = document.getElementById('resourceNote');
+        if(!videoList) return;
+        if(videoList.children.length > 0) return; // existing code already filled it
+
+        const samples = [
+          {id:'ysz5S6PUM-U', title:'Funny English Conversation', note:'3:21 — Beginner friendly'},
+          {id:'ScMzIvxBSi4', title:'Daily English Phrases', note:'5:12 — Useful phrases'},
+          {id:'2Vv-BfVoq4g', title:'Short Story Listening', note:'4:00 — Listening practice'}
+        ];
+
+        samples.forEach((v, idx)=>{
+          const div = document.createElement('div');
+          div.className = 'video-item';
+          div.tabIndex = 0;
+          div.setAttribute('data-src', `https://www.youtube.com/embed/${v.id}?rel=0`);
+          div.setAttribute('data-title', v.title);
+          div.innerHTML = `<img class="video-thumb" src="https://i.ytimg.com/vi/${v.id}/hqdefault.jpg" alt="thumb">
+            <div class="title-col"><div class="small-title">${v.title}</div><div class="small-meta">${v.note}</div></div>`;
+          div.addEventListener('click', ()=>{
+            const src = div.getAttribute('data-src');
+            if(player) player.innerHTML = `<iframe src="${src}" title="${v.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+            if(resourceNote) resourceNote.textContent = v.note;
+          });
+          videoList.appendChild(div);
+        });
+
+        // set first
+        if(samples[0] && player){
+          const v = samples[0];
+          player.innerHTML = `<iframe src="https://www.youtube.com/embed/${v.id}?rel=0" title="${v.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+          if(resourceNote) resourceNote.textContent = samples[0].note;
+        }
+      }catch(e){console.error(e)}
+    })();
+
     // Full resources view (second window) functions
     function openResources() {
       // hide other main views and ensure proper cleanup
@@ -3595,7 +3931,9 @@
     // mapping section -> array of video objects (id,title,note)
     const resourceVideos = {
       1: [
-        { id: 'hJfpHq6upR8' }
+        { id: 'ZD3ZaytFKiU', title: 'Video 1' },
+        { id: 'URM0-DQJ27Q', title: 'Video 2' }, 
+        { id: 'DvfTJqczEgM', title: 'Video 3' }
       ]
     };
 
@@ -3611,13 +3949,13 @@
       grid.innerHTML = '';
       if (!list.length) {
         const msg = document.createElement('div');
-        msg.style.padding = '28px'; msg.style.background = 'var(--surface)'; msg.style.borderRadius = '12px'; msg.style.textAlign = 'center';
-        msg.style.fontWeight = '700'; msg.style.color = 'var(--muted)'; msg.textContent = 'Video joylanmagan';
+        msg.className = 'resource-empty';
+        msg.textContent = 'Video joylanmagan';
         grid.appendChild(msg);
       } else {
         list.forEach((v, idx) => {
           const card = document.createElement('div');
-          card.style.background = 'var(--surface)'; card.style.padding = '12px'; card.style.borderRadius = '12px';
+          card.className = 'resource-card';
           // thumbnail + title + play button
           const thumbSrc = v.id ? `https://i.ytimg.com/vi/${v.id}/hqdefault.jpg` : '';
           card.innerHTML = `
@@ -3679,16 +4017,20 @@
       });
     }
 
-    // back button for resource window
-    document.getElementById('resourceBackBtn').addEventListener('click', function () {
-      // Let the history/popstate handler manage the transition so state stays consistent.
-      try { history.back(); } catch (e) {
-        // Fallback: manually show resources view
-        document.getElementById('resourceWindow').style.display = 'none';
-        renderResourceSections();
-        document.getElementById('resourcesView').style.display = 'block';
-      }
-    });
+    // back button for resource window (guarded)
+    (function () {
+      const backBtn = document.getElementById('resourceBackBtn');
+      if (!backBtn) return;
+      backBtn.addEventListener('click', function () {
+        // Let the history/popstate handler manage the transition so state stays consistent.
+        try { history.back(); } catch (e) {
+          // Fallback: manually show resources view
+          const rw = document.getElementById('resourceWindow'); if (rw) rw.style.display = 'none';
+          try { renderResourceSections(); } catch (e) { }
+          const rv = document.getElementById('resourcesView'); if (rv) rv.style.display = 'block';
+        }
+      });
+    })();
 
     function closeResourceModal() {
       // hide modal and destroy player but do NOT navigate history — keep user inside the same section/view
@@ -3735,6 +4077,54 @@
     window.addEventListener('popstate', handleNavigationState);
     window.addEventListener('hashchange', function () { handleNavigationState({ state: history.state }); });
 
+  </script>
+
+  <script>
+    (function(){
+      const logos = [
+          './logo-pro-knot.svg',
+          './logo-pro-solid.svg',
+          './logo-pro-badge2.svg',
+          './logo-premium-glyph.svg',
+          './logo-refined-glyph.svg',
+          './logo-pro-monogram.svg',
+          './logo-pro-abstract.svg',
+          './logo-pro-badge.svg',
+          './logo.svg'
+        ];
+      const img = document.getElementById('siteLogoImg');
+      const wrap = document.getElementById('siteLogoWrap');
+      let idx = parseInt(localStorage.getItem('siteLogoIdx') || '0', 10);
+      if(!logos[idx]) idx = 0;
+      img.src = logos[idx];
+
+      function setIdx(newIdx){
+        idx = (newIdx + logos.length) % logos.length;
+        img.src = logos[idx];
+        localStorage.setItem('siteLogoIdx', String(idx));
+      }
+<!-- Admin populate snippet (for copy into just.html) -->
+<div id="adminPopulate" style="position:fixed;right:12px;bottom:12px;width:360px;max-width:90vw;background:rgba(255,255,255,0.96);border:1px solid #ddd;padding:12px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.08);display:none;z-index:9999;font-family:Inter,Arial,sans-serif;font-size:13px;color:#111;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+    <b>Populate sections</b>
+    <button id="adminCloseBtn" style="background:transparent;border:none;font-size:16px;cursor:pointer">✖</button>
+  </div>
+  <label style="font-size:12px;color:#666;">Paste URLs (one per line)</label>
+  <textarea id="adminUrls" style="width:100%;height:140px;margin-top:6px;padding:8px;border-radius:6px;border:1px solid #ddd;resize:vertical"></textarea>
+  <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+    <label style="font-size:12px;color:#666">Sections:</label>
+    <input id="adminSections" type="number" min="1" value="3" style="width:64px;padding:6px;border-radius:6px;border:1px solid #ddd" />
+    <button id="adminPopulateBtn" class="btn" style="margin-left:auto">Populate</button>
+  </div>
+  <div style="font-size:12px;color:#888;margin-top:8px">Tip: paste many links — they will be split into 10 per section and extra will be ignored.</div>
+</div>
+  /* Logo switching disabled per user request. To re-enable, uncomment below.
+  img.addEventListener('click', function(){ setIdx(idx+1); });
+  img.addEventListener('contextmenu', function(e){ e.preventDefault(); setIdx(idx-1); return false; });
+  // keyboard support: press L while focusing header to cycle forward
+  document.addEventListener('keydown', function(e){ if(e.key.toLowerCase() === 'l') setIdx(idx+1); });
+  */
+    })();
   </script>
 </body>
 
