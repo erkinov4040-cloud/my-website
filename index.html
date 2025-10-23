@@ -183,7 +183,12 @@
 
     html,
     body {
-      height: 100%
+      height: 100%;
+      scroll-behavior: smooth;
+      overflow-y: overlay;
+      scroll-padding-top: 0;
+      overscroll-behavior-y: none;
+      -webkit-overflow-scrolling: touch;
     }
 
     body {
@@ -191,6 +196,7 @@
       font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
       color: var(--text);
       background-color: #c454542c;
+      will-change: scroll-position;
       /* biroz ochroq kulrang */
 
 
@@ -385,6 +391,10 @@
       display: flex;
       flex-direction: column;
       align-items: flex-start;
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
+      will-change: transform;
+      transition: transform 0.2s ease-out;
     }
 
     /* Raised variation: visually lifted (disabled -> restore original look) */
@@ -624,9 +634,49 @@
     /* sections */
     .sections {
       display: grid;
+  scroll-margin-top: 0;
+  scroll-snap-align: start;
+  scroll-margin-top: 0;
       grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
       gap: 22px;
       margin-top: 30px;
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
+      backface-visibility: hidden;
+      will-change: transform;
+    }
+
+    /* Smooth transitions for views */
+    #hero, #sectionsView, #galleryView, #resourcesView {
+      transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+      will-change: opacity, transform;
+    }
+
+    /* Layout robustness fixes
+       - Ensure SPA main views occupy full width inside the flex column (.wrap)
+       - Prevent grid items from overflowing or forcing unexpected wrapping
+       - Make sure hero/preview columns don't produce overflow when hidden
+    */
+    main[id$="View"], #resourceWindow, #galleryView {
+      width: 100%;
+      box-sizing: border-box;
+      display: block;
+    }
+
+    /* Prevent grid rows from collapsing and ensure items align to top */
+    .sections, .gallery {
+      align-items: start;
+      grid-auto-rows: minmax(0, auto);
+    }
+
+    /* Ensure cards do not force columns to expand beyond available space */
+    .section-card, .img-wrap {
+      min-width: 0;
+    }
+
+    /* Prevent preview/hero children from creating horizontal overflow */
+    .hero, .hero-left, .preview {
+      min-width: 0;
     }
 
     .section-card {
@@ -821,6 +871,13 @@
       padding: 10px 0 0 0;
       cursor: pointer;
       transition: color .18s;
+    }
+
+    /* Footer links inside .footer-links should not stretch full width */
+    .footer-links .footer-contact {
+      display: inline-flex !important;
+      width: auto !important;
+      padding: 6px 10px !important;
     }
 
     .footer-contact:hover {
@@ -1161,9 +1218,7 @@
         </div>
       </div>
       <nav>
-        <button class="btn" onclick="scrollToHero()">
-          <span class="material-icons" style="font-size:18px">info</span> About
-        </button>
+        <!-- About button removed per user request -->
 
         <a href="https://t.me/CEFRRReading" target="_blank" rel="noopener noreferrer" class="telegram-btn"
           title="Bizning Telegram guruhimiz">
@@ -1332,19 +1387,24 @@
         style="margin-top:14px; display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px"></div>
     </main>
 
-    <footer>
-      © CEFR Reading Vocabulary — Madeing for you
-      <a class="footer-contact" href="https://t.me/ErkinovTOP" target="_blank" rel="noopener noreferrer"
-        style="color:#007BFF; margin-right: 10px;">
-        TAKLIF uchun bog‘laning 💬
-      </a>
+    <footer style="display:flex;flex-direction:column;align-items:center;text-align:center;">
+      <div style="width:100%;max-width:900px;">
+        <div>© CEFR Reading Vocabulary — Madeing for you</div>
+          <div class="footer-links" style="display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:10px;">
+        <a class="footer-contact" href="https://t.me/ErkinovTOP" target="_blank" rel="noopener noreferrer"
+          style="color:#007BFF; display:inline-flex; align-items:center; gap:8px; width:auto;">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram" style="width:20px;height:20px;display:inline-block;vertical-align:middle;" loading="lazy">
+          <span>TAKLIF uchun bog‘laning 💬</span>
+        </a>
 
-      <a class="footer-contact" href="https://t.me/ramatovuz" target="_blank" rel="noopener noreferrer"
-        style="color:#007BFF;">
-        Your opinion important for us !!! 📩
-      </a>
-      <br>
-      <div class="horazm">Madeing in Khorezm</div>
+        <a class="footer-contact" href="https://t.me/ramatovuz" target="_blank" rel="noopener noreferrer"
+          style="color:#007BFF; display:inline-flex; align-items:center; gap:8px; width:auto;">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram" style="width:20px;height:20px;display:inline-block;vertical-align:middle;" loading="lazy">
+          <span>Your opinion important for us !!! 📩</span>
+        </a>
+        </div>
+      </div>
+      <div class="horazm" style="margin-top:12px;">Madeing in Khorezm</div>
     </footer>
   </div>
 
@@ -3039,6 +3099,9 @@
       // push history state (if requested)
       if (push) { safePush({ view: 'gallery', section }, `#section${section}`); }
       sectionsView.style.display = 'none';
+      // ensure hero is hidden when viewing a gallery (prevents page refresh/hash from leaving
+      // the hero visible and pushing the gallery content downward)
+      try { document.getElementById('hero').style.display = 'none'; } catch (e) { }
       galleryView.style.display = 'block';
       searchWord.value = '';
       // har safar lug‘atlarni boshidan chiqarish uchun slice() bilan yangi array
@@ -3050,8 +3113,23 @@
       // ensure container and window are scrolled to top (delay slightly to allow layout)
       setTimeout(() => {
         try { if (galleryGrid) { galleryGrid.scrollTop = 0; galleryGrid.scrollTo({ top: 0 }); } } catch (e) { }
-        try { window.scrollTo({ top: 0, behavior: 'auto' }); } catch (e) { }
+  try { setScrollOffsetAndScroll(galleryView, 'auto', 0); } catch (e) { }
       }, 30);
+    }
+
+    // Utility: scroll an element into view taking sticky header into account
+    function setScrollOffsetAndScroll(el, behavior = 'smooth', gap = 8) {
+      if (!el) return;
+      try {
+        const header = document.querySelector('header');
+        const headerHeight = header ? header.getBoundingClientRect().height : 0;
+        // Apply temporary scrollMarginTop so scrollIntoView respects header
+        const prev = el.style.scrollMarginTop;
+        el.style.scrollMarginTop = (Math.ceil(headerHeight) + gap) + 'px';
+        el.scrollIntoView({ behavior: behavior, block: 'start' });
+        // cleanup after animation completes
+        setTimeout(() => { try { el.style.scrollMarginTop = prev || ''; } catch (e) { } }, 700);
+      } catch (e) { }
     }
 
 
@@ -3062,23 +3140,34 @@
       sectionsView.style.display = 'block';
       document.getElementById('hero').style.display = 'none';
       renderSections();
-      // reset scroll to top
+      // Smooth scroll to top, taking sticky header into account
       setTimeout(() => {
-        try { sectionsView.scrollTop = 0; } catch (e) { }
-        try { window.scrollTo({ top: 0, behavior: 'auto' }); } catch (e) { }
+        try { if (typeof sectionsView.scrollTo === 'function') sectionsView.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { }
+        try { setScrollOffsetAndScroll(sectionsView, 'smooth'); } catch (e) { }
       }, 20);
     }
 
     function goHome(push = true) {
       if (push) { safePush({ view: 'home' }, '#home'); }
+      
       galleryView.style.display = 'none';
       sectionsView.style.display = 'none';
+      document.getElementById('resourcesView').style.display = 'none';
+      document.getElementById('resourceWindow').style.display = 'none';
+      
       document.getElementById('hero').style.display = 'grid';
-      // reset scroll to top
-      setTimeout(() => {
-        try { document.getElementById('hero').scrollIntoView(true); } catch (e) { }
-        try { window.scrollTo({ top: 0, behavior: 'auto' }); } catch (e) { }
-      }, 20);
+      
+      // Immediately scroll to top smoothly
+      try {
+        window.scrollTo({ 
+          top: 0, 
+          behavior: 'smooth',
+          block: 'start'
+        });
+      } catch (e) {
+        // Fallback for older browsers
+        window.scrollTo(0, 0);
+      }
     }
 
     function renderGallery(wordList) {
@@ -3324,13 +3413,42 @@
       localStorage.setItem('favorites', JSON.stringify(favorites));
     }
 
-    // scrollToHero (keeps original behavior but visual cue simplified)
+    // scrollToHero with smooth scroll and visual feedback
     function scrollToHero() {
-      window.scroll({ top: document.querySelector('.hero').offsetTop - 20, behavior: 'smooth' });
-      // visual cue: briefly change border of hero
-      const h = document.querySelector('.hero');
-      h.style.outline = '2px solid var(--accent)';
-      setTimeout(() => { h.style.outline = ''; }, 700);
+      const hero = document.querySelector('.hero');
+      if (!hero) return;
+      
+      // Smooth scroll with RAF for better performance
+      const start = window.pageYOffset;
+      const target = hero.offsetTop;
+      const distance = target - start;
+      const duration = 500;
+      let startTime = null;
+
+      function animation(currentTime) {
+        if (startTime === null) startTime = currentTime;
+        const timeElapsed = currentTime - startTime;
+        const progress = Math.min(timeElapsed / duration, 1);
+        
+        // Easing function for smoother animation
+        const ease = t => t<.5 ? 2*t*t : -1+(4-2*t)*t;
+        
+        window.scrollTo(0, start + (distance * ease(progress)));
+        
+        if (timeElapsed < duration) {
+          requestAnimationFrame(animation);
+        } else {
+          // Visual feedback after scroll completes
+          hero.style.transition = 'outline 0.3s ease-in-out';
+          hero.style.outline = '2px solid var(--accent)';
+          setTimeout(() => {
+            hero.style.outline = '';
+            setTimeout(() => hero.style.transition = '', 300);
+          }, 700);
+        }
+      }
+      
+      requestAnimationFrame(animation);
     }
 
     // Site protection (kept)
@@ -3351,23 +3469,21 @@
       if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     } catch (e) { }
 
-    // Handle browser back/forward
-    window.addEventListener('popstate', function (evt) {
-      const state = evt.state || {};
-      if (!state.view) {
-        // fallback to home
-        goHome(false);
-        return;
-      }
-      if (state.view === 'home') {
-        goHome(false);
-      } else if (state.view === 'sections') {
-        openSections(false);
-      } else if (state.view === 'gallery') {
-        const sec = state.section || 1;
-        openGallery(sec, false);
-      }
+    // Handle page reload/refresh
+    window.addEventListener('load', function(evt) {
+      // Clear any existing hash to ensure clean state
+      try {
+        if (location.hash) {
+          history.replaceState({view: 'home'}, '', location.pathname);
+        }
+      } catch (e) { }
+      
+      // Always go home on page load/refresh
+      handleNavigationState({type: 'load'});
     });
+
+    // Handle browser back/forward
+    window.addEventListener('popstate', handleNavigationState);
 
     // On first load respect hash like #section3 or #sections
     (function () {
@@ -3444,13 +3560,19 @@
 
     // Full resources view (second window) functions
     function openResources() {
-      // hide other main views
-      try { document.getElementById('sectionsView').style.display = 'none'; } catch (e) { }
-      try { document.getElementById('galleryView').style.display = 'none'; } catch (e) { }
+      // hide other main views and ensure proper cleanup
+      document.getElementById('sectionsView').style.display = 'none';
+      document.getElementById('galleryView').style.display = 'none';
+      document.getElementById('resourceWindow').style.display = 'none';
       document.getElementById('hero').style.display = 'none';
       document.getElementById('resourcesView').style.display = 'block';
+      
+      // Render sections and handle navigation
       renderResourceSections();
       safePush({ view: 'resources' }, '#resources');
+      
+      // Smooth scroll to top with header offset
+  setTimeout(() => { try { setScrollOffsetAndScroll(document.getElementById('resourcesView'), 'smooth', 0); } catch (e) { } }, 20);
     }
 
     function renderResourceSections() {
@@ -3512,6 +3634,8 @@
         });
       }
       if (push) { try { history.pushState({ view: 'resourceWindow', section }, '', `#resource-window-${section}`); } catch (e) { } }
+      // Scroll so the resource window is visible below the sticky header
+  try { setScrollOffsetAndScroll(win, 'smooth', 0); } catch (e) { }
     }
 
     // Play a video inside modal
@@ -3557,11 +3681,13 @@
 
     // back button for resource window
     document.getElementById('resourceBackBtn').addEventListener('click', function () {
-      document.getElementById('resourceWindow').style.display = 'none';
-      // refresh sections to remove any inline 'no videos' messages
-      renderResourceSections();
-      document.getElementById('resourcesView').style.display = 'block';
-      try { history.back(); } catch (e) { }
+      // Let the history/popstate handler manage the transition so state stays consistent.
+      try { history.back(); } catch (e) {
+        // Fallback: manually show resources view
+        document.getElementById('resourceWindow').style.display = 'none';
+        renderResourceSections();
+        document.getElementById('resourcesView').style.display = 'block';
+      }
     });
 
     function closeResourceModal() {
@@ -3578,35 +3704,32 @@
 
     // central navigation handler used by popstate and hashchange
     function handleNavigationState(evt) {
-      const state = (evt && evt.state) || {};
-      const hash = (location && location.hash) ? location.hash : '';
-
-      // If the state or hash indicates we're on a resource window
-      if (state.view === 'resourceWindow' || /^#resource-window-\d+/.test(hash)) {
-        // determine section from state or hash
-        let section = state.section;
-        const m = hash.match(/^#resource-window-(\d+)/);
-        if (!section && m) section = Number(m[1]);
-        if (section) {
-          try { openResourceSection(section, false); } catch (e) { console.error(e); }
-          return;
-        }
-      }
-
-      // If the state or hash indicates resources list
-      if (state.view === 'resources' || hash === '#resources') {
-        try {
-          document.getElementById('resourcesView').style.display = 'block';
-          document.getElementById('resourceWindow').style.display = 'none';
-          document.getElementById('hero').style.display = 'none';
-          renderResourceSections();
-        } catch (e) { }
+      // On page refresh/reload, always go home
+      if (evt && evt.type === 'load') {
+        goHome(false);
         return;
       }
 
-      // otherwise fall back to home
-      try { document.getElementById('resourcesView').style.display = 'none'; document.getElementById('resourceWindow').style.display = 'none'; } catch (e) { }
-      goHome(false);
+      const state = (evt && evt.state) || {};
+      const hash = (location && location.hash) ? location.hash : '';
+
+      // Default to home if no state/hash
+      if (!state.view && !hash) {
+        goHome(false);
+        return;
+      }
+
+      // Handle specific views based on state/hash
+      if (state.view === 'home' || hash === '#home' || hash === '') {
+        goHome(false);
+      } else if (state.view === 'sections' || hash === '#sections') {
+        openSections(false);
+      } else if (state.view === 'gallery' && state.section) {
+        openGallery(state.section, false);
+      } else {
+        // If no matching route, go home
+        goHome(false);
+      }
     }
 
     window.addEventListener('popstate', handleNavigationState);
