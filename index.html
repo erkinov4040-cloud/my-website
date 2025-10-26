@@ -570,77 +570,22 @@
       font-weight: 500;
     }
 
-    /* Resources (video gallery) - redesigned dark-first */
-    .resources {
-      display: grid;
-      grid-template-columns: 1fr 260px;
-      gap: 16px;
-      align-items: start;
-      width: 100%;
+
+
+    #resourceWindowGrid .small-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0;
     }
 
-    /* Player card */
-    .video-player {
-      background: #f7f8fa; /* light fallback */
-      border-radius: 14px;
-      padding: 16px;
-      box-shadow: 0 6px 20px rgba(2,6,23,0.3);
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+    #resourceWindowGrid .small-meta {
+      font-size: 13px;
+      color: var(--muted);
     }
 
-    .video-player .player-wrap {
-      background: #ffffff;
-      border-radius: 10px;
-      overflow: hidden;
-      border: 1px solid #e6e6e9;
-    }
-
-    .video-player iframe {
-      width: 100%;
-      height: 320px;
-      display: block;
-      border: 0;
-      background: #000; /* ensures dark inside when iframe has transparent bg */
-    }
-
-    .video-meta {
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-    }
-
-    .video-title {
-      font-size:16px;
-      font-weight:700;
-      color: #0f1720;
-    }
-
-    /* Nudge the resource window title slightly to the right */
-    #resourceWindowTitle {
-      margin-left: 12px;
-    }
-
-    /* Ensure the resource header (title + back button) sits outside the dark card
-       and the dark rounded panel is only the grid area below it */
-    #resourceWindow {
-      background: transparent !important;
-      padding: 0 !important;
-    }
-
-    #resourceWindow > div:first-child {
-      /* header row: keep it visually separate */
-      margin-bottom: 8px;
-    }
-
-    #resourceWindowGrid {
-      margin-top: 14px;
-      background: var(--surface);
-      padding: 18px;
-      border-radius: 12px;
-      border: 1px solid #e6e6e9;
+    #resourceWindowGrid .btn {
+      align-self: flex-start;
+      margin-top: auto;
     }
 
     body[data-theme="dark"] #resourceWindowGrid {
@@ -675,6 +620,24 @@
       transition: all .14s ease;
       background: #ffffff;
       border: 1px solid #e9eef5;
+      height: 100px; /* Barcha video kartochkalar uchun bir xil balandlik */
+      margin-bottom: 10px; /* Kartochkalar orasidagi masofa */
+    }
+
+    /* Video kartochkalar konteynerini to'g'rilash */
+    #resourceWindowGrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 15px;
+      align-items: start;
+    }
+
+    /* Video kartochka ichidagi rasmlar uchun */
+    .video-item img {
+      width: 120px;
+      height: 70px;
+      object-fit: cover;
+      flex-shrink: 0;
     }
 
     .video-thumb { width:84px; height:56px; border-radius:8px; object-fit:cover }
@@ -1195,23 +1158,126 @@
 
   <!-- small favicon data URL (simple glyph) -->
   <link id="faviconLink" rel="icon" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="%232bb4d9"/></svg>'>
+  <style>
+    /* Auto-contrast helper: when #hero is mostly visible, add `in-hero` on <body>
+       so we can slightly adjust background/heading contrast without changing
+       existing theme rules. This fixes the "Coder" / header text blending issue. */
+
+    /* Base header rectangle: subtle frosted effect so the header block separates
+       from the hero content while staying lightweight. We keep this small so
+       it doesn't become visually heavy on mobile. */
+    header {
+      background-color: rgba(255,255,255,0.92); /* light gentle surface */
+      -webkit-backdrop-filter: blur(6px) saturate(1.02);
+      backdrop-filter: blur(6px) saturate(1.02);
+      box-shadow: 0 6px 18px rgba(2,6,23,0.06);
+      transition: background-color 220ms ease, box-shadow 220ms ease;
+    }
+
+    /* Dark-mode header base */
+    body[data-theme="dark"] header {
+      background-color: rgba(10,14,18,0.52);
+      -webkit-backdrop-filter: blur(6px) saturate(1.02);
+      backdrop-filter: blur(6px) saturate(1.02);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.55);
+    }
+
+    /* When viewing the hero, strengthen the separation slightly */
+    body.in-hero header {
+      box-shadow: 0 10px 36px rgba(2,6,23,0.18);
+      -webkit-backdrop-filter: blur(8px) saturate(1.05);
+      backdrop-filter: blur(8px) saturate(1.05);
+      z-index: 120;
+    }
+
+    /* Slightly tint the animated background while in-hero so top text contrasts better */
+    body.in-hero .bg-anim {
+      opacity: 0.06 !important;
+      background: linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.06));
+    }
+
+    /* Make the credits line stand out a bit when hero is active (dark mode & light) */
+    body.in-hero .credits {
+      color: #bfe8ff !important; /* gentle sky-blue to match site accent but visible */
+      text-shadow: 0 1px 0 rgba(0,0,0,0.35);
+    }
+
+    /* If dark-theme specifically, use a slightly stronger accent for clarity */
+    body[data-theme="dark"].in-hero .credits {
+      color: #87CEEB !important;
+    }
+
+    /* Mobile: reduce blur amount and shadow for performance and clarity */
+    @media (max-width: 650px) {
+      header { -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); box-shadow: 0 4px 12px rgba(2,6,23,0.08); }
+      body.in-hero header { -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); box-shadow: 0 6px 18px rgba(2,6,23,0.12); }
+    }
+    /* --- Stronger dark header option when user requested a 'black' background --- */
+    /* Apply when hero is visible to make header rectangle clearly stand out */
+    body.in-hero header {
+      background-color: rgba(0,0,0,0.82) !important;
+      color: #ffffff !important;
+      box-shadow: 0 12px 42px rgba(0,0,0,0.5) !important;
+      -webkit-backdrop-filter: blur(10px) !important;
+      backdrop-filter: blur(10px) !important;
+    }
+
+    /* Ensure header children remain readable */
+    body.in-hero header .title,
+    body.in-hero header .subtitle,
+    body.in-hero header .credits {
+      color: #ffffff !important;
+    }
+
+    /* Telegram circle and theme button must stay visible on dark header */
+    body.in-hero .telegram-btn { background-color: rgba(255,255,255,0.06) !important; }
+    body.in-hero .telegram-btn img { filter: brightness(1.6) contrast(1.0) !important; }
+    body.in-hero .theme-switch { border-color: rgba(255,255,255,0.18) !important; color: #fff !important; }
+
+    /* Mobile tweak: use slightly less intense black for small screens */
+    @media (max-width: 650px) {
+      body.in-hero header { background-color: rgba(0,0,0,0.72) !important; backdrop-filter: blur(6px) !important; }
+    }
+  </style>
+
   <script>
     (function(){
-      // When theme toggles, swap favicon to a contrasting small SVG (inline data-URI)
-      function setFavicon(isDark){
-        const link = document.getElementById('faviconLink');
-        if(!link) return;
-        if(isDark){
-          link.href = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="%23062229"/></svg>';
-        } else {
-          link.href = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="%232bb4d9"/></svg>';
-        }
+      const target = document.getElementById('hero');
+      if(!target) return;
+
+      function setState(active){
+        document.body.classList.toggle('in-hero', !!active);
       }
-      // initial
-      const dark = document.body && document.body.getAttribute('data-theme') === 'dark';
-      setFavicon(dark);
-      const obs = new MutationObserver(()=> setFavicon(document.body.getAttribute('data-theme') === 'dark'));
-      obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+      if('IntersectionObserver' in window){
+        const io = new IntersectionObserver((entries)=>{
+          entries.forEach(e=>{
+            // mark active when >=50% of hero is visible
+            setState(e.isIntersecting && e.intersectionRatio >= 0.5);
+          });
+        }, { threshold: [0, 0.25, 0.5, 0.75, 1] });
+        io.observe(target);
+      } else {
+        // fallback: check on scroll/resize
+        const check = () => {
+          const rect = target.getBoundingClientRect();
+          const vh = window.innerHeight || document.documentElement.clientHeight;
+          const visible = Math.max(0, Math.min(rect.bottom, vh) - Math.max(rect.top, 0));
+          const ratio = rect.height > 0 ? visible / rect.height : 0;
+          setState(ratio >= 0.5);
+        };
+        check();
+        window.addEventListener('scroll', throttle(check, 120));
+        window.addEventListener('resize', throttle(check, 120));
+      }
+
+      function throttle(fn, wait){
+        let last = 0;
+        return function(...args){
+          const now = Date.now();
+          if(now - last >= wait){ last = now; fn.apply(this, args); }
+        };
+      }
     })();
   </script>
   <style>
@@ -1492,31 +1558,7 @@
                 style="font-size:18px">arrow_forward</span> Enter </button>
           </div>
 
-          <!-- resources area (hidden by default) -->
-          <div class="resources" id="resourcesArea" style="display:none; margin-top:18px;">
-            <div class="video-player" id="videoPlayer">
-              <div class="player-wrap" id="playerWrap">
-                <!-- iframe will be injected here by JS -->
-                <iframe id="mainPlayer" src="about:blank" frameborder="0" allowfullscreen loading="lazy"></iframe>
-              </div>
-              <div class="video-meta">
-                <div>
-                  <div class="video-title" id="currentVideoTitle">Video title</div>
-                  <div class="video-desc" id="currentVideoDesc">Qisqacha izoh yoki subtitle.</div>
-                </div>
-                <div>
-                  <button class="btn" id="playPauseBtn">▸ Play</button>
-                </div>
-              </div>
-            </div>
 
-            <div class="video-list" id="videoList" aria-label="Video ro'yxati">
-              <!-- thumbnails will be injected here by JS -->
-            </div>
-
-            <div class="resource-note" id="resourceNote">Har bir video ostida qisqacha inglizcha izoh va o'qishga
-              aloqador kulgili voqealar bo'ladi.</div>
-          </div>
 
 
         </div>
@@ -1617,8 +1659,8 @@
       </div>
     </main>
 
-    <!-- Full resource window (like lug'at gallery) -->
-    <main id="resourceWindow" style="display:none">
+  <!-- Full resource window (like lug'at gallery) -->
+  <main id="resourceWindow" class="section-card" style="display:none">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:18px;">
         <div>
           <h2 id="resourceWindowTitle" style="font-size:21px;color:var(--accent2);margin:0;">Video bo'limi</h2>
@@ -1664,6 +1706,14 @@
       style="background:transparent; width:100%; height:100vh; max-width:none; max-height:none; overflow:hidden; border-radius:0; padding:0; position:relative; display:flex; align-items:center; justify-content:center;">
       <button onclick="closeResourceModal()"
         style="position:absolute;right:14px;top:12px;background:rgba(0,0,0,0.5);color:#fff;border:none;font-size:20px;border-radius:8px;padding:6px 10px;cursor:pointer;z-index:4010">✖</button>
+      <button id="prevVideoBtn" onclick="playPreviousVideo()" 
+        style="position:absolute;left:20px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.5);color:#fff;border:none;font-size:20px;border-radius:50%;width:50px;height:50px;cursor:pointer;z-index:4010;display:flex;align-items:center;justify-content:center;">
+        <span class="material-icons">arrow_back_ios</span>
+      </button>
+      <button id="nextVideoBtn" onclick="playNextVideo()"
+        style="position:absolute;right:20px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.5);color:#fff;border:none;font-size:20px;border-radius:50%;width:50px;height:50px;cursor:pointer;z-index:4010;display:flex;align-items:center;justify-content:center;">
+        <span class="material-icons">arrow_forward_ios</span>
+      </button>
       <div id="resourceModalContent"
         style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"></div>
     </div>
@@ -3818,9 +3868,24 @@
     // --- Resources (video gallery) ---
     (function () {
       const videos = [
-        { id: 'dQw4w9WgXcQ', title: "Funny English story - short", note: "Short funny anecdote related to reading." },
-        { id: 'M7lc1UVf-VE', title: "Reading tips: skimming vs scanning", note: "Quick techniques for exam reading passages." },
-        { id: 'e-ORhEE9VVg', title: "Vocabulary hacks", note: "Memory tricks for words." }
+
+        // --- Yangi videolar ---
+        { id: 'X4B947IqV70', title: "New Video 1", note: "" },
+        { id: 'IjfzWZdRbfo', title: "New Video 2", note: "" },
+        { id: 'ZVzgfmqCwGQ', title: "New Video 3", note: "" },
+        { id: 'bvoBy2J7vj0', title: "New Video 4", note: "" },
+        { id: 'dMfsen6Dor4', title: "New Video 5", note: "" },
+        { id: 'ndmjsf_DZtk', title: "New Video 6", note: "" },
+        { id: 'llJtisztYdI', title: "New Video 7", note: "" },
+        { id: 'qnbZF0--4GU', title: "New Video 8", note: "" },
+        { id: '0FXfOR6gHOA', title: "New Video 9", note: "" },
+        { id: 'SvJYznkdB9Y', title: "New Video 10", note: "" },
+        { id: '702XzWEg_PY', title: "New Video 11", note: "" },
+        { id: 'stmfj-JslcI', title: "New Video 12", note: "" },
+        { id: 'ckJhTIROiXc', title: "New Video 13", note: "" },
+        { id: 'bXbr9y6LPcc', title: "New Video 14", note: "" },
+        { id: '4ZXTnqHg3L8', title: "New Video 15", note: "" },
+        { id: 'bNVABRbLz-g', title: "New Video 16", note: "" }
       ];
 
       const showBtn = document.getElementById('showResourcesBtn');
@@ -3940,13 +4005,72 @@
     // mapping section -> array of video objects (id,title,note)
     const resourceVideos = {
       1: [
-        { id: 'ZD3ZaytFKiU', title: 'Video 1' },
-        { id: 'URM0-DQJ27Q', title: 'Video 2' }, 
-        { id: 'DvfTJqczEgM', title: 'Video 3' }
+        { id: 'ZD3ZaytFKiU', title: ' Video 1', note: "" },
+        { id: 'URM0-DQJ27Q', title: ' Video 2', note: "" }, 
+        { id: 'DvfTJqczEgM', title: ' Video 3', note: "" },
+        { id: 'X4B947IqV70', title: " Video 4", note: "" },
+        { id: 'IjfzWZdRbfo', title: " Video 5", note: "" },
+        { id: 'ZVzgfmqCwGQ', title: " Video 6", note: "" },
+        { id: 'bvoBy2J7vj0', title: " Video 7", note: "" },
+        { id: 'dMfsen6Dor4', title: " Video 8", note: "" },
+        { id: 'ndmjsf_DZtk', title: " Video 9", note: "" },
+        { id: 'llJtisztYdI', title: " Video 10", note: "" },
+        { id: 'qnbZF0--4GU', title: " Video 11", note: "" },
+        { id: '0FXfOR6gHOA', title: " Video 12", note: "" },
+        { id: 'SvJYznkdB9Y', title: " Video 13", note: "" },
+        { id: '702XzWEg_PY', title: " Video 14", note: "" },
+        { id: 'stmfj-JslcI', title: " Video 15", note: "" },
+        { id: 'ckJhTIROiXc', title: " Video 16", note: "" },
+        { id: 'bXbr9y6LPcc', title: " Video 17", note: "" },
+        { id: '4ZXTnqHg3L8', title: " Video 18", note: "" },
+        { id: 'bNVABRbLz-g', title: " Video 19", note: "" }
       ]
     };
 
+    // Global o'zgaruvchi video indeksi uchun
+    let currentVideoIndex = 0;
+
+    function playVideoFromCard(videoId, title, note, index) {
+      currentVideoIndex = index;
+      playVideoModal(videoId);
+      updateNavigationButtons();
+    }
+
+    function playNextVideo() {
+      const videos = resourceVideos[currentSection] || [];
+      if (currentVideoIndex < videos.length - 1) {
+        currentVideoIndex++;
+        const nextVideo = videos[currentVideoIndex];
+        playVideoModal(nextVideo.id);
+        updateNavigationButtons();
+      }
+    }
+
+    function playPreviousVideo() {
+      const videos = resourceVideos[currentSection] || [];
+      if (currentVideoIndex > 0) {
+        currentVideoIndex--;
+        const prevVideo = videos[currentVideoIndex];
+        playVideoModal(prevVideo.id);
+        updateNavigationButtons();
+      }
+    }
+
+    function updateNavigationButtons() {
+      const videos = resourceVideos[currentSection] || [];
+      const prevBtn = document.getElementById('prevVideoBtn');
+      const nextBtn = document.getElementById('nextVideoBtn');
+      
+      if (prevBtn) {
+        prevBtn.style.display = currentVideoIndex > 0 ? 'flex' : 'none';
+      }
+      if (nextBtn) {
+        nextBtn.style.display = currentVideoIndex < videos.length - 1 ? 'flex' : 'none';
+      }
+    }
+
     function openResourceSection(section, push = true) {
+      currentSection = section;
       // open full resource window for the section
       const list = resourceVideos[section] || [];
       const win = document.getElementById('resourceWindow');
@@ -3955,6 +4079,12 @@
       win.style.display = 'block';
       document.getElementById('resourceWindowTitle').textContent = `Bo'lim ${section} videolari`;
       document.getElementById('resourceWindowStat').textContent = `${list.length} video`;
+      // Grid containerga stil qo'shamiz
+      grid.style.display = 'grid';
+      grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(280px, 1fr))';
+      grid.style.gap = '15px';
+      grid.style.padding = '15px';
+      
       grid.innerHTML = '';
       if (!list.length) {
         const msg = document.createElement('div');
@@ -3965,15 +4095,17 @@
         list.forEach((v, idx) => {
           const card = document.createElement('div');
           card.className = 'resource-card';
-          // thumbnail + title + play button
+          // thumbnail + title + play button 
           const thumbSrc = v.id ? `https://i.ytimg.com/vi/${v.id}/hqdefault.jpg` : '';
           card.innerHTML = `
-          <div style="display:flex;gap:10px;align-items:center">
-            <img src="${thumbSrc}" alt="thumb" style="width:120px;height:70px;object-fit:cover;border-radius:8px">
-            <div style="flex:1">
-              <div style="font-weight:700;margin-bottom:6px">${escapeHtml(v.title || ('Video ' + (idx + 1)))}</div>
-              <div style="color:var(--muted);font-size:13px;margin-bottom:8px">${escapeHtml(v.note || '')}</div>
-              <div><button class="btn" data-vid="${escapeHtml(v.id || '')}" onclick="playVideoModal('${escapeHtml(v.id || '')}')">▶ Play</button></div>
+          <div class="video-item" style="cursor:pointer;position:relative;display:flex;flex-direction:column;height:200px;border-radius:12px;overflow:hidden;background:var(--surface);border:1px solid var(--accent2)" onclick="playVideoFromCard('${escapeHtml(v.id || '')}', '${escapeHtml(v.title || ('Video ' + (idx + 1)))}', '${escapeHtml(v.note || '')}', ${idx})">
+            <img src="${thumbSrc}" alt="thumb" style="width:100%;height:140px;object-fit:cover">
+            <div style="flex:1;padding:10px;display:flex;flex-direction:column;justify-content:space-between">
+              <div style="font-weight:600;font-size:14px;line-height:1.4">${escapeHtml(v.title || ('Video ' + (idx + 1)))}</div>
+              <div style="color:var(--muted);font-size:12px">${escapeHtml(v.note || '')}</div>
+            </div>
+            <div class="play-button" style="position:absolute;left:50%;top:70px;transform:translate(-50%,-50%);background:rgba(0,0,0,0.7);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;">
+              <span class="material-icons" style="color:white;font-size:24px">play_arrow</span>
             </div>
           </div>
         `;
@@ -3981,8 +4113,8 @@
         });
       }
       if (push) { try { history.pushState({ view: 'resourceWindow', section }, '', `#resource-window-${section}`); } catch (e) { } }
-      // Scroll so the resource window is visible below the sticky header
-  try { setScrollOffsetAndScroll(win, 'smooth', 0); } catch (e) { }
+      // Scroll so the resource window is visible below the sticky header 
+      try { setScrollOffsetAndScroll(win, 'smooth', 0); } catch (e) { }
     }
 
     // Play a video inside modal
