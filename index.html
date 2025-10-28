@@ -73,7 +73,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>CEFR Reading | English Reading Practice and Vocabulary</title>
   <meta name="theme-color" content="#87CEEB">
-  <link rel="icon" href="https://banner2.cleanpng.com/lnd/20250201/ae/37aa9a4e34fbe80da0980fc7d71031.webp" />
+  <link rel="icon" href="https://avatars.githubusercontent.com/u/857719?v=4&s=400" />
   <meta name="description"
     content="Practice CEFR reading exercises and improve your English with free texts and vocabulary lessons. Perfect for beginners and all CEFR levels (A1–C1).">
   <meta name="keywords"
@@ -83,35 +83,101 @@
   <meta name="google-site-verification" content="googleaa65d6fb45c7d483.html">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="logo-fixes.css" rel="stylesheet">
     <style>
-  /* site logo styling: use currentColor so it adapts to light/dark themes */
-  .site-logo{display:inline-flex;align-items:center;gap:8px}
-  .site-logo img, .site-logo svg{width:36px;height:36px;display:block;color:var(--accent,#2b8aef)}
-  /* theme-aware header logo (works for IMG or inline SVG elements that use these classes) */
-  .logo .logo-light{display:inline-block}
-    .logo .logo-dark{display:none}
-    body[data-theme="dark"] .logo .logo-light{display:none}
-    body[data-theme="dark"] .logo .logo-dark{display:inline-block}
-    /* Make dark-mode logo circular and centered */
-    body[data-theme="dark"] .logo img.logo-dark {
-      display: inline-block !important;
-      width: 56px !important;
-      height: 56px !important;
-      object-fit: cover !important;
-      border-radius: 50% !important;
-      overflow: hidden !important;
-      object-position: center !important;
-      transform: scale(1) !important;
+
+
+/* Logo visibility fixes: use a larger container and contain the image to avoid cropping */
+.logo {
+  width: 56px !important;
+  height: 56px !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: transparent !important;
+  border: 0 !important;
+}
+
+.logo img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important; /* preserve original image proportions for clarity */
+  display: block !important;
+}
+
+/* Dark mode tweaks (no forced white background which can wash out transparent PNGs) */
+body[data-theme="dark"] .logo {
+  background: transparent !important;
+}
+
+/* Mobile optimizations */
+@media (max-width: 650px) {
+  .logo {
+    width: 40px !important;
+    height: 40px !important;
+  }
+}
+  /* Logo styling (restored for clarity) */
+  .logo {
+    display: block;
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: transparent;
+    transition: transform 0.12s ease;
+  }
+
+  .logo:hover {
+    transform: scale(1.03);
+  }
+
+  .logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* preserve original image, avoid cropping */
+    image-rendering: auto;
+    display: block;
+  }
+
+  /* Mobile */
+  @media (max-width: 650px) {
+    .logo {
+      width: 40px;
+      height: 40px;
     }
-    
-    @media (max-width: 650px) {
-      body[data-theme="dark"] .logo img.logo-dark {
-        width: 32px !important;
-        height: 32px !important;
-      }
-    }
-    body[data-theme="dark"] .site-logo img, body[data-theme="dark"] .site-logo svg{filter: none}
+  }
     </style>
+    <!-- Floating theme wiring removed (floating controls deleted) -->
+
+    <!-- Controls removed as requested by the user (Telegram and theme toggle not needed) -->
+    <script>
+      // Position floating controls at bottom-right (respect safe-area). Less intrusive and professional.
+      (function(){
+        const wrap = document.getElementById('floatingControlWrap');
+        if(!wrap) return;
+
+        function position() {
+          try {
+            // prefer CSS env variable if available; fallback to 12px
+            const safeBottom = getComputedStyle(document.documentElement).getPropertyValue('--safe-bottom') || '16px';
+            // place 12px above the safe area
+            wrap.style.bottom = `calc(${safeBottom} + 12px)`;
+            wrap.style.top = 'auto';
+            // keep a comfortable right offset
+            wrap.style.right = '12px';
+          } catch (e) { /* ignore */ }
+        }
+
+        function throttle(fn, wait){ let last=0; return function(){ const now=Date.now(); if(now-last>wait){ last=now; fn(); } }; }
+
+        window.addEventListener('load', position);
+        window.addEventListener('resize', throttle(position, 120));
+        position();
+      })();
+    </script>
   <style>
     /* Faqat "Orqaga" tugmasiga ta’sir qiladi */
     button.btn[onclick="openSections()"] {
@@ -349,20 +415,23 @@
     }
 
     .logo {
-      width: 56px !important;
-      /* logoning konteyner kengligi */
-      height: 56px !important;
-      /* logoning konteyner balandligi */
+      width: 48px !important;
+      height: 48px !important;
       border-radius: var(--radius-lg);
       overflow: hidden;
-      /* rasm konteynerdan chiqmasin */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #ffffff;
+      border: 1px solid rgba(0,0,0,0.1);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
 
     .logo img {
-      width: 56px !important;
-      height: 56px !important;
-      object-fit: contain !important;
-      /* rasm konteynerga moslashadi */
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      display: block;
     }
 
     .brand-titles {
@@ -1637,10 +1706,9 @@
 
     <header>
       <div class="brand">
-        <div class="logo" id="siteLogoWrap">
-          <img class="logo-light" src="https://banner2.cleanpng.com/lnd/20250201/ae/37aa9a4e34fbe80da0980fc7d71031.webp" alt="Logo light" style="width:56px;height:56px;object-fit:contain;" />
-          <img class="logo-dark" src="https://avatars.githubusercontent.com/u/857719?v=4&s=400" alt="Logo dark" style="width:56px;height:56px;object-fit:contain;" />
-        </div>
+        <a href="#" class="logo" aria-label="CEFR Reading home">
+          <img src="https://avatars.githubusercontent.com/u/857719?v=4&s=400" alt="CEFR Reading" width="56" height="56" loading="lazy">
+        </a>
 
         <div class="brand-titles">
           <div class="title">CEFR Reading — Lug‘atlar</div>
@@ -1648,23 +1716,108 @@
           <div class="credits">Coder: M.Erkinov &nbsp;|&nbsp; Designer: T.Ramatov &amp; X.Ramatov</div>
         </div>
       </div>
-      <nav>
-        <!-- About button removed per user request -->
-
-        <a href="https://t.me/CEFRRReading" target="_blank" rel="noopener noreferrer" class="telegram-btn"
-          title="Bizning Telegram guruhimiz">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram"
-            class="tg-icon" loading="lazy">
-        </a>
-
-        <button class="theme-switch" id="themeBtn" title="Rejimni o'zgartirish">
-          <span class="material-icons" id="themeIcon">dark_mode</span>
-        </button>
-      </nav>
+      <nav aria-hidden="true"></nav>
 
 
 
     </header>
+
+    <style>
+      /* Mobile header adjustments: keep brand texts visible and move controls to their own row */
+      @media (max-width: 650px) {
+        header {
+          align-items: flex-start;
+          padding: 10px 12px;
+          /* allow children to wrap into rows */
+          flex-wrap: wrap;
+        }
+
+        /* Brand row: logo + titles (occupies full width) */
+        .brand {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          width: 100%;
+          order: 1;
+          min-width: 0;
+        }
+
+        .logo {
+          flex: 0 0 auto;
+          width: 36px !important;
+          height: 36px !important;
+          border-radius: 10px;
+        }
+
+        .logo img {
+          width: 100% !important;
+          height: 100% !important;
+          object-fit: cover !important;
+          border-radius: 8px;
+        }
+        
+        body[data-theme="dark"] .logo {
+          background: #1c1f26;
+          border-color: rgba(255,255,255,0.1);
+          box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .brand-titles {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          flex: 1 1 auto;
+          min-width: 0; /* allow wrapping inside */
+        }
+
+        .title { font-size: 16px; }
+
+        .subtitle { font-size: 12px; }
+
+        .credits {
+          font-size: 10px; /* smaller on phones */
+          margin-top: 4px;
+          color: var(--muted);
+          display: block;
+          white-space: normal;
+          overflow-wrap: anywhere; /* keep long words from overflowing */
+          padding: 2px 6px; /* reduce padding so it looks compact on small screens */
+        }
+
+        /* Controls row: place nav (telegram + theme) on a separate line below the brand */
+        nav {
+          order: 2;
+          width: 100%;
+          display: flex;
+          justify-content: flex-end;
+          gap: 8px;
+          margin-top: 8px;
+        }
+
+        /* Make the small buttons compact on phones */
+        .telegram-btn, .theme-switch {
+          margin-left: 0;
+          width: 36px;
+          height: 36px;
+          padding: 6px;
+          border-radius: 10px;
+        }
+
+        .telegram-btn img { width: 20px; height: 20px; }
+      }
+    </style>
+
+    <style>
+      /* Ensure header/brand remain vertically centered on small screens so logo doesn't jump up */
+      @media (max-width: 650px) {
+        header { align-items: center !important; }
+        .brand { align-items: center !important; }
+        .brand-titles { gap: 4px; }
+        .title { display:flex; align-items:center; gap:10px; }
+        .title-logo { width:40px !important; height:40px !important; margin-top:0 !important; vertical-align:middle !important; }
+        .credits { font-size:10px !important; padding:2px 6px !important; }
+      }
+    </style>
 
     <section class="hero" id="hero">
       <div class="hero-left">
@@ -1833,17 +1986,28 @@
   <div id="modalBg" style="display:none;"></div>
 
   <style>
-    #prevVideoBtn, #nextVideoBtn {
+    /* side and bottom controls share visibility rules */
+    #prevVideoBtn, #nextVideoBtn, #prevVideoBtnBottom, #nextVideoBtnBottom {
       opacity: 0;
-      transition: opacity 0.3s ease;
+      transition: opacity 0.25s ease, transform 0.25s ease;
     }
 
+    /* when modal hovered or controls visible, show controls */
     #resourceModal:hover #prevVideoBtn,
     #resourceModal:hover #nextVideoBtn,
+    #resourceModal:hover #prevVideoBtnBottom,
+    #resourceModal:hover #nextVideoBtnBottom,
     .controls-visible #prevVideoBtn,
-    .controls-visible #nextVideoBtn {
+    .controls-visible #nextVideoBtn,
+    .controls-visible #prevVideoBtnBottom,
+    .controls-visible #nextVideoBtnBottom {
       opacity: 1;
+      transform: translateY(0);
     }
+
+    /* bottom controls should be clickable when visible */
+    #prevVideoBtnBottom, #nextVideoBtnBottom { pointer-events: none; }
+    .controls-visible #prevVideoBtnBottom, .controls-visible #nextVideoBtnBottom { pointer-events: auto; }
   </style>
 
   <script>
@@ -1852,32 +2016,38 @@
     function hideControls() {
         const modal = document.getElementById('resourceModal');
         const videoControls = document.getElementById('videoControls');
-        if (modal && videoControls) {
+        const bottomControls = document.getElementById('resourceModalBottomControls');
+        if (modal) {
             modal.classList.remove('controls-visible');
-            videoControls.style.opacity = '0';
+            if (videoControls) videoControls.style.opacity = '0';
+            if (bottomControls) bottomControls.style.opacity = '0';
         }
     }
 
     function showControls() {
         const modal = document.getElementById('resourceModal');
         const videoControls = document.getElementById('videoControls');
-        if (modal && videoControls) {
+        const bottomControls = document.getElementById('resourceModalBottomControls');
+        if (modal) {
             modal.classList.add('controls-visible');
-            videoControls.style.opacity = '1';
+            if (videoControls) videoControls.style.opacity = '1';
+            if (bottomControls) bottomControls.style.opacity = '1';
             
             if (hideControlsTimeout) {
                 clearTimeout(hideControlsTimeout);
             }
             
-            hideControlsTimeout = setTimeout(hideControls, 2000);
+            hideControlsTimeout = setTimeout(hideControls, 2500);
         }
     }
 
     const resourceModal = document.getElementById('resourceModal');
     const prevBtn = document.getElementById('prevVideoBtn');
     const nextBtn = document.getElementById('nextVideoBtn');
+    const prevBtnBottom = document.getElementById('prevVideoBtnBottom');
+    const nextBtnBottom = document.getElementById('nextVideoBtnBottom');
 
-    if (resourceModal && prevBtn && nextBtn) {
+    if (resourceModal) {
         let isMouseOverControls = false;
         let lastMouseMoveTime = Date.now();
 
@@ -1907,10 +2077,10 @@
             showControls();
         }
 
-        prevBtn.addEventListener('mouseenter', onButtonEnter);
-        prevBtn.addEventListener('mouseleave', onButtonLeave);
-        nextBtn.addEventListener('mouseenter', onButtonEnter);
-        nextBtn.addEventListener('mouseleave', onButtonLeave);
+        if (prevBtn) { prevBtn.addEventListener('mouseenter', onButtonEnter); prevBtn.addEventListener('mouseleave', onButtonLeave); }
+        if (nextBtn) { nextBtn.addEventListener('mouseenter', onButtonEnter); nextBtn.addEventListener('mouseleave', onButtonLeave); }
+        if (prevBtnBottom) { prevBtnBottom.addEventListener('mouseenter', onButtonEnter); prevBtnBottom.addEventListener('mouseleave', onButtonLeave); }
+        if (nextBtnBottom) { nextBtnBottom.addEventListener('mouseenter', onButtonEnter); nextBtnBottom.addEventListener('mouseleave', onButtonLeave); }
 
         resourceModal.addEventListener('mouseleave', () => {
             isMouseOverControls = false;
@@ -1938,26 +2108,49 @@
     const style = document.createElement('style');
     style.textContent = `
         @media (hover: none) and (pointer: coarse) {
-            #prevVideoBtn, #nextVideoBtn {
-                padding: 15px;
-                width: 60px;
-                height: 60px;
-            }
-            
-            #prevVideoBtn .material-icons,
-            #nextVideoBtn .material-icons {
-                font-size: 30px;
-            }
+          /* Side nav buttons hidden on mobile, bottom replaces */
+          #prevVideoBtn, #nextVideoBtn {
+            display: none;
+          }
 
-            .video-controls {
-                padding-top: env(safe-area-inset-top, 20px) !important;
-            }
+          /* YouTube-style bottom controls */
+          #resourceModalBottomControls {
+            padding: 40px 16px 16px !important;
+            background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.2) 60%, transparent 100%) !important;
+            bottom: 0 !important;
+          }
 
-            .control-btn {
-                width: 44px !important;
-                height: 44px !important;
-                font-size: 22px !important;
-            }
+          /* Bottom nav buttons - YouTube style */
+          .nav-btn {
+            padding: 8px 12px !important;
+            border-radius: 2px !important;
+            height: 36px !important;
+            font-size: 15px !important;
+            background: rgba(28,28,28,0.9) !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+            display: flex !important;
+            align-items: center !important;
+          }
+
+          .nav-btn .material-icons {
+            font-size: 18px !important;
+            margin: -1px 0 !important;
+          }
+
+          .nav-btn:hover {
+            background: rgba(28,28,28,0.95) !important;
+          }
+
+          .video-controls {
+            padding-top: calc(env(safe-area-inset-top, 20px) + 10px) !important;
+          }
+
+          .control-btn {
+            width: 40px !important;
+            height: 40px !important;
+            font-size: 20px !important;
+          }
         }
 
         .video-controls {
@@ -1972,20 +2165,31 @@
     style="display:none; position:fixed; inset:0; z-index:4000; align-items:center; justify-content:center; background:rgba(0,0,0,0.85);">
     <div id="resourceModal"
       style="background:transparent; width:100%; height:100vh; max-width:none; max-height:none; overflow:hidden; border-radius:0; padding:0; position:relative; display:flex; align-items:center; justify-content:center;">
-      <div id="videoControls" class="video-controls" style="position:absolute;top:0;left:0;right:0;padding:10px;display:flex;justify-content:flex-end;z-index:4010;opacity:0;transition:opacity 0.3s ease;">
-        <button onclick="closeResourceModal()" class="control-btn" style="background:rgba(0,0,0,0.5);color:#fff;border:none;font-size:20px;border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-left:10px;">✖</button>
-        <button class="control-btn volume-btn" style="background:rgba(0,0,0,0.5);color:#fff;border:none;font-size:20px;border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-left:10px;">🔊</button>
+      <!-- Top controls with close button -->
+      <div id="videoControls" class="video-controls" 
+        style="position:absolute;top:0;left:0;right:0;padding:10px;display:flex;justify-content:flex-end;z-index:4010;opacity:0;transition:opacity 0.3s ease;background:linear-gradient(to bottom, rgba(0,0,0,0.4), transparent);">
+        <button onclick="closeResourceModal()" class="control-btn" 
+          style="background:rgba(28,28,28,0.9);color:#fff;border:none;font-size:16px;border-radius:2px;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin:8px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);">✖</button>
       </div>
-      <button id="prevVideoBtn" onclick="playPreviousVideo()" 
-        style="position:absolute;left:20px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.5);color:#fff;border:none;font-size:20px;border-radius:50%;width:50px;height:50px;cursor:pointer;z-index:4010;display:flex;align-items:center;justify-content:center;">
-        <span class="material-icons">arrow_back_ios</span>
-      </button>
-      <button id="nextVideoBtn" onclick="playNextVideo()"
-        style="position:absolute;right:20px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.5);color:#fff;border:none;font-size:20px;border-radius:50%;width:50px;height:50px;cursor:pointer;z-index:4010;display:flex;align-items:center;justify-content:center;">
-        <span class="material-icons">arrow_forward_ios</span>
-      </button>
       <div id="resourceModalContent"
         style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"></div>
+
+      <!-- Bottom-centered controls (YouTube-style) -->
+      <div id="resourceModalBottomControls" style="position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:center;align-items:center;z-index:4010;opacity:1;pointer-events:none;background:linear-gradient(to top, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.2) 60%, transparent 100%);padding:40px 20px 20px;">
+        <div style="display:flex;justify-content:center;gap:16px;align-items:center;width:100%;max-width:400px;">
+          <button id="prevVideoBtn" onclick="playPreviousVideo()" class="nav-btn"
+            style="pointer-events:auto;display:none;align-items:center;justify-content:center;background:rgba(28,28,28,0.9);color:#fff;border:none;border-radius:2px;padding:8px 12px;height:36px;font-size:15px;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);">
+            <span class="material-icons" style="font-size:18px;margin:-1px 0;">arrow_back_ios</span>
+            <span style="margin-left:4px"></span>
+          </button>
+          <button id="nextVideoBtn" onclick="playNextVideo()" class="nav-btn"
+            style="pointer-events:auto;display:none;align-items:center;justify-content:center;background:rgba(28,28,28,0.9);color:#fff;border:none;border-radius:2px;padding:8px 12px;height:36px;font-size:15px;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);">
+            <span style="margin-right:4px"></span>
+            <span class="material-icons" style="font-size:18px;margin:-1px 0;">arrow_forward_ios</span>
+          </button>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -4299,15 +4503,19 @@
 
     // Global o'zgaruvchi video indeksi uchun
     let currentVideoIndex = 0;
+  // currently active list shown in the modal (either resourceVideos[currentSection] or window.videos)
+  window.activeResourceList = null;
 
     function playVideoFromCard(videoId, title, note, index) {
       currentVideoIndex = index;
+      // set active list to the current section mapping (fallback to window.videos)
+      window.activeResourceList = (resourceVideos[currentSection] && resourceVideos[currentSection].length) ? resourceVideos[currentSection] : (window.videos || []);
       playVideoModal(videoId);
       updateNavigationButtons();
     }
 
     function playNextVideo() {
-      const videos = resourceVideos[currentSection] || [];
+      const videos = (window.activeResourceList && window.activeResourceList.length) ? window.activeResourceList : (resourceVideos[currentSection] || window.videos || []);
       if (currentVideoIndex < videos.length - 1) {
         currentVideoIndex++;
         const nextVideo = videos[currentVideoIndex];
@@ -4317,7 +4525,7 @@
     }
 
     function playPreviousVideo() {
-      const videos = resourceVideos[currentSection] || [];
+      const videos = (window.activeResourceList && window.activeResourceList.length) ? window.activeResourceList : (resourceVideos[currentSection] || window.videos || []);
       if (currentVideoIndex > 0) {
         currentVideoIndex--;
         const prevVideo = videos[currentVideoIndex];
@@ -4326,18 +4534,69 @@
       }
     }
 
-    function updateNavigationButtons() {
-      const videos = resourceVideos[currentSection] || [];
-      const prevBtn = document.getElementById('prevVideoBtn');
-      const nextBtn = document.getElementById('nextVideoBtn');
-      
-      if (prevBtn) {
-        prevBtn.style.display = currentVideoIndex > 0 ? 'flex' : 'none';
+    // iife for side/bottom video navigation controls
+    (function() {
+      // create mobile/touch detect helper
+      function isMobileOrTouch() {
+        return window.matchMedia('(hover: none), (pointer: coarse)').matches;
       }
-      if (nextBtn) {
-        nextBtn.style.display = currentVideoIndex < videos.length - 1 ? 'flex' : 'none';
+
+      function updateNavigationButtons() {
+        const videos = (window.activeResourceList && window.activeResourceList.length) ? window.activeResourceList : (resourceVideos[currentSection] || window.videos || []);
+        const prevBtn = document.getElementById('prevVideoBtn');
+        const nextBtn = document.getElementById('nextVideoBtn');
+        const prevBtnBottom = document.getElementById('prevVideoBtnBottom');
+        const nextBtnBottom = document.getElementById('nextVideoBtnBottom');
+        
+        const showPrev = currentVideoIndex > 0;
+        const showNext = currentVideoIndex < videos.length - 1;
+
+        // always hide either side OR bottom based on device - never show both
+        const useSideButtons = !isMobileOrTouch();
+
+        // for desktop, show side buttons
+        if (useSideButtons) {
+          if (prevBtn) {
+            prevBtn.style.display = showPrev ? 'flex' : 'none';
+            prevBtn.style.pointerEvents = showPrev ? 'auto' : 'none';
+          }
+          if (nextBtn) {
+            nextBtn.style.display = showNext ? 'flex' : 'none';
+            nextBtn.style.pointerEvents = showNext ? 'auto' : 'none';
+          }
+          // hide bottom controls
+          if (prevBtnBottom) prevBtnBottom.style.display = 'none';
+          if (nextBtnBottom) nextBtnBottom.style.display = 'none';
+        }
+        // for mobile/touch, show bottom buttons
+        else {
+          // hide side buttons
+          if (prevBtn) prevBtn.style.display = 'none';
+          if (nextBtn) nextBtn.style.display = 'none';
+          // show/hide bottom controls based on availability
+          if (prevBtnBottom) {
+            prevBtnBottom.style.display = showPrev ? 'flex' : 'none';
+            prevBtnBottom.style.pointerEvents = showPrev ? 'auto' : 'none';
+          }
+          if (nextBtnBottom) {
+            nextBtnBottom.style.display = showNext ? 'flex' : 'none';
+            nextBtnBottom.style.pointerEvents = showNext ? 'auto' : 'none';
+          }
+        }
       }
-    }
+
+      // expose updateNavigationButtons in window scope for external calls
+      window.updateNavigationButtons = updateNavigationButtons;
+
+      // run initial update
+      try { updateNavigationButtons(); } catch (e) { }
+
+      // update on orientation change (may switch between mobile/desktop)
+      window.addEventListener('orientationchange', function() {
+        try { setTimeout(updateNavigationButtons, 150); } catch (e) { }
+      });
+
+    })();
 
     function openResourceSection(section, push = true) {
       currentSection = section;
@@ -4405,6 +4664,13 @@
       const modalContent = document.getElementById('resourceModalContent');
       modalContent.innerHTML = `<div id="ytPlayerWrap" style="width:100%;height:100%;"></div>`;
       document.getElementById('resourceModalBg').style.display = 'flex';
+
+      // show controls briefly when opening
+      try { showControls(); setTimeout(hideControls, 2500); } catch (e) {}
+
+      // update prev/next UI based on current index/list
+      try { updateNavigationButtons(); } catch (e) {}
+
       // ensure API loaded then create player
       loadYouTubeAPI(function () {
         // destroy previous
@@ -4503,40 +4769,61 @@
           './logo-pro-badge.svg',
           './logo.svg'
         ];
-      const img = document.getElementById('siteLogoImg');
+      // prefer the light logo image inside the existing wrapper
+      const img = document.querySelector('#siteLogoWrap img.logo-light') || document.querySelector('#siteLogoWrap img');
       const wrap = document.getElementById('siteLogoWrap');
-      let idx = parseInt(localStorage.getItem('siteLogoIdx') || '0', 10);
-      if(!logos[idx]) idx = 0;
-      img.src = logos[idx];
+      if (!img) return; // nothing to do
+
+      // Only override the existing src if user previously selected an alternate logo
+      // (we don't want to replace working absolute URLs with local relative paths).
+      const stored = localStorage.getItem('siteLogoIdx');
+      let idx = parseInt(stored || '0', 10);
+
+      if (stored !== null) {
+        if (!logos[idx]) idx = 0;
+        const candidate = logos[idx];
+        // preload candidate to avoid showing broken image if file missing
+        const tester = new Image();
+        tester.onload = function() { img.src = candidate; };
+        tester.onerror = function() { console.warn('Logo file failed to load:', candidate); };
+        tester.src = candidate;
+      }
 
       function setIdx(newIdx){
         idx = (newIdx + logos.length) % logos.length;
-        img.src = logos[idx];
-        localStorage.setItem('siteLogoIdx', String(idx));
+        const candidate = logos[idx];
+        const tester = new Image();
+        tester.onload = function() { img.src = candidate; localStorage.setItem('siteLogoIdx', String(idx)); };
+        tester.onerror = function() { showToast('Logo fayli topilmadi'); };
+        tester.src = candidate;
       }
-<!-- Admin populate snippet (for copy into just.html) -->
-<div id="adminPopulate" style="position:fixed;right:12px;bottom:12px;width:360px;max-width:90vw;background:rgba(255,255,255,0.96);border:1px solid #ddd;padding:12px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.08);display:none;z-index:9999;font-family:Inter,Arial,sans-serif;font-size:13px;color:#111;">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-    <b>Populate sections</b>
-    <button id="adminCloseBtn" style="background:transparent;border:none;font-size:16px;cursor:pointer">✖</button>
-  </div>
-  <label style="font-size:12px;color:#666;">Paste URLs (one per line)</label>
-  <textarea id="adminUrls" style="width:100%;height:140px;margin-top:6px;padding:8px;border-radius:6px;border:1px solid #ddd;resize:vertical"></textarea>
-  <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
-    <label style="font-size:12px;color:#666">Sections:</label>
-    <input id="adminSections" type="number" min="1" value="3" style="width:64px;padding:6px;border-radius:6px;border:1px solid #ddd" />
-    <button id="adminPopulateBtn" class="btn" style="margin-left:auto">Populate</button>
-  </div>
-  <div style="font-size:12px;color:#888;margin-top:8px">Tip: paste many links — they will be split into 10 per section and extra will be ignored.</div>
-</div>
-  /* Logo switching disabled per user request. To re-enable, uncomment below.
-  img.addEventListener('click', function(){ setIdx(idx+1); });
-  img.addEventListener('contextmenu', function(e){ e.preventDefault(); setIdx(idx-1); return false; });
-  // keyboard support: press L while focusing header to cycle forward
-  document.addEventListener('keydown', function(e){ if(e.key.toLowerCase() === 'l') setIdx(idx+1); });
-  */
+
+      /* Logo switching disabled by default. To re-enable, uncomment below.
+      if (img) {
+        img.addEventListener('click', function(){ setIdx(idx+1); });
+        img.addEventListener('contextmenu', function(e){ e.preventDefault(); setIdx(idx-1); return false; });
+      }
+      // keyboard support: press L while focusing header to cycle forward
+      // document.addEventListener('keydown', function(e){ if(e.key.toLowerCase() === 'l') setIdx(idx+1); });
+      */
     })();
   </script>
+
+  <!-- Admin populate snippet (kept outside script). Hidden by default. -->
+  <div id="adminPopulate" style="position:fixed;right:12px;bottom:12px;width:360px;max-width:90vw;background:rgba(255,255,255,0.96);border:1px solid #ddd;padding:12px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.08);display:none;z-index:9999;font-family:Inter,Arial,sans-serif;font-size:13px;color:#111;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <b>Populate sections</b>
+      <button id="adminCloseBtn" style="background:transparent;border:none;font-size:16px;cursor:pointer">✖</button>
+    </div>
+    <label style="font-size:12px;color:#666;">Paste URLs (one per line)</label>
+    <textarea id="adminUrls" style="width:100%;height:140px;margin-top:6px;padding:8px;border-radius:6px;border:1px solid #ddd;resize:vertical"></textarea>
+    <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+      <label style="font-size:12px;color:#666">Sections:</label>
+      <input id="adminSections" type="number" min="1" value="3" style="width:64px;padding:6px;border-radius:6px;border:1px solid #ddd" />
+      <button id="adminPopulateBtn" class="btn" style="margin-left:auto">Populate</button>
+    </div>
+    <div style="font-size:12px;color:#888;margin-top:8px">Tip: paste many links — they will be split into 10 per section and extra will be ignored.</div>
+  </div>
 </body>
 
 </html>
