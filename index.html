@@ -729,35 +729,50 @@ body[data-theme="dark"] .logo {
       border-color: #2a2a2a !important;
     }
 
-    .video-desc {
-      color:var(--muted);
-      font-size:13px;
+    /* Modern video player styling */
+    .video-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      padding: 1rem;
     }
 
-    /* Playlist / sidebar */
-    .video-list {
-      background: transparent;
-      border-radius: 12px;
-      padding: 8px;
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      max-height:420px;
-      overflow:auto;
+    .video-card {
+      background: var(--surface);
+      border-radius: 1rem;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
-    .video-item {
-      display:flex;
-      gap:10px;
-      align-items:center;
-      padding:10px;
-      border-radius:10px;
-      cursor:pointer;
-      transition: all .14s ease;
-      background: #ffffff;
-      border: 1px solid #e9eef5;
-      height: 100px; /* Barcha video kartochkalar uchun bir xil balandlik */
-      margin-bottom: 10px; /* Kartochkalar orasidagi masofa */
+    .video-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .video-thumbnail {
+      width: 100%;
+      aspect-ratio: 16/9;
+      object-fit: cover;
+      border-radius: 1rem 1rem 0 0;
+    }
+
+    .video-info {
+      padding: 1rem;
+    }
+
+    .video-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+
+    .video-description {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.4;
     }
 
     /* Video kartochkalar konteynerini to'g'rilash */
@@ -930,13 +945,13 @@ body[data-theme="dark"] .logo {
     /* sections */
     .sections {
       display: grid;
-  scroll-margin-top: 0;
-  scroll-snap-align: start;
-  scroll-margin-top: 0;
-      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-      gap: 22px;
+      scroll-margin-top: 0;
+      scroll-snap-align: start;
+      scroll-margin-top: 0;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Kamaytirildi 230px dan 180px ga */
+      gap: 16px; /* Kamaytirildi 22px dan 16px ga */
       padding-bottom: calc(var(--safe-bottom) + 18px);
-      margin-top: 30px;
+      margin-top: 20px; /* Kamaytirildi 30px dan 20px ga */
       transform: translateZ(0);
       -webkit-transform: translateZ(0);
       backface-visibility: hidden;
@@ -978,7 +993,7 @@ body[data-theme="dark"] .logo {
 
     .section-card {
       background: var(--surface);
-      padding: 26px 20px;
+      padding: 18px 16px; /* Padding kamaytirildi */
       border-radius: var(--radius-md);
       cursor: pointer;
       border: 1px solid #e6e6e9;
@@ -987,25 +1002,27 @@ body[data-theme="dark"] .logo {
       flex-direction: column;
       align-items: flex-start;
       position: relative;
+      min-height: 100px; /* Minimal balandlik qo'shildi */
     }
 
     .section-card:focus,
     .section-card:hover {
-      transform: translateY(-6px);
+      transform: translateY(-4px); /* Kamroq ko'tariladi */
       z-index: 1;
     }
 
     .section-title {
       font-weight: 700;
-      margin-bottom: 7px;
-      font-size: 19px;
+      margin-bottom: 6px; /* Margin kamaytirildi */
+      font-size: 16px; /* Shrift o'lchami kamaytirildi */
       color: black;
     }
 
     .section-desc {
-      font-size: 14px;
+      font-size: 13px; /* Shrift o'lchami kamaytirildi */
       color: var(--muted);
       font-weight: 500;
+      line-height: 1.4; /* Qatorlar orasi qisqartirildi */
     }
 
     /* gallery */
@@ -1099,7 +1116,7 @@ body[data-theme="dark"] .logo {
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0, 0, 0, 0.18);
+      background: rgba(0, 0, 0, 0.5); /* Darker overlay */
       z-index: 2000;
       display: flex;
       align-items: center;
@@ -1111,10 +1128,141 @@ body[data-theme="dark"] .logo {
       color: inherit;
       border-radius: var(--radius-lg);
       padding: 28px 22px 22px 22px;
-      min-width: 310px;
-      max-width: 90vw;
+      min-width: 400px;
+      max-width: 95vw;
+      width: 800px;
+      height: 600px; /* Added fixed height */
       position: relative;
       border: 1px solid #e6e6e9;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Video container inside modal */
+    .modal .video-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    /* Video iframe */
+    .modal iframe {
+      width: 100%;
+      height: calc(100% - 80px); /* Space for navigation buttons */
+      border: none;
+      border-radius: 12px;
+      background: #000;
+      margin-bottom: 16px; /* Space between video and buttons */
+    }
+
+    /* Navigation controls container */
+    .modal .nav-controls {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      width: 100%;
+      padding: 0 16px;
+      margin-top: auto;
+    }
+
+    /* Navigation buttons */
+    .modal .nav-btn {
+      padding: 12px 24px;
+      border-radius: 8px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: transform 0.2s, opacity 0.2s;
+    }
+
+    .modal .nav-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .modal .nav-btn:not(:disabled):hover {
+      transform: translateY(-2px);
+    }
+
+    .modal .nav-btn .material-icons {
+      font-size: 20px;
+    }
+
+    /* Mobile responsive styles */
+    @media (max-width: 768px) {
+      .modal {
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        padding: 16px !important;
+        border-radius: 0 !important;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .modal-bg {
+        background: rgba(0, 0, 0, 0.9); /* Darker overlay on mobile */
+      }
+
+      .modal iframe {
+        height: 50vh; /* Half viewport height on mobile */
+        border-radius: 12px;
+      }
+
+      .modal-close {
+        top: 8px !important;
+        right: 8px !important;
+        padding: 8px !important;
+        font-size: 24px !important;
+        background: rgba(0, 0, 0, 0.5) !important;
+        color: white !important;
+        border-radius: 50% !important;
+        width: 40px !important;
+        height: 40px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        z-index: 2001 !important;
+      }
+
+      /* Dark mode adjustments for mobile */
+      body[data-theme="dark"] .modal {
+        background: #1c1f26 !important;
+      }
+
+      body[data-theme="dark"] .modal-close {
+        background: rgba(255, 255, 255, 0.1) !important;
+        color: #ffffff !important;
+      }
+    }
+
+    /* Small phones and landscape mode */
+    @media (max-width: 480px), (max-height: 480px) {
+      .modal {
+        padding: 12px !important;
+      }
+
+      .modal iframe {
+        height: 45vh; /* Slightly smaller for very small screens */
+      }
+
+      .modal-close {
+        width: 36px !important;
+        height: 36px !important;
+        font-size: 20px !important;
+      }
     }
 
     .modal-close {
@@ -1138,6 +1286,111 @@ body[data-theme="dark"] .logo {
       margin: 0 0 8px 0;
       font-size: 16px;
       color: inherit;
+    }
+
+    /* Video modal styles */
+    .modal .video-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    .modal iframe {
+      width: 100%;
+      height: calc(100% - 80px);
+      border: none;
+      border-radius: 12px;
+      background: #000;
+      margin-bottom: 16px;
+    }
+
+    .modal .nav-controls {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      width: 100%;
+      padding: 0 16px;
+      margin-top: auto;
+    }
+
+    .modal .nav-btn {
+      padding: 12px 24px;
+      border-radius: 8px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: transform 0.2s, opacity 0.2s;
+    }
+
+    .modal .nav-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .modal .nav-btn:not(:disabled):hover {
+      transform: translateY(-2px);
+    }
+
+    .modal .nav-btn .material-icons {
+      font-size: 20px;
+    }
+
+    /* Mobile responsive styles */
+    @media (max-width: 768px) {
+      .modal {
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        padding: 16px !important;
+        border-radius: 0 !important;
+      }
+
+      .modal iframe {
+        height: 38vh;
+        margin-bottom: 16px;
+      }
+
+      .modal .nav-controls {
+        padding: 0;
+        gap: 12px;
+        flex-direction: row;
+      }
+
+      .modal .nav-btn {
+        flex: 1;
+        padding: 14px 16px;
+        font-size: 14px;
+        border-radius: 12px;
+        justify-content: center;
+      }
+
+      .modal .nav-btn .material-icons {
+        font-size: 18px;
+      }
+    }
+
+    /* Small phones */
+    @media (max-width: 480px) {
+      .modal iframe {
+        height: 35vh;
+      }
+
+      .modal .nav-btn {
+        padding: 12px;
+        font-size: 13px;
+      }
     }
 
     /* footer */
@@ -1287,8 +1540,22 @@ body[data-theme="dark"] .logo {
       }
 
       .sections {
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-        gap: 8px
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Kamaytirildi 140px dan 120px ga */
+        gap: 8px;
+      }
+      
+      .section-card {
+        padding: 12px 10px; /* Mobile uchun yanada kichikroq padding */
+        min-height: 90px; /* Mobile uchun minimal balandlik */
+      }
+      
+      .section-title {
+        font-size: 14px; /* Mobile uchun kichikroq shrift */
+        margin-bottom: 4px;
+      }
+      
+      .section-desc {
+        font-size: 12px; /* Mobile uchun kichikroq shrift */
       }
 
       .gallery {
@@ -1827,7 +2094,7 @@ body[data-theme="dark"] .logo {
             Kerakli bo‘limni tanlang — siz uchun eng muhim so‘zlar shu yerda.
           </p>
 
-          <button class="enter-btn" id="enterBtn"><span class="material-icons"
+          <button class="enter-btn" id="enterBtn" onclick="openResources()"><span class="material-icons"
               style="font-size:18px">arrow_forward</span>ENTER — Kirish</button>
           <div class="note">Har kuni bir bo‘limni o‘qing, natijani sezilarli o‘zgaradi! 🚀</div>
         </div>
@@ -1884,6 +2151,7 @@ body[data-theme="dark"] .logo {
             <div class="mini-card">Bo'lim 28</div>
             <div class="mini-card">Bo'lim 29</div>
             <div class="mini-card">Bo'lim 30</div>
+            <div class="mini-card">Bo'lim 31</div>
           </div>
         </div>
       </div>
@@ -1985,213 +2253,11 @@ body[data-theme="dark"] .logo {
   <!-- Modal -->
   <div id="modalBg" style="display:none;"></div>
 
-  <style>
-    /* side and bottom controls share visibility rules */
-    #prevVideoBtn, #nextVideoBtn, #prevVideoBtnBottom, #nextVideoBtnBottom {
-      opacity: 0;
-      transition: opacity 0.25s ease, transform 0.25s ease;
-    }
+  <!-- Video control styles removed (using simple external links instead) -->
 
-    /* when modal hovered or controls visible, show controls */
-    #resourceModal:hover #prevVideoBtn,
-    #resourceModal:hover #nextVideoBtn,
-    #resourceModal:hover #prevVideoBtnBottom,
-    #resourceModal:hover #nextVideoBtnBottom,
-    .controls-visible #prevVideoBtn,
-    .controls-visible #nextVideoBtn,
-    .controls-visible #prevVideoBtnBottom,
-    .controls-visible #nextVideoBtnBottom {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  <!-- Removed complex in-modal video control script; videos open externally now -->
 
-    /* bottom controls should be clickable when visible */
-    #prevVideoBtnBottom, #nextVideoBtnBottom { pointer-events: none; }
-    .controls-visible #prevVideoBtnBottom, .controls-visible #nextVideoBtnBottom { pointer-events: auto; }
-  </style>
-
-  <script>
-    let hideControlsTimeout;
-
-    function hideControls() {
-        const modal = document.getElementById('resourceModal');
-        const videoControls = document.getElementById('videoControls');
-        const bottomControls = document.getElementById('resourceModalBottomControls');
-        if (modal) {
-            modal.classList.remove('controls-visible');
-            if (videoControls) videoControls.style.opacity = '0';
-            if (bottomControls) bottomControls.style.opacity = '0';
-        }
-    }
-
-    function showControls() {
-        const modal = document.getElementById('resourceModal');
-        const videoControls = document.getElementById('videoControls');
-        const bottomControls = document.getElementById('resourceModalBottomControls');
-        if (modal) {
-            modal.classList.add('controls-visible');
-            if (videoControls) videoControls.style.opacity = '1';
-            if (bottomControls) bottomControls.style.opacity = '1';
-            
-            if (hideControlsTimeout) {
-                clearTimeout(hideControlsTimeout);
-            }
-            
-            hideControlsTimeout = setTimeout(hideControls, 2500);
-        }
-    }
-
-    const resourceModal = document.getElementById('resourceModal');
-    const prevBtn = document.getElementById('prevVideoBtn');
-    const nextBtn = document.getElementById('nextVideoBtn');
-    const prevBtnBottom = document.getElementById('prevVideoBtnBottom');
-    const nextBtnBottom = document.getElementById('nextVideoBtnBottom');
-
-    if (resourceModal) {
-        let isMouseOverControls = false;
-        let lastMouseMoveTime = Date.now();
-
-        resourceModal.addEventListener('mousemove', () => {
-            lastMouseMoveTime = Date.now();
-            if (!isMouseOverControls) {
-                showControls();
-            }
-        });
-
-        setInterval(() => {
-            if (!isMouseOverControls && Date.now() - lastMouseMoveTime > 2000) {
-                hideControls();
-            }
-        }, 1000);
-
-        function onButtonEnter() {
-            isMouseOverControls = true;
-            if (hideControlsTimeout) {
-                clearTimeout(hideControlsTimeout);
-            }
-        }
-
-        function onButtonLeave() {
-            isMouseOverControls = false;
-            lastMouseMoveTime = Date.now();
-            showControls();
-        }
-
-        if (prevBtn) { prevBtn.addEventListener('mouseenter', onButtonEnter); prevBtn.addEventListener('mouseleave', onButtonLeave); }
-        if (nextBtn) { nextBtn.addEventListener('mouseenter', onButtonEnter); nextBtn.addEventListener('mouseleave', onButtonLeave); }
-        if (prevBtnBottom) { prevBtnBottom.addEventListener('mouseenter', onButtonEnter); prevBtnBottom.addEventListener('mouseleave', onButtonLeave); }
-        if (nextBtnBottom) { nextBtnBottom.addEventListener('mouseenter', onButtonEnter); nextBtnBottom.addEventListener('mouseleave', onButtonLeave); }
-
-        resourceModal.addEventListener('mouseleave', () => {
-            isMouseOverControls = false;
-            hideControls();
-        });
-
-        resourceModal.addEventListener('touchstart', () => {
-            const modal = document.getElementById('resourceModal');
-            if (modal.classList.contains('controls-visible')) {
-                hideControls();
-            } else {
-                showControls();
-                setTimeout(hideControls, 3000);
-            }
-        }, { passive: true });
-
-        resourceModal.addEventListener('click', () => {
-            lastMouseMoveTime = Date.now();
-            if (!isMouseOverControls) {
-                showControls();
-            }
-        });
-    }
-
-    const style = document.createElement('style');
-    style.textContent = `
-        @media (hover: none) and (pointer: coarse) {
-          /* Side nav buttons hidden on mobile, bottom replaces */
-          #prevVideoBtn, #nextVideoBtn {
-            display: none;
-          }
-
-          /* YouTube-style bottom controls */
-          #resourceModalBottomControls {
-            padding: 40px 16px 16px !important;
-            background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.2) 60%, transparent 100%) !important;
-            bottom: 0 !important;
-          }
-
-          /* Bottom nav buttons - YouTube style */
-          .nav-btn {
-            padding: 8px 12px !important;
-            border-radius: 2px !important;
-            height: 36px !important;
-            font-size: 15px !important;
-            background: rgba(28,28,28,0.9) !important;
-            backdrop-filter: blur(8px) !important;
-            -webkit-backdrop-filter: blur(8px) !important;
-            display: flex !important;
-            align-items: center !important;
-          }
-
-          .nav-btn .material-icons {
-            font-size: 18px !important;
-            margin: -1px 0 !important;
-          }
-
-          .nav-btn:hover {
-            background: rgba(28,28,28,0.95) !important;
-          }
-
-          .video-controls {
-            padding-top: calc(env(safe-area-inset-top, 20px) + 10px) !important;
-          }
-
-          .control-btn {
-            width: 40px !important;
-            height: 40px !important;
-            font-size: 20px !important;
-          }
-        }
-
-        .video-controls {
-            background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent);
-        }
-    `;
-    document.head.appendChild(style);
-  </script>
-
-  <!-- Resource modal (yangi oyna) - full screen player -->
-  <div id="resourceModalBg"
-    style="display:none; position:fixed; inset:0; z-index:4000; align-items:center; justify-content:center; background:rgba(0,0,0,0.85);">
-    <div id="resourceModal"
-      style="background:transparent; width:100%; height:100vh; max-width:none; max-height:none; overflow:hidden; border-radius:0; padding:0; position:relative; display:flex; align-items:center; justify-content:center;">
-      <!-- Top controls with close button -->
-      <div id="videoControls" class="video-controls" 
-        style="position:absolute;top:0;left:0;right:0;padding:10px;display:flex;justify-content:flex-end;z-index:4010;opacity:0;transition:opacity 0.3s ease;background:linear-gradient(to bottom, rgba(0,0,0,0.4), transparent);">
-        <button onclick="closeResourceModal()" class="control-btn" 
-          style="background:rgba(28,28,28,0.9);color:#fff;border:none;font-size:16px;border-radius:2px;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin:8px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);">✖</button>
-      </div>
-      <div id="resourceModalContent"
-        style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"></div>
-
-      <!-- Bottom-centered controls (YouTube-style) -->
-      <div id="resourceModalBottomControls" style="position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:center;align-items:center;z-index:4010;opacity:1;pointer-events:none;background:linear-gradient(to top, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.2) 60%, transparent 100%);padding:40px 20px 20px;">
-        <div style="display:flex;justify-content:center;gap:16px;align-items:center;width:100%;max-width:400px;">
-          <button id="prevVideoBtn" onclick="playPreviousVideo()" class="nav-btn"
-            style="pointer-events:auto;display:none;align-items:center;justify-content:center;background:rgba(28,28,28,0.9);color:#fff;border:none;border-radius:2px;padding:8px 12px;height:36px;font-size:15px;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);">
-            <span class="material-icons" style="font-size:18px;margin:-1px 0;">arrow_back_ios</span>
-            <span style="margin-left:4px"></span>
-          </button>
-          <button id="nextVideoBtn" onclick="playNextVideo()" class="nav-btn"
-            style="pointer-events:auto;display:none;align-items:center;justify-content:center;background:rgba(28,28,28,0.9);color:#fff;border:none;border-radius:2px;padding:8px 12px;height:36px;font-size:15px;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);">
-            <span style="margin-right:4px"></span>
-            <span class="material-icons" style="font-size:18px;margin:-1px 0;">arrow_forward_ios</span>
-          </button>
-        </div>
-      </div>
-
-    </div>
-  </div>
+  <!-- Video modal removed: videos now open in a new tab from the resource window -->
 
   <script>
     // --- Vocabulary Data ---
@@ -3754,8 +3820,19 @@ body[data-theme="dark"] .logo {
       modalBg.innerHTML = `
       <div class="modal">
         <button class="modal-close" onclick="closeModal()"><span class="material-icons">close</span></button>
-        <h3>${escapeHtml(title)}</h3>
-        <p>${escapeHtml(desc)}</p>
+        <div class="video-container">
+          <iframe id="videoPlayer" allowfullscreen></iframe>
+          <div class="nav-controls">
+            <button class="nav-btn" id="prevBtn" onclick="playPrevVideo()">
+              <span class="material-icons">arrow_back</span>
+              Oldingisi
+            </button>
+            <button class="nav-btn" id="nextBtn" onclick="playNextVideo()">
+              Keyingisi
+              <span class="material-icons">arrow_forward</span>
+            </button>
+          </div>
+        </div>
       </div>
     `;
       modalBg.style.display = 'flex';
@@ -3834,7 +3911,7 @@ body[data-theme="dark"] .logo {
           // remove any accidental duplicate listeners and add a clean one
           btn.onclick = null;
           btn.addEventListener('click', function handler() {
-            try { openSections(); } catch (e) { console.error('openSections error', e); }
+             try { openResources(); } catch (e) { console.error('openResources error', e); }
           });
           // If opened inside Telegram webview, try to open externally (Chrome / Google Translate) and show a fallback banner
           function showExternalOpenBanner(href, translateUrl) {
@@ -3905,7 +3982,21 @@ body[data-theme="dark"] .logo {
 
 
     if (enter) {
-      try { enter.addEventListener('click', () => openSections()); } catch (e) { enter.onclick = () => openSections(); }
+      try {
+        // Remove previous handlers and set a single reliable handler that opens resources
+        try { enter.replaceWith(enter.cloneNode(true)); } catch (e) { /* ignore if replace not allowed */ }
+        const freshEnter = document.getElementById('enterBtn');
+        if (freshEnter) {
+          freshEnter.onclick = null;
+          freshEnter.addEventListener('click', function (ev) {
+            try { if (ev && ev.preventDefault) ev.preventDefault(); if (ev && ev.stopPropagation) ev.stopPropagation(); } catch (e) { }
+            try { openResources(); } catch (err) { console.error('openResources error', err); }
+          }, false);
+        }
+      } catch (e) {
+        // Last-resort fallback
+        enter.onclick = function (ev) { try { if (ev && ev.preventDefault) ev.preventDefault(); openResources(); } catch (err) { console.error(err); } };
+      }
     }
 
     function renderSections() {
@@ -4339,108 +4430,13 @@ body[data-theme="dark"] .logo {
       }, 40);
     })();
 
-    // --- Resources (video gallery) ---
+    // Resources trigger: open resources view (videos are shown as external links)
     (function () {
-      const videos = [
-
-        // --- Yangi videolar ---
-        { id: 'X4B947IqV70', title: "New Video 1", note: "" },
-        { id: 'IjfzWZdRbfo', title: "New Video 2", note: "" },
-        { id: 'ZVzgfmqCwGQ', title: "New Video 3", note: "" },
-        { id: 'bvoBy2J7vj0', title: "New Video 4", note: "" },
-        { id: 'dMfsen6Dor4', title: "New Video 5", note: "" },
-        { id: 'ndmjsf_DZtk', title: "New Video 6", note: "" },
-        { id: 'llJtisztYdI', title: "New Video 7", note: "" },
-        { id: 'qnbZF0--4GU', title: "New Video 8", note: "" },
-        { id: '0FXfOR6gHOA', title: "New Video 9", note: "" },
-        { id: 'SvJYznkdB9Y', title: "New Video 10", note: "" },
-        { id: '702XzWEg_PY', title: "New Video 11", note: "" },
-        { id: 'stmfj-JslcI', title: "New Video 12", note: "" },
-        { id: 'ckJhTIROiXc', title: "New Video 13", note: "" },
-        { id: 'bXbr9y6LPcc', title: "New Video 14", note: "" },
-        { id: '4ZXTnqHg3L8', title: "New Video 15", note: "" },
-        { id: 'bNVABRbLz-g', title: "New Video 16", note: "" }
-      ];
-
       const showBtn = document.getElementById('showResourcesBtn');
-      const resArea = document.getElementById('resourcesArea');
-      const videoList = document.getElementById('videoList');
-      const player = document.getElementById('videoPlayer');
-      const resTitle = document.getElementById('resTitle');
-      const resLead = document.getElementById('resLead');
-
-      function renderList() {
-        videoList.innerHTML = '';
-        videos.forEach((v, idx) => {
-          const div = document.createElement('div');
-          div.className = 'video-item';
-          div.tabIndex = 0;
-          div.innerHTML = `<img class="video-thumb" src="https://i.ytimg.com/vi/${v.id}/hqdefault.jpg" alt="${escapeHtml(v.title)}">
-          <div class="video-title">${escapeHtml(v.title)}</div>`;
-          div.onclick = () => playVideo(idx);
-          div.onkeyup = (e) => { if (e.key === 'Enter') playVideo(idx); };
-          videoList.appendChild(div);
-        });
-      }
-
-      function playVideo(i) {
-        const v = videos[i];
-        if (!v) return;
-        player.innerHTML = `<iframe src="https://www.youtube.com/embed/${v.id}?rel=0" title="${escapeHtml(v.title)}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
-        document.getElementById('resourceNote').textContent = v.note;
-        // update title/lead to reflect language (user requested text changes)
-        resTitle.textContent = 'Video resurs: ' + v.title;
-        resLead.textContent = 'English explanation below the video. (Inglizcha)';
-      }
-
-      showBtn.addEventListener('click', function () {
-        // kept for backward compat but primary action is openResources()
-        openResources();
-      });
-
-      // resInfo button removed from DOM per user request; no info handler required
-
+      if (showBtn) showBtn.addEventListener('click', function () { openResources(); });
     })();
 
-    // Demo fallback: populate resources list with sample videos if empty (non-destructive)
-    (function(){
-      try{
-        const videoList = document.getElementById('videoList');
-        const player = document.getElementById('videoPlayer');
-        const resourceNote = document.getElementById('resourceNote');
-        if(!videoList) return;
-        if(videoList.children.length > 0) return; // existing code already filled it
-
-        const samples = [
-          {id:'ysz5S6PUM-U', title:'Funny English Conversation', note:'3:21 — Beginner friendly'},
-          {id:'ScMzIvxBSi4', title:'Daily English Phrases', note:'5:12 — Useful phrases'},
-          {id:'2Vv-BfVoq4g', title:'Short Story Listening', note:'4:00 — Listening practice'}
-        ];
-
-        samples.forEach((v, idx)=>{
-          const div = document.createElement('div');
-          div.className = 'video-item';
-          div.tabIndex = 0;
-          div.setAttribute('data-src', `https://www.youtube.com/embed/${v.id}?rel=0`);
-          div.setAttribute('data-title', v.title);
-          div.innerHTML = `<img class="video-thumb" src="https://i.ytimg.com/vi/${v.id}/hqdefault.jpg" alt="thumb">
-            <div class="title-col"><div class="small-title">${v.title}</div><div class="small-meta">${v.note}</div></div>`;
-          div.addEventListener('click', ()=>{
-            const src = div.getAttribute('data-src');
-            if(player) player.innerHTML = `<iframe src="${src}" title="${v.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
-            if(resourceNote) resourceNote.textContent = v.note;
-          });
-          videoList.appendChild(div);
-        });
-
-        // set first
-        if(samples[0] && player){
-          const v = samples[0];
-          player.innerHTML = `<iframe src="https://www.youtube.com/embed/${v.id}?rel=0" title="${v.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
-          if(resourceNote) resourceNote.textContent = samples[0].note;
-        }
-      }catch(e){console.error(e)}
-    })();
+    // Demo fallback removed; resource window now shows external links only
 
     // Full resources view (second window) functions
     function openResources() {
@@ -4464,143 +4460,46 @@ body[data-theme="dark"] .logo {
       try { const old = document.querySelectorAll('#resourceSectionsGrid .no-videos'); old.forEach(n => n.remove()); } catch (e) { }
       const container = document.getElementById('resourceSectionsGrid');
       container.innerHTML = '';
-      for (let i = 1; i <= 30; i++) {
-        const div = document.createElement('div');
-        div.className = 'section-card';
-        div.tabIndex = 0;
-        div.dataset.section = String(i);
-        div.innerHTML = `<div class="section-title">Bo'lim ${i}</div><div class="section-desc">10 video</div>`;
-        div.onclick = () => openResourceSection(i);
-        div.onkeyup = (e) => { if (e.key === 'Enter') openResourceSection(i); };
-        container.appendChild(div);
-      }
+      const div = document.createElement('div');
+      div.className = 'section-card';
+      div.tabIndex = 0;
+      div.dataset.section = "1";
+      div.innerHTML = `<div class="section-title">Bo'lim 1</div><div class="section-desc">19 video</div>`;
+      div.onclick = () => openResourceSection(1);
+      div.onkeyup = (e) => { if (e.key === 'Enter') openResourceSection(1); };
+      container.appendChild(div);
     }
 
-    // mapping section -> array of video objects (id,title,note)
+    // Simplified static video listing (no inline player)
+    // Each section maps to an array of video objects with id/title/note.
+    // Clicking a video opens it in a new tab (no modal/player logic).
     const resourceVideos = {
       1: [
-        { id: 'ZD3ZaytFKiU', title: ' Video 1', note: "" },
-        { id: 'URM0-DQJ27Q', title: ' Video 2', note: "" }, 
-        { id: 'DvfTJqczEgM', title: ' Video 3', note: "" },
-        { id: 'X4B947IqV70', title: " Video 4", note: "" },
-        { id: 'IjfzWZdRbfo', title: " Video 5", note: "" },
-        { id: 'ZVzgfmqCwGQ', title: " Video 6", note: "" },
-        { id: 'bvoBy2J7vj0', title: " Video 7", note: "" },
-        { id: 'dMfsen6Dor4', title: " Video 8", note: "" },
-        { id: 'ndmjsf_DZtk', title: " Video 9", note: "" },
-        { id: 'llJtisztYdI', title: " Video 10", note: "" },
-        { id: 'qnbZF0--4GU', title: " Video 11", note: "" },
-        { id: '0FXfOR6gHOA', title: " Video 12", note: "" },
-        { id: 'SvJYznkdB9Y', title: " Video 13", note: "" },
-        { id: '702XzWEg_PY', title: " Video 14", note: "" },
-        { id: 'stmfj-JslcI', title: " Video 15", note: "" },
-        { id: 'ckJhTIROiXc', title: " Video 16", note: "" },
-        { id: 'bXbr9y6LPcc', title: " Video 17", note: "" },
-        { id: '4ZXTnqHg3L8', title: " Video 18", note: "" },
-        { id: 'bNVABRbLz-g', title: " Video 19", note: "" }
+        { id: 'ZD3ZaytFKiU', title: 'Video 1', note: '' },
+        { id: 'URM0-DQJ27Q', title: 'Video 2', note: '' },
+        { id: 'DvfTJqczEgM', title: 'Video 3', note: '' },
+        { id: 'X4B947IqV70', title: 'Video 4', note: '' },
+        { id: 'IjfzWZdRbfo', title: 'Video 5', note: '' },
+        { id: 'ZVzgfmqCwGQ', title: 'Video 6', note: '' },
+        { id: 'bvoBy2J7vj0', title: 'Video 7', note: '' },
+        { id: 'dMfsen6Dor4', title: 'Video 8', note: '' },
+        { id: 'ndmjsf_DZtk', title: 'Video 9', note: '' },
+        { id: 'llJtisztYdI', title: 'Video 10', note: '' },
+        { id: 'qnbZF0--4GU', title: 'Video 11', note: '' },
+        { id: '0FXfOR6gHOA', title: 'Video 12', note: '' },
+        { id: 'SvJYznkdB9Y', title: 'Video 13', note: '' },
+        { id: '702XzWEg_PY', title: 'Video 14', note: '' },
+        { id: 'stmfj-JslcI', title: 'Video 15', note: '' },
+        { id: 'OQhh5Mg0gls', title: 'Video 16', note: '' },
+        { id: 'bXbr9y6LPcc', title: 'Video 17', note: '' },
+        { id: '4ZXTnqHg3L8', title: 'Video 18', note: '' },
+        { id: 'bNVABRbLz-g', title: 'Video 19', note: '' }
       ]
     };
 
-    // Global o'zgaruvchi video indeksi uchun
-    let currentVideoIndex = 0;
-  // currently active list shown in the modal (either resourceVideos[currentSection] or window.videos)
-  window.activeResourceList = null;
-
-    function playVideoFromCard(videoId, title, note, index) {
-      currentVideoIndex = index;
-      // set active list to the current section mapping (fallback to window.videos)
-      window.activeResourceList = (resourceVideos[currentSection] && resourceVideos[currentSection].length) ? resourceVideos[currentSection] : (window.videos || []);
-      playVideoModal(videoId);
-      updateNavigationButtons();
-    }
-
-    function playNextVideo() {
-      const videos = (window.activeResourceList && window.activeResourceList.length) ? window.activeResourceList : (resourceVideos[currentSection] || window.videos || []);
-      if (currentVideoIndex < videos.length - 1) {
-        currentVideoIndex++;
-        const nextVideo = videos[currentVideoIndex];
-        playVideoModal(nextVideo.id);
-        updateNavigationButtons();
-      }
-    }
-
-    function playPreviousVideo() {
-      const videos = (window.activeResourceList && window.activeResourceList.length) ? window.activeResourceList : (resourceVideos[currentSection] || window.videos || []);
-      if (currentVideoIndex > 0) {
-        currentVideoIndex--;
-        const prevVideo = videos[currentVideoIndex];
-        playVideoModal(prevVideo.id);
-        updateNavigationButtons();
-      }
-    }
-
-    // iife for side/bottom video navigation controls
-    (function() {
-      // create mobile/touch detect helper
-      function isMobileOrTouch() {
-        return window.matchMedia('(hover: none), (pointer: coarse)').matches;
-      }
-
-      function updateNavigationButtons() {
-        const videos = (window.activeResourceList && window.activeResourceList.length) ? window.activeResourceList : (resourceVideos[currentSection] || window.videos || []);
-        const prevBtn = document.getElementById('prevVideoBtn');
-        const nextBtn = document.getElementById('nextVideoBtn');
-        const prevBtnBottom = document.getElementById('prevVideoBtnBottom');
-        const nextBtnBottom = document.getElementById('nextVideoBtnBottom');
-        
-        const showPrev = currentVideoIndex > 0;
-        const showNext = currentVideoIndex < videos.length - 1;
-
-        // always hide either side OR bottom based on device - never show both
-        const useSideButtons = !isMobileOrTouch();
-
-        // for desktop, show side buttons
-        if (useSideButtons) {
-          if (prevBtn) {
-            prevBtn.style.display = showPrev ? 'flex' : 'none';
-            prevBtn.style.pointerEvents = showPrev ? 'auto' : 'none';
-          }
-          if (nextBtn) {
-            nextBtn.style.display = showNext ? 'flex' : 'none';
-            nextBtn.style.pointerEvents = showNext ? 'auto' : 'none';
-          }
-          // hide bottom controls
-          if (prevBtnBottom) prevBtnBottom.style.display = 'none';
-          if (nextBtnBottom) nextBtnBottom.style.display = 'none';
-        }
-        // for mobile/touch, show bottom buttons
-        else {
-          // hide side buttons
-          if (prevBtn) prevBtn.style.display = 'none';
-          if (nextBtn) nextBtn.style.display = 'none';
-          // show/hide bottom controls based on availability
-          if (prevBtnBottom) {
-            prevBtnBottom.style.display = showPrev ? 'flex' : 'none';
-            prevBtnBottom.style.pointerEvents = showPrev ? 'auto' : 'none';
-          }
-          if (nextBtnBottom) {
-            nextBtnBottom.style.display = showNext ? 'flex' : 'none';
-            nextBtnBottom.style.pointerEvents = showNext ? 'auto' : 'none';
-          }
-        }
-      }
-
-      // expose updateNavigationButtons in window scope for external calls
-      window.updateNavigationButtons = updateNavigationButtons;
-
-      // run initial update
-      try { updateNavigationButtons(); } catch (e) { }
-
-      // update on orientation change (may switch between mobile/desktop)
-      window.addEventListener('orientationchange', function() {
-        try { setTimeout(updateNavigationButtons, 150); } catch (e) { }
-      });
-
-    })();
-
+    // Render a clean, modern grid for a resource section. Each card links to YouTube in a new tab.
     function openResourceSection(section, push = true) {
       currentSection = section;
-      // open full resource window for the section
       const list = resourceVideos[section] || [];
       const win = document.getElementById('resourceWindow');
       const grid = document.getElementById('resourceWindowGrid');
@@ -4608,13 +4507,13 @@ body[data-theme="dark"] .logo {
       win.style.display = 'block';
       document.getElementById('resourceWindowTitle').textContent = `Bo'lim ${section} videolari`;
       document.getElementById('resourceWindowStat').textContent = `${list.length} video`;
-      // Grid containerga stil qo'shamiz
+
       grid.style.display = 'grid';
-      grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(280px, 1fr))';
-      grid.style.gap = '15px';
-      grid.style.padding = '15px';
-      
+      grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(260px, 1fr))';
+      grid.style.gap = '16px';
+      grid.style.padding = '16px';
       grid.innerHTML = '';
+
       if (!list.length) {
         const msg = document.createElement('div');
         msg.className = 'resource-empty';
@@ -4624,95 +4523,29 @@ body[data-theme="dark"] .logo {
         list.forEach((v, idx) => {
           const card = document.createElement('div');
           card.className = 'resource-card';
-          // thumbnail + title + play button 
-          const thumbSrc = v.id ? `https://i.ytimg.com/vi/${v.id}/hqdefault.jpg` : '';
+          card.tabIndex = 0;
+          card.style.cursor = 'pointer';
+          // Open inline player on this site instead of navigating away
+          card.addEventListener('click', () => { try { inlineResourceList = list; inlineResourceIndex = idx; openInlineVideo(v.id); } catch (e) { window.open('https://www.youtube.com/watch?v=' + encodeURIComponent(v.id || ''), '_blank'); } });
+          card.addEventListener('keyup', (e) => { if (e.key === 'Enter') { try { inlineResourceList = list; inlineResourceIndex = idx; openInlineVideo(v.id); } catch (err) { window.open('https://www.youtube.com/watch?v=' + encodeURIComponent(v.id || ''), '_blank'); } } });
+
+          const thumb = `https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`;
           card.innerHTML = `
-          <div class="video-item" style="cursor:pointer;position:relative;display:flex;flex-direction:column;height:200px;border-radius:12px;overflow:hidden;background:var(--surface);border:1px solid var(--accent2)" onclick="playVideoFromCard('${escapeHtml(v.id || '')}', '${escapeHtml(v.title || ('Video ' + (idx + 1)))}', '${escapeHtml(v.note || '')}', ${idx})">
-            <img src="${thumbSrc}" alt="thumb" style="width:100%;height:140px;object-fit:cover">
-            <div style="flex:1;padding:10px;display:flex;flex-direction:column;justify-content:space-between">
-              <div style="font-weight:600;font-size:14px;line-height:1.4">${escapeHtml(v.title || ('Video ' + (idx + 1)))}</div>
-              <div style="color:var(--muted);font-size:12px">${escapeHtml(v.note || '')}</div>
+            <div style="overflow:hidden;border-radius:12px;background:var(--surface);border:1px solid var(--accent2)">
+              <img src="${thumb}" alt="${escapeHtml(v.title || 'Video')}" style="width:100%;height:160px;object-fit:cover;display:block">
+              <div style="padding:12px">
+                <div style="font-weight:600;margin-bottom:6px">${escapeHtml(v.title || ('Video ' + (idx + 1)))}</div>
+                <div style="color:var(--muted);font-size:12px">${escapeHtml(v.note || '')}</div>
+              </div>
             </div>
-            <div class="play-button" style="position:absolute;left:50%;top:70px;transform:translate(-50%,-50%);background:rgba(0,0,0,0.7);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;">
-              <span class="material-icons" style="color:white;font-size:24px">play_arrow</span>
-            </div>
-          </div>
-        `;
+          `;
+
           grid.appendChild(card);
         });
       }
+
       if (push) { try { history.pushState({ view: 'resourceWindow', section }, '', `#resource-window-${section}`); } catch (e) { } }
-      // Scroll so the resource window is visible below the sticky header 
       try { setScrollOffsetAndScroll(win, 'smooth', 0); } catch (e) { }
-    }
-
-    // Play a video inside modal
-    // Load YouTube IFrame API (if not loaded)
-    let _ytApiLoaded = false;
-    let _ytPlayer = null;
-    function loadYouTubeAPI(cb) {
-      if (window.YT && window.YT.Player) { _ytApiLoaded = true; return cb && cb(); }
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-      window.onYouTubeIframeAPIReady = function () { _ytApiLoaded = true; cb && cb(); };
-    }
-
-    function playVideoModal(videoId) {
-      if (!videoId) return showToast('Video ID mavjud emas');
-      const modalContent = document.getElementById('resourceModalContent');
-      modalContent.innerHTML = `<div id="ytPlayerWrap" style="width:100%;height:100%;"></div>`;
-      document.getElementById('resourceModalBg').style.display = 'flex';
-
-      // show controls briefly when opening
-      try { showControls(); setTimeout(hideControls, 2500); } catch (e) {}
-
-      // update prev/next UI based on current index/list
-      try { updateNavigationButtons(); } catch (e) {}
-
-      // ensure API loaded then create player
-      loadYouTubeAPI(function () {
-        // destroy previous
-        try { if (_ytPlayer && _ytPlayer.destroy) _ytPlayer.destroy(); } catch (e) { }
-        _ytPlayer = new YT.Player('ytPlayerWrap', {
-          height: '100%', width: '100%', videoId: videoId,
-          playerVars: { autoplay: 1, controls: 1, rel: 0 },
-          events: {
-            'onStateChange': function (e) {
-              // 0 means ended
-              if (e.data === YT.PlayerState.ENDED) {
-                // only close the modal/player — do not navigate away from the current section
-                setTimeout(() => {
-                  try { if (_ytPlayer && _ytPlayer.destroy) { _ytPlayer.destroy(); _ytPlayer = null; } } catch (e) { }
-                  document.getElementById('resourceModalBg').style.display = 'none';
-                }, 200);
-              }
-            }
-          }
-        });
-      });
-    }
-
-    // back button for resource window (guarded)
-    (function () {
-      const backBtn = document.getElementById('resourceBackBtn');
-      if (!backBtn) return;
-      backBtn.addEventListener('click', function () {
-        // Let the history/popstate handler manage the transition so state stays consistent.
-        try { history.back(); } catch (e) {
-          // Fallback: manually show resources view
-          const rw = document.getElementById('resourceWindow'); if (rw) rw.style.display = 'none';
-          try { renderResourceSections(); } catch (e) { }
-          const rv = document.getElementById('resourcesView'); if (rv) rv.style.display = 'block';
-        }
-      });
-    })();
-
-    function closeResourceModal() {
-      // hide modal and destroy player but do NOT navigate history — keep user inside the same section/view
-      document.getElementById('resourceModalBg').style.display = 'none';
-      try { if (_ytPlayer && _ytPlayer.destroy) { _ytPlayer.destroy(); _ytPlayer = null; } } catch (e) { }
     }
 
     // safe pushState fallback (use hash when pushState unavailable)
@@ -4824,6 +4657,152 @@ body[data-theme="dark"] .logo {
     </div>
     <div style="font-size:12px;color:#888;margin-top:8px">Tip: paste many links — they will be split into 10 per section and extra will be ignored.</div>
   </div>
+  
+  <!-- Inline video modal (plays YouTube video inside the site, controls hidden) -->
+  <div id="inlineVideoModalBg" style="display:none;position:fixed;inset:0;z-index:6000;align-items:center;justify-content:center;background:rgba(0,0,0,0.85);">
+    <div id="inlineVideoModal" style="width:min(1000px,96%);height:min(560px,80%);background:#000;border-radius:10px;overflow:hidden;position:relative;box-shadow:0 12px 40px rgba(0,0,0,0.6);">
+      <button id="inlinePrevBtn" aria-label="Previous video" title="Prev" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);z-index:12;background:rgba(255,255,255,0.04);border:none;color:#fff;padding:10px;border-radius:10px;cursor:pointer;font-size:18px">◀</button>
+      <button id="inlineCloseBtn" aria-label="Close video" style="position:absolute;right:10px;top:10px;z-index:12;background:rgba(255,255,255,0.06);border:none;color:#fff;padding:8px;border-radius:8px;cursor:pointer;font-size:18px">✖</button>
+      <button id="inlineNextBtn" aria-label="Next video" title="Next" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);z-index:12;background:rgba(255,255,255,0.04);border:none;color:#fff;padding:10px;border-radius:10px;cursor:pointer;font-size:18px">▶</button>
+      <div id="inlineVideoPlayerWrap" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#000;"></div>
+    </div>
+  </div>
+
+  <script>
+    // Inline YouTube player using IFrame API with controls disabled.
+    let _ytInlineApiLoaded = false;
+    let _ytInlinePlayer = null;
+    // track the current resource list and index so prev/next work
+    let inlineResourceList = [];
+    let inlineResourceIndex = -1;
+
+    function loadYouTubeAPIInline(cb) {
+      if (window.YT && window.YT.Player) { _ytInlineApiLoaded = true; return cb && cb(); }
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      document.head.appendChild(tag);
+      window.onYouTubeIframeAPIReady = function() { _ytInlineApiLoaded = true; cb && cb(); };
+    }
+
+    function updateInlineNavButtons() {
+      try {
+        const prev = document.getElementById('inlinePrevBtn');
+        const next = document.getElementById('inlineNextBtn');
+        if (!prev || !next) return;
+        if (!inlineResourceList || inlineResourceList.length === 0) {
+          prev.disabled = true; next.disabled = true; return;
+        }
+        prev.disabled = inlineResourceIndex <= 0;
+        next.disabled = inlineResourceIndex >= inlineResourceList.length - 1;
+      } catch (e) { }
+    }
+
+    function openInlineVideo(videoId) {
+      if (!videoId) return;
+      const bg = document.getElementById('inlineVideoModalBg');
+      const wrap = document.getElementById('inlineVideoPlayerWrap');
+      bg.style.display = 'flex';
+      wrap.innerHTML = '<div id="ivPlayer" style="width:100%;height:100%"></div>';
+
+      loadYouTubeAPIInline(function(){
+        try {
+          if (_ytInlinePlayer && _ytInlinePlayer.destroy) { _ytInlinePlayer.destroy(); _ytInlinePlayer = null; }
+        } catch (e) { }
+
+        _ytInlinePlayer = new YT.Player('ivPlayer', {
+          height: '100%',
+          width: '100%',
+          videoId: videoId,
+          playerVars: {
+            autoplay: 1,
+            controls: 0,
+            rel: 0,
+            modestbranding: 1,
+            playsinline: 1,
+            disablekb: 1,
+            fs: 0
+          },
+          events: {
+            onReady: function(e){
+              try { e.target.playVideo(); } catch (err) { }
+              // update nav buttons once player is ready
+              updateInlineNavButtons();
+            },
+            onStateChange: function(e){
+              // optional: respond to end state to auto-advance
+              try {
+                if (e.data === YT.PlayerState.ENDED) {
+                  // auto-advance to next when finished
+                  playNextResource();
+                }
+              } catch (err) { }
+            }
+          }
+        });
+      });
+      // update nav immediately for visual feedback
+      updateInlineNavButtons();
+    }
+
+    function playNextResource() {
+      try {
+        if (!inlineResourceList || inlineResourceList.length === 0) return;
+        if (inlineResourceIndex < inlineResourceList.length - 1) inlineResourceIndex++;
+        const id = inlineResourceList[inlineResourceIndex] && inlineResourceList[inlineResourceIndex].id;
+        if (!id) return;
+        if (_ytInlinePlayer && _ytInlinePlayer.loadVideoById) {
+          _ytInlinePlayer.loadVideoById({ videoId: id, startSeconds: 0 });
+        } else {
+          openInlineVideo(id);
+        }
+        updateInlineNavButtons();
+      } catch (e) { console.error('playNextResource', e); }
+    }
+
+    function playPrevResource() {
+      try {
+        if (!inlineResourceList || inlineResourceList.length === 0) return;
+        if (inlineResourceIndex > 0) inlineResourceIndex--;
+        const id = inlineResourceList[inlineResourceIndex] && inlineResourceList[inlineResourceIndex].id;
+        if (!id) return;
+        if (_ytInlinePlayer && _ytInlinePlayer.loadVideoById) {
+          _ytInlinePlayer.loadVideoById({ videoId: id, startSeconds: 0 });
+        } else {
+          openInlineVideo(id);
+        }
+        updateInlineNavButtons();
+      } catch (e) { console.error('playPrevResource', e); }
+    }
+
+    function closeInlineVideo() {
+      const bg = document.getElementById('inlineVideoModalBg');
+      const wrap = document.getElementById('inlineVideoPlayerWrap');
+      try { if (_ytInlinePlayer && _ytInlinePlayer.destroy) { _ytInlinePlayer.destroy(); _ytInlinePlayer = null; } } catch (e) { }
+      wrap.innerHTML = '';
+      bg.style.display = 'none';
+      // reset inline list/index
+      inlineResourceList = [];
+      inlineResourceIndex = -1;
+    }
+
+    // button wiring
+    document.addEventListener('click', function(e){
+      if (!e.target) return;
+      if (e.target.id === 'inlineCloseBtn') closeInlineVideo();
+      if (e.target.id === 'inlineNextBtn') playNextResource();
+      if (e.target.id === 'inlinePrevBtn') playPrevResource();
+    });
+
+    // keyboard: left/right to navigate, ESC to close
+    document.addEventListener('keydown', function(e){
+      const bg = document.getElementById('inlineVideoModalBg');
+      const open = bg && bg.style.display === 'flex';
+      if (!open) return;
+      if (e.key === 'Escape') { closeInlineVideo(); return; }
+      if (e.key === 'ArrowRight') { playNextResource(); return; }
+      if (e.key === 'ArrowLeft') { playPrevResource(); return; }
+    });
+  </script>
 </body>
 
 </html>
