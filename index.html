@@ -5983,6 +5983,8 @@ document.addEventListener('keydown', function (e) {
 
   <div id="modalBg" style="display:none;"></div>
 
+
+  
 </body>
 
 </html>
@@ -6024,12 +6026,18 @@ document.addEventListener('keydown', function (e) {
       } catch (e) { }
     }
 
+    let videoModalOpen = false;
+    
     function openInlineVideo(videoId) {
       if (!videoId) return;
       const bg = document.getElementById('inlineVideoModalBg');
       const wrap = document.getElementById('inlineVideoPlayerWrap');
       bg.style.display = 'flex';
       wrap.innerHTML = '<div id="ivPlayer" style="width:100%;height:100%"></div>';
+      
+      videoModalOpen = true;
+      // Body scroll ni to'xtatish
+      document.body.style.overflow = 'hidden';
 
       loadYouTubeAPIInline(function(){
         try {
@@ -6090,23 +6098,43 @@ document.addEventListener('keydown', function (e) {
       updateInlineNavButtons();
     }
 
+    function closeInlineVideo() {
+      try {
+        const bg = document.getElementById('inlineVideoModalBg');
+        if (bg) bg.style.display = 'none';
+        if (_ytInlinePlayer && _ytInlinePlayer.destroy) {
+          _ytInlinePlayer.destroy();
+          _ytInlinePlayer = null;
+        }
+        const wrap = document.getElementById('inlineVideoPlayerWrap');
+        if (wrap) wrap.innerHTML = '';
+        // reset inline list/index
+        inlineResourceList = [];
+        inlineResourceIndex = -1;
+        videoModalOpen = false;
+        // Body scroll ni qaytarish
+        document.body.style.overflow = '';
+      } catch (e) { }
+    }
+
     function playNextResource() {
       try {
         if (!inlineResourceList || inlineResourceList.length === 0) return;
-        if (inlineResourceIndex < inlineResourceList.length - 1) {
-          inlineResourceIndex++;
-          const id = inlineResourceList[inlineResourceIndex] && inlineResourceList[inlineResourceIndex].id;
-          if (!id) return;
-          // Always show cover before loading next video
-          try { showInlineCover(); } catch (er) {}
-          if (_ytInlinePlayer && _ytInlinePlayer.loadVideoById) {
-            _ytInlinePlayer.loadVideoById({ videoId: id, startSeconds: 0 });
-          } else {
-            openInlineVideo(id);
-          }
-          updateInlineNavButtons();
+        if (inlineResourceIndex < inlineResourceList.length - 1) inlineResourceIndex++;
+        const id = inlineResourceList[inlineResourceIndex] && inlineResourceList[inlineResourceIndex].id;
+        if (!id) return;
+        
+        try { showInlineCover(); } catch (er) {}
+        
+        if (_ytInlinePlayer && _ytInlinePlayer.loadVideoById) {
+          _ytInlinePlayer.loadVideoById({ videoId: id, startSeconds: 0 });
+        } else {
+          openInlineVideo(id);
         }
-      } catch (e) { console.error('playNextResource', e); }
+        updateInlineNavButtons();
+      } catch (e) {
+        console.error('playNextResource', e);
+      }
     }
 
     function playPrevResource() {
@@ -6115,46 +6143,66 @@ document.addEventListener('keydown', function (e) {
         if (inlineResourceIndex > 0) inlineResourceIndex--;
         const id = inlineResourceList[inlineResourceIndex] && inlineResourceList[inlineResourceIndex].id;
         if (!id) return;
+        
         if (_ytInlinePlayer && _ytInlinePlayer.loadVideoById) {
           _ytInlinePlayer.loadVideoById({ videoId: id, startSeconds: 0 });
         } else {
           openInlineVideo(id);
         }
         updateInlineNavButtons();
-      } catch (e) { console.error('playPrevResource', e); }
+      } catch (e) {
+        console.error('playPrevResource', e);
+      }
     }
 
-    function closeInlineVideo() {
-      const bg = document.getElementById('inlineVideoModalBg');
-      const wrap = document.getElementById('inlineVideoPlayerWrap');
-      try { if (_ytInlinePlayer && _ytInlinePlayer.destroy) { _ytInlinePlayer.destroy(); _ytInlinePlayer = null; } } catch (e) { }
-      wrap.innerHTML = '';
-      bg.style.display = 'none';
-      // reset inline list/index
-      inlineResourceList = [];
-      inlineResourceIndex = -1;
-    }
-
-    // button wiring
+    // Event listeners
     document.addEventListener('click', function(e){
       if (!e.target) return;
       if (e.target.id === 'inlineCloseBtn') closeInlineVideo();
       if (e.target.id === 'inlineNextBtn') playNextResource();
       if (e.target.id === 'inlinePrevBtn') playPrevResource();
+      // Qora fon bosilganda video yopish
+      if (e.target.id === 'inlineVideoModalBg') closeInlineVideo();
     });
 
-    // keyboard: left/right to navigate, ESC to close
+    // Keyboard navigation
     document.addEventListener('keydown', function(e){
       const bg = document.getElementById('inlineVideoModalBg');
       const open = bg && bg.style.display === 'flex';
       if (!open) return;
-      if (e.key === 'Escape') { closeInlineVideo(); return; }
-      if (e.key === 'ArrowRight') { playNextResource(); return; }
-      if (e.key === 'ArrowLeft') { playPrevResource(); return; }
+      
+      if (e.key === 'Escape') {
+        closeInlineVideo();
+        return;
+      }
+      if (e.key === 'ArrowRight') {
+        playNextResource();
+        return;
+      }
+      if (e.key === 'ArrowLeft') {
+        playPrevResource();
+        return;
+      }
     });
 
-
-
+    // Brauzer orqaga tugmasini bekor qilish
+    function preventBackButton() {
+      if (videoModalOpen) {
+        window.history.pushState(null, null, window.location.pathname);
+        closeInlineVideo();
+      }
+    }
     
+    window.addEventListener('popstate', preventBackButton);
+
+
+
+
+
+
+
+
   </script>
 
+</body>
+</html>
