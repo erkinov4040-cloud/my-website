@@ -130,7 +130,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>CEFR Reading | English Reading Practice and Vocabulary</title>
-  <meta name="theme-color" content="#87CEEB">
+  <meta name="theme-color" content="#c8f3ed">
+  <meta name="msapplication-navbutton-color" content="#c8f3ed">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="icon" href="https://avatars.githubusercontent.com/u/857719?v=4&s=400" />
   <meta name="description"
     content="Practice CEFR reading exercises and improve your English with free texts and vocabulary lessons. Perfect for beginners and all CEFR levels (A1–C1).">
@@ -1554,21 +1556,56 @@ body[data-theme="dark"] .logo {
     }
 
     /* search */
+    .search-container {
+      position: relative;
+      margin-bottom: 12px;
+    }
+
     .search-bar {
-      padding: 10px 14px;
-      border-radius: var(--radius-md);
-      border: 1px solid var(--accent2);
+      width: 100%;
+      padding: 12px 45px 12px 16px;
+      border-radius: 25px;
+      border: 2px solid var(--accent2);
       background: #fff;
-      font-size: 15px;
+      font-size: 16px;
       color: var(--text);
       outline: none;
-      margin-bottom: 12px;
       min-width: 0;
-      transition: border .19s;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
 
     .search-bar:focus {
-      border: 1.5px solid var(--accent);
+      border: 2px solid var(--accent);
+      box-shadow: 0 4px 20px rgba(135, 206, 235, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--accent);
+      font-size: 20px;
+      pointer-events: none;
+    }
+
+    .search-bar::placeholder {
+      color: #999;
+      font-style: italic;
+    }
+
+    /* Dark mode uchun */
+    body[data-theme="dark"] .search-bar {
+      background: #2b313a;
+      color: #ffffff;
+      border-color: #3a414b;
+    }
+
+    body[data-theme="dark"] .search-bar:focus {
+      border-color: var(--accent);
+      box-shadow: 0 4px 20px rgba(135, 206, 235, 0.2);
     }
 
     /* modal */
@@ -2167,14 +2204,8 @@ body[data-theme="dark"] .logo {
       border-radius: 15px;
       box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
     }
-  </style>
 
-  </style>
 
-  </style>
-
-  
-  
   </style>
   <style>
 #resourceWindow {
@@ -2480,8 +2511,9 @@ body[data-theme="dark"] .logo {
           <span id="galleryStat"
             style="color:var(--muted);font-size:13px;display:inline-block;margin-bottom:3px;"></span>
         </div>
-        <div style="display:flex; gap:7px;">
-          <input class="search-bar" id="searchWord" placeholder="So'z qidirish...">
+        <div class="search-container" style="max-width: 300px;">
+          <input class="search-bar" id="searchWord" placeholder="🔍 So'z qidiring yoki ChatGPT ga savol bering...">
+          <span class="search-icon material-icons">search</span>
         </div>
       </div>
 
@@ -4783,6 +4815,7 @@ body[data-theme="dark"] .logo {
       } else {
         setDarkMode(false);
       }
+      
       // set header height CSS var after initial layout
       try { updateHeaderHeightCSS(); } catch (e) { }
       // update on resize/orientation change
@@ -5195,8 +5228,132 @@ body[data-theme="dark"] .logo {
       }
     }
 
-    // Search
-    searchWord.oninput = () => renderGallery(words[currentSection]);
+    // Haqiqiy tarjima AI
+    async function searchWithChatGPT(query) {
+      try {
+        // Google Translate API
+        const response = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=uz&dt=t&q=${encodeURIComponent(query)}`);
+        const data = await response.json();
+        
+        if (data && data[0] && data[0][0] && data[0][0][0]) {
+          const translation = data[0][0][0];
+          return `${query} - ${translation}`;
+        }
+        
+        throw new Error('Tarjima topilmadi');
+        
+      } catch (error) {
+        // Fallback: MyMemory API
+        try {
+          const response2 = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(query)}&langpair=en|uz`);
+          const data2 = await response2.json();
+          
+          if (data2.responseStatus === 200 && data2.responseData) {
+            return `${query} - ${data2.responseData.translatedText}`;
+          }
+        } catch (e) {}
+        
+        // Agar hech narsa ishlamasa
+        return `${query} - tarjima topilmadi. Iltimos, internetni tekshiring.`;
+      }
+    }
+
+    // Qidirish maydoniga ChatGPT javobini ko'rsatish
+    let searchTimeout;
+    searchWord.oninput = async () => {
+      const query = searchWord.value.trim();
+      
+      // Agar input bo'sh bo'lsa, barcha so'zlarni ko'rsatish
+      if (query === '') {
+        clearTimeout(searchTimeout);
+        renderGallery(words[currentSection]);
+        return;
+      }
+      
+      // Agar so'z qidirilsa, oddiy qidirish
+      if (query && words[currentSection]) {
+        const filtered = words[currentSection].filter(w => 
+          w.toLowerCase().includes(query.toLowerCase())
+        );
+        
+        if (filtered.length > 0) {
+          clearTimeout(searchTimeout);
+          renderGallery(filtered);
+          return;
+        }
+      }
+      
+      // Agar so'z topilmasa yoki savol berilsa, ChatGPT dan javob olish
+      if (query.length > 3) {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(async () => {
+          const chatResponse = await searchWithChatGPT(query);
+          showChatGPTResponse(chatResponse);
+        }, 1000); // 1 soniya kutish
+      } else {
+        clearTimeout(searchTimeout);
+        renderGallery(words[currentSection]);
+      }
+    };
+
+    // ChatGPT javobini ko'rsatish
+    async function showChatGPTResponse(response) {
+      galleryGrid.innerHTML = `
+        <div style="
+          background: linear-gradient(145deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+          color: white;
+          padding: 25px;
+          border-radius: 20px;
+          margin: 15px 0;
+          box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3), 0 5px 15px rgba(0,0,0,0.1);
+          border: 1px solid rgba(255,255,255,0.2);
+          position: relative;
+          overflow: hidden;
+        ">
+          <div style="
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+          ">
+            <div style="
+              background: rgba(255,255,255,0.2);
+              border-radius: 50%;
+              width: 40px;
+              height: 40px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 20px;
+            ">🤖</div>
+            <h3 style="
+              margin: 0;
+              font-size: 18px;
+              font-weight: 600;
+              text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            ">✨ AI Yordamchi</h3>
+          </div>
+          <div style="
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 1;
+          ">
+            <p style="
+              margin: 0;
+              line-height: 1.7;
+              font-size: 16px;
+              text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            ">${response}</p>
+          </div>
+        </div>
+      `;
+    }
 
     // Favorites
     function toggleFavorite(word) {
@@ -5497,68 +5654,63 @@ document.addEventListener('keydown', function (e) {
     // mapping section -> array of video objects (id,title,note)
     const resourceVideos = {
       1: [
-        { id: 'Uo3QarxA7NU', title: 'Video ', note: "" },
-        { id: 'FmJBY_SynY8', title: 'Video ', note: "" },
-        { id: '97GmvIJWXdE', title: 'Video ', note: "" },
-        { id: 'uKzvpopTFfM', title: 'Video ', note: "" },
-        { id: '2GrifNhxai0', title: 'Video ', note: "" },
-        { id: 'NQjGuye0jfo', title: 'Video ', note: "" },
-        { id: 'uEq6FWDCwSM', title: 'Video ', note: "" },
-        { id: 'pakPAOZNqmE', title: 'Video ', note: "" },
-        { id: '9a9qNLUpkV8', title: 'Video ', note: "" },
-        { id: 'uyw6ctsu_gw', title: 'Video ', note: "" },
-        { id: 'ZIgxOMiTPh0', title: 'Video ', note: "" },
-        { id: 'yb54VGUjHf8', title: 'Video ', note: "" },
-        { id: 'L0gHmgmevNc', title: 'Video ', note: "" },
-        { id: 'RSJoD5-73tM', title: 'Video ', note: "" },
-        { id: 'zs3Q3a4pHOM', title: 'Video ', note: "" },
-        { id: 'M9CLXs_7ups', title: 'Video ', note: "" },
-        { id: '42fapAkNXU0', title: 'Video ', note: "" },
-        { id: 'RvF_ZFcbofM', title: 'Video ', note: "" },
-        { id: 'oOSLR5IQklY', title: ' Video ', note: "" },
-        { id: 'ZD3ZaytFKiU', title: ' Video 1', note: "" },
-        { id: 'URM0-DQJ27Q', title: ' Video 2', note: "" }, 
-        { id: 'DvfTJqczEgM', title: ' Video 3', note: "" },
-        { id: 'X4B947IqV70', title: " Video 4", note: "" },
-        { id: 'IjfzWZdRbfo', title: " Video 5", note: "" },
-        { id: 'ZVzgfmqCwGQ', title: " Video 6", note: "" },
-        { id: 'bvoBy2J7vj0', title: " Video 7", note: "" },
-        { id: 'dMfsen6Dor4', title: " Video 8", note: "" },
-        { id: 'ndmjsf_DZtk', title: " Video 9", note: "" },
-        { id: 'llJtisztYdI', title: " Video 10", note: "" },
-        { id: 'qnbZF0--4GU', title: " Video 11", note: "" },
-        { id: '0FXfOR6gHOA', title: " Video 12", note: "" },
-        { id: 'SvJYznkdB9Y', title: " Video 13", note: "" },
-        { id: '702XzWEg_PY', title: " Video 14", note: "" },
-        { id: 'stmfj-JslcI', title: " Video 15", note: "" },
-        { id: '62br5UmqtSg', title: " Video 16", note: "" },
-        { id: 'bXbr9y6LPcc', title: " Video 17", note: "" },
-        { id: '4ZXTnqHg3L8', title: " Video 18", note: "" },
-        { id: '3lahqP3ZA7Y', title: " Video 19", note: "" },
-        { id: 'NnyNRnWFDEs', title: ' Video 20', note: '' },
-        { id: 'KyTkxPOWmp4', title: ' Video 21', note: '' },
-        { id: 'rwUAzKy4xT0', title: ' Video 22', note: '' },
-        { id: 'Mdvb_JpvMGo', title: ' Video 23', note: '' },
-        { id: 'mcJb04j_s74', title: ' Video 24', note: '' },
-        { id: 'bBqQUqdJTVU', title: ' Video 25', note: '' },
-        { id: 'OHc_ZH_pkhQ', title: ' Video 26', note: '' },
-        { id: '3iQsY4Bi510', title: ' Video 27', note: '' },
-        { id: 'Ia7LPksqlR0', title: ' Video 28', note: '' },
-        { id: 'RU4j1WsU3dw', title: ' Video 29', note: '' },
-        { id: 'W-Rm8yN_-9A', title: ' Video 30', note: '' },
-        { id: '-G2XkygH9fI', title: ' Video 31', note: '' },
-        { id: 'xhq-WrZf53A', title: ' Video 32', note: '' },
-        { id: 'e0LCeMTDxro', title: ' Video 33', note: '' },
-        { id: 'qIJdG3YcB48', title: ' Video 34', note: '' },
-        { id: 'EJ1QNP-AKzc', title: ' Video 35', note: '' },
-        { id: 'UQ2njZ89rvY', title: ' Video 36', note: '' },
-        { id: '-U7QMl76Ixg', title: ' Video 37', note: '' },
-        { id: '8ctAug8xT7M', title: ' Video 38', note: '' },
-        { id: 'uFThdXspww4', title: ' Video 39', note: '' },
-        { id: 'nJg1pavURCU', title: ' Video 40', note: '' },
-        { id: 'X8dXWT85uhQ', title: ' Video 41', note: '' },
-        { id: 'gpQwPUyOSE0', title: ' Video 42', note: '' },
-        { id: 'YaoOjURVKgE', title: ' Video 43', note: '' }
+        
+        { id: 'FmJBY_SynY8', title: 'Video 1', note: "" },
+        { id: '97GmvIJWXdE', title: 'Video 2', note: "" },
+        { id: 'uKzvpopTFfM', title: 'Video 3', note: "" },
+        { id: '2GrifNhxai0', title: 'Video 4', note: "" },
+        { id: 'NQjGuye0jfo', title: 'Video 5', note: "" },
+        { id: 'uEq6FWDCwSM', title: 'Video 6', note: "" },
+        { id: 'pakPAOZNqmE', title: 'Video 7', note: "" },
+        { id: '9a9qNLUpkV8', title: 'Video 8', note: "" },
+        { id: 'ZIgxOMiTPh0', title: 'Video 9', note: "" },
+        { id: 'yb54VGUjHf8', title: 'Video 10', note: "" },
+        { id: 'RSJoD5-73tM', title: 'Video 11', note: "" },
+        { id: 'zs3Q3a4pHOM', title: 'Video 12', note: "" },
+        { id: 'M9CLXs_7ups', title: 'Video 13', note: "" },
+        { id: '42fapAkNXU0', title: 'Video 14', note: "" },
+        { id: 'RvF_ZFcbofM', title: 'Video 15', note: "" },
+        { id: 'oOSLR5IQklY', title: 'Video 16', note: "" },
+        { id: 'ZD3ZaytFKiU', title: 'Video 17', note: "" },
+        { id: 'URM0-DQJ27Q', title: 'Video 18', note: "" }, 
+        { id: 'DvfTJqczEgM', title: 'Video 19', note: "" },
+        { id: 'X4B947IqV70', title: "Video 20", note: "" },
+        { id: 'IjfzWZdRbfo', title: "Video 21", note: "" },
+        { id: 'bvoBy2J7vj0', title: "Video 22", note: "" },
+        { id: 'dMfsen6Dor4', title: "Video 23", note: "" },
+        { id: 'ndmjsf_DZtk', title: "Video 24", note: "" },
+        { id: 'llJtisztYdI', title: "Video 25", note: "" },
+        { id: 'qnbZF0--4GU', title: "Video 26", note: "" },
+        { id: '0FXfOR6gHOA', title: "Video 27", note: "" },
+        { id: 'SvJYznkdB9Y', title: "Video 28", note: "" },
+        { id: '702XzWEg_PY', title: "Video 29", note: "" },
+        { id: 'stmfj-JslcI', title: "Video 30", note: "" },
+        { id: '62br5UmqtSg', title: "Video 31", note: "" },
+        { id: 'bXbr9y6LPcc', title: "Video 32", note: "" },
+        { id: '4ZXTnqHg3L8', title: "Video 33", note: "" },
+        { id: '3lahqP3ZA7Y', title: "Video 34", note: "" },
+        { id: 'NnyNRnWFDEs', title: 'Video 35', note: '' },
+        { id: 'rwUAzKy4xT0', title: 'Video 36', note: '' },
+        { id: 'mcJb04j_s74', title: 'Video 37', note: '' },
+        { id: 'bBqQUqdJTVU', title: 'Video 38', note: '' },
+        { id: 'OHc_ZH_pkhQ', title: 'Video 39', note: '' },
+        { id: '3iQsY4Bi510', title: 'Video 40', note: '' },
+        { id: 'Ia7LPksqlR0', title: 'Video 41', note: '' },
+        { id: 'RU4j1WsU3dw', title: 'Video 42', note: '' },
+        { id: 'W-Rm8yN_-9A', title: 'Video 43', note: '' },
+        { id: '-G2XkygH9fI', title: 'Video 44', note: '' },
+        { id: 'xhq-WrZf53A', title: 'Video 45', note: '' },
+        { id: 'e0LCeMTDxro', title: 'Video 46', note: '' },
+        { id: 'qIJdG3YcB48', title: 'Video 47', note: '' },
+        { id: 'EJ1QNP-AKzc', title: 'Video 48', note: '' },
+        { id: 'UQ2njZ89rvY', title: 'Video 49', note: '' },
+        { id: '-U7QMl76Ixg', title: 'Video 50', note: '' },
+        { id: '8ctAug8xT7M', title: 'Video 51', note: '' },
+        { id: 'uFThdXspww4', title: 'Video 52', note: '' },
+        { id: 'nJg1pavURCU', title: 'Video 53', note: '' },
+        { id: 'X8dXWT85uhQ', title: 'Video 54', note: '' },
+        { id: 'gpQwPUyOSE0', title: 'Video 55', note: '' },
+        { id: 'YaoOjURVKgE', title: 'Video 56', note: '' }
       ]
     };
 
@@ -5592,22 +5744,26 @@ document.addEventListener('keydown', function (e) {
 
     function playNextVideo() {
       const videos = (window.activeResourceList && window.activeResourceList.length) ? window.activeResourceList : (resourceVideos[currentSection] || window.videos || []);
-      if (currentVideoIndex < videos.length - 1) {
-        currentVideoIndex++;
-        const nextVideo = videos[currentVideoIndex];
-        try { iv_openInlineVideo(nextVideo.id); } catch (e) { playVideoModal(nextVideo.id); }
-        updateNavigationButtons();
-      }
+      if (currentVideoIndex >= videos.length - 1) return;
+      
+      currentVideoIndex++;
+      const nextVideo = videos[currentVideoIndex];
+      if (!nextVideo || !nextVideo.id) return;
+      
+      try { iv_openInlineVideo(nextVideo.id); } catch (e) { playVideoModal(nextVideo.id); }
+      updateNavigationButtons();
     }
 
     function playPreviousVideo() {
       const videos = (window.activeResourceList && window.activeResourceList.length) ? window.activeResourceList : (resourceVideos[currentSection] || window.videos || []);
-      if (currentVideoIndex > 0) {
-        currentVideoIndex--;
-        const prevVideo = videos[currentVideoIndex];
-        try { iv_openInlineVideo(prevVideo.id); } catch (e) { playVideoModal(prevVideo.id); }
-        updateNavigationButtons();
-      }
+      if (currentVideoIndex <= 0) return;
+      
+      currentVideoIndex--;
+      const prevVideo = videos[currentVideoIndex];
+      if (!prevVideo || !prevVideo.id) return;
+      
+      try { iv_openInlineVideo(prevVideo.id); } catch (e) { playVideoModal(prevVideo.id); }
+      updateNavigationButtons();
     }
 
 
@@ -6120,16 +6276,18 @@ document.addEventListener('keydown', function (e) {
     function playNextResource() {
       try {
         if (!inlineResourceList || inlineResourceList.length === 0) return;
-        if (inlineResourceIndex < inlineResourceList.length - 1) inlineResourceIndex++;
-        const id = inlineResourceList[inlineResourceIndex] && inlineResourceList[inlineResourceIndex].id;
-        if (!id) return;
+        if (inlineResourceIndex >= inlineResourceList.length - 1) return;
+        
+        inlineResourceIndex++;
+        const video = inlineResourceList[inlineResourceIndex];
+        if (!video || !video.id) return;
         
         try { showInlineCover(); } catch (er) {}
         
         if (_ytInlinePlayer && _ytInlinePlayer.loadVideoById) {
-          _ytInlinePlayer.loadVideoById({ videoId: id, startSeconds: 0 });
+          _ytInlinePlayer.loadVideoById({ videoId: video.id, startSeconds: 0 });
         } else {
-          openInlineVideo(id);
+          openInlineVideo(video.id);
         }
         updateInlineNavButtons();
       } catch (e) {
@@ -6140,14 +6298,16 @@ document.addEventListener('keydown', function (e) {
     function playPrevResource() {
       try {
         if (!inlineResourceList || inlineResourceList.length === 0) return;
-        if (inlineResourceIndex > 0) inlineResourceIndex--;
-        const id = inlineResourceList[inlineResourceIndex] && inlineResourceList[inlineResourceIndex].id;
-        if (!id) return;
+        if (inlineResourceIndex <= 0) return;
+        
+        inlineResourceIndex--;
+        const video = inlineResourceList[inlineResourceIndex];
+        if (!video || !video.id) return;
         
         if (_ytInlinePlayer && _ytInlinePlayer.loadVideoById) {
-          _ytInlinePlayer.loadVideoById({ videoId: id, startSeconds: 0 });
+          _ytInlinePlayer.loadVideoById({ videoId: video.id, startSeconds: 0 });
         } else {
-          openInlineVideo(id);
+          openInlineVideo(video.id);
         }
         updateInlineNavButtons();
       } catch (e) {
@@ -6194,6 +6354,70 @@ document.addEventListener('keydown', function (e) {
     }
     
     window.addEventListener('popstate', preventBackButton);
+
+    // Bepul tarjima funksiyasi
+    async function translateText(text, targetLang = 'uz') {
+      try {
+        // MyMemory bepul tarjima API
+        const sourceLang = targetLang === 'uz' ? 'en' : 'uz';
+        const targetL = targetLang === 'uz' ? 'uz' : 'en';
+        
+        const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sourceLang}|${targetL}`);
+        const data = await response.json();
+        
+        if (data.responseStatus === 200 && data.responseData) {
+          return data.responseData.translatedText;
+        }
+        
+        // Fallback: Google Translate bepul API
+        const googleResponse = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetL}&dt=t&q=${encodeURIComponent(text)}`);
+        const googleData = await googleResponse.json();
+        
+        if (googleData && googleData[0] && googleData[0][0]) {
+          return googleData[0][0][0];
+        }
+        
+        return text;
+      } catch (error) {
+        console.error('Tarjima xatosi:', error);
+        return text;
+      }
+    }
+
+    // Matnni tanlash va tarjima qilish
+    document.addEventListener('mouseup', async function() {
+      const selectedText = window.getSelection().toString().trim();
+      if (selectedText.length > 0) {
+        const translated = await translateText(selectedText);
+        
+        // Tarjimani ko'rsatish uchun tooltip yaratish
+        const tooltip = document.createElement('div');
+        tooltip.innerHTML = `<strong>Tarjima:</strong> ${translated}`;
+        tooltip.style.cssText = `
+          position: fixed;
+          background: #333;
+          color: white;
+          padding: 8px 12px;
+          border-radius: 6px;
+          font-size: 14px;
+          z-index: 9999;
+          max-width: 300px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        `;
+        
+        // Mouse pozitsiyasiga tooltip joylashtirish
+        const rect = window.getSelection().getRangeAt(0).getBoundingClientRect();
+        tooltip.style.left = rect.left + 'px';
+        tooltip.style.top = (rect.bottom + 5) + 'px';
+        
+        document.body.appendChild(tooltip);
+        
+        // 5 soniyadan keyin tooltip ni o'chirish
+        setTimeout(() => {
+          if (tooltip.parentNode) tooltip.parentNode.removeChild(tooltip);
+        }, 5000);
+      }
+    });
 
 
 
