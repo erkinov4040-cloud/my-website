@@ -131,7 +131,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>CEFR Reading | English Reading Practice and Vocabulary</title>
-  <meta name="theme-color" content="#87CEEB">
+  <meta name="theme-color" content="#c8f3ed">
+  <meta name="msapplication-navbutton-color" content="#c8f3ed">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="icon" href="https://avatars.githubusercontent.com/u/857719?v=4&s=400" />
   <meta name="description"
     content="Practice CEFR reading exercises and improve your English with free texts and vocabulary lessons. Perfect for beginners and all CEFR levels (A1–C1).">
@@ -260,87 +262,7 @@ body[data-theme="dark"] .logo {
 
         window.closeModal = function() {
           modalBg = modalBg || document.getElementById('modalBg');
-          try { 
-            if (modalBg) { 
-              modalBg.style.display = 'none'; 
-              modalBg.innerHTML = ''; 
-            } 
-            document.body.style.overflow = ''; 
-          } catch (e) {}
-        };
-
-        // compatibility stubs
-        window.playNextVideo = window.playNextVideo || function(){};
-        window.playPrevVideo = window.playPrevVideo || function(){};
-
-        // Close modal on ESC
-        window.addEventListener('keydown', function(e){ if (e.key === 'Escape') { try { closeModal(); } catch (er){} } });
-      })();
-      
-      /* YouTube IFrame API integration: create/destroy player when modal opens/closes */
-      (function(){
-        var YT_API_LOADED = false;
-        var pendingInit = null;
-        var player = null;
-
-        // load API once
-        function ensureApi() {
-          if (window.YT && window.YT.Player) { YT_API_LOADED = true; return Promise.resolve(); }
-          if (window._ytApiLoading) return window._ytApiLoading;
-          var p = new Promise(function(res){
-            window.onYouTubeIframeAPIReady = function(){ YT_API_LOADED = true; res(); };
-            var s = document.createElement('script'); s.src = 'https://www.youtube.com/iframe_api'; s.async = true; document.head.appendChild(s);
-          });
-          window._ytApiLoading = p;
-          return p;
-        }
-
-        window.initPlayerWithId = function(vid) {
-          // ensure API loaded then attach player; if a previous player exists, destroy it
-          ensureApi().then(function(){
-            try { if (player && player.destroy) { player.destroy(); player = null; } } catch(e){}
-            try {
-              player = new YT.Player('videoPlayer', {
-                videoId: vid,
-                playerVars: { autoplay: 1, controls: 1, modestbranding: 1, rel: 0, iv_load_policy: 3, playsinline: 1 },
-                events: {
-                  onReady: function(e){ try{ e.target.playVideo(); }catch(err){} },
-                  onStateChange: function(e){
-                    // Video holatini kuzatish, lekin avtomatik yopmaslik
-                    console.log('Video state:', e.data);
-                  }
-                }
-              });
-            } catch (err) { console.error('YT player init error', err); }
-          }).catch(function(err){ console.error('YT API load failed', err); });
-        };
-
-        // Hook closeModal to clean up player
-        var origClose = window.closeModal;
-        window.closeModal = function(){ 
-          try{ 
-            if (player && player.destroy) {
-              player.destroy(); 
-              player = null; 
-            }
-          }catch(e){} 
-          try{ 
-            origClose(); 
-          }catch(e){} 
-        };
-
-        // Prev/Next stubs (user's existing handlers may replace these)
-        window.playNextVideo = window.playNextVideo || function(){
-          // default: close overlay so user sees playlist or we can navigate
-          try{ if (player) { player.stopVideo(); } }catch(e){}
-          // user can override this function to actually load the next id
-        };
-        window.playPrevVideo = window.playPrevVideo || function(){
-          try{ if (player) { player.stopVideo(); } }catch(e){}
-        };
-
-      })();
-      </script>ML = ''; } document.body.style.overflow = ''; } catch (e) {}
+          try { if (modalBg) { modalBg.style.display = 'none'; modalBg.innerHTML = ''; } document.body.style.overflow = ''; } catch (e) {}
         };
 
         // compatibility stubs
@@ -694,7 +616,6 @@ body[data-theme="dark"] .logo {
       justify-content: center;
       background: #ffffff;
       border: 1px solid rgba(0,0,0,0.1);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
 
     .logo img {
@@ -714,24 +635,43 @@ body[data-theme="dark"] .logo {
       font-size: 22px;
       font-weight: 800;
       letter-spacing: 0.03em;
-      color: var(--text)
+      color: #2c3e50;
     }
 
     .subtitle {
       font-size: 14px;
-      color: var(--muted);
-      font-weight: 500
+      color: #6c757d;
+      font-weight: 500;
+      font-style: italic;
     }
 
     .credits {
       font-size: 12px;
-      background: transparent;
-      border-radius: var(--radius-sm);
-      color: var(--muted);
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 12px;
+      color: #495057;
       margin-top: 7px;
-      padding: 6px 10px;
-      font-weight: 500;
+      padding: 8px 12px;
+      font-weight: 600;
       display: inline-block;
+      border: 1px solid rgba(206, 212, 218, 0.5);
+      box-shadow: 0 2px 8px rgba(108, 117, 125, 0.1);
+      animation: creditsShine 4s ease-in-out infinite;
+    }
+
+    @keyframes titleGlow {
+      0% { filter: brightness(1); }
+      100% { filter: brightness(1.1); }
+    }
+
+    @keyframes subtitleFloat {
+      0% { transform: translateY(0px); }
+      100% { transform: translateY(-2px); }
+    }
+
+    @keyframes creditsShine {
+      0%, 100% { box-shadow: 0 2px 8px rgba(108, 117, 125, 0.1); }
+      50% { box-shadow: 0 4px 12px rgba(108, 117, 125, 0.15); }
     }
 
     nav {
@@ -1635,21 +1575,56 @@ body[data-theme="dark"] .logo {
     }
 
     /* search */
+    .search-container {
+      position: relative;
+      margin-bottom: 12px;
+    }
+
     .search-bar {
-      padding: 10px 14px;
-      border-radius: var(--radius-md);
-      border: 1px solid var(--accent2);
+      width: 100%;
+      padding: 12px 45px 12px 16px;
+      border-radius: 25px;
+      border: 2px solid var(--accent2);
       background: #fff;
-      font-size: 15px;
+      font-size: 16px;
       color: var(--text);
       outline: none;
-      margin-bottom: 12px;
       min-width: 0;
-      transition: border .19s;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
 
     .search-bar:focus {
-      border: 1.5px solid var(--accent);
+      border: 2px solid var(--accent);
+      box-shadow: 0 4px 20px rgba(135, 206, 235, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--accent);
+      font-size: 20px;
+      pointer-events: none;
+    }
+
+    .search-bar::placeholder {
+      color: #999;
+      font-style: italic;
+    }
+
+    /* Dark mode uchun */
+    body[data-theme="dark"] .search-bar {
+      background: #2b313a;
+      color: #ffffff;
+      border-color: #3a414b;
+    }
+
+    body[data-theme="dark"] .search-bar:focus {
+      border-color: var(--accent);
+      box-shadow: 0 4px 20px rgba(135, 206, 235, 0.2);
     }
 
     /* modal */
@@ -2166,20 +2141,116 @@ body[data-theme="dark"] .logo {
     /* Sarlavha matnlari */
     body[data-theme="dark"] h1,
     body[data-theme="dark"] h2,
-    body[data-theme="dark"] h3,
-    body[data-theme="dark"] .title,
-    body[data-theme="dark"] .subtitle,
-    body[data-theme="dark"] .credits {
+    body[data-theme="dark"] h3 {
       color: #ffffff !important;
     }
 
-    /* 📚 Dedication */
+    body[data-theme="dark"] .title {
+      color: #ffffff !important;
+    }
+
+    body[data-theme="dark"] .subtitle {
+      color: #b0b0b0 !important;
+    }
+
+    body[data-theme="dark"] .credits {
+      background: linear-gradient(135deg, #495057 0%, #6c757d 100%) !important;
+      color: #ffffff !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3) !important;
+    }
+
+    /* 📚 Dedication - Chiroyli dizayn */
+    .dedication {
+      background: linear-gradient(135deg, #e8f4f8 0%, #f0f8ff 100%);
+      color: #2c3e50;
+      border-radius: 15px;
+      padding: 20px;
+      margin: 20px 0;
+      box-shadow: 0 4px 16px rgba(135, 206, 235, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(135, 206, 235, 0.2);
+      animation: dedicationGlow 3s ease-in-out infinite alternate;
+    }
+
+    .dedication::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(135, 206, 235, 0.1), transparent);
+      animation: dedicationShine 4s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes dedicationGlow {
+      0% { box-shadow: 0 4px 16px rgba(135, 206, 235, 0.15); }
+      100% { box-shadow: 0 6px 20px rgba(135, 206, 235, 0.25); }
+    }
+
+    @keyframes dedicationShine {
+      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+
+    .dedication-icon {
+      font-size: 24px;
+      animation: dedicationBounce 2s ease-in-out infinite;
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+    }
+
+    .dedication-text {
+      text-align: center;
+      flex: 1;
+    }
+
+    .dedication-quote {
+      font-size: 16px;
+      font-weight: 500;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      letter-spacing: 0.5px;
+      line-height: 1.4;
+    }
+
+    @keyframes dedicationBounce {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+    }
+
+    /* Dark mode uchun */
     body[data-theme="dark"] .dedication {
-      background-color: #1c1f26;
-      color: #ffffff;
-      border-radius: 10px;
-      padding: 12px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+      background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%) !important;
+      box-shadow: 0 8px 32px rgba(45, 55, 72, 0.4) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+
+    body[data-theme="dark"] .dedication::before {
+      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 650px) {
+      .dedication {
+        padding: 15px;
+        margin: 15px 0;
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      .dedication-icon {
+        font-size: 20px;
+      }
+      
+      .dedication-quote {
+        font-size: 14px;
+      }
     }
 
     /* Hero card (asosiy blok) */
@@ -2248,14 +2319,8 @@ body[data-theme="dark"] .logo {
       border-radius: 15px;
       box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
     }
-  </style>
 
-  </style>
 
-  </style>
-
-  
-  
   </style>
   <style>
 #resourceWindow {
@@ -2386,13 +2451,12 @@ body[data-theme="dark"] .logo {
         .subtitle { font-size: 12px; }
 
         .credits {
-          font-size: 10px; /* smaller on phones */
-          margin-top: 4px;
-          color: var(--muted);
-          display: block;
-          white-space: normal;
-          overflow-wrap: anywhere; /* keep long words from overflowing */
-          padding: 2px 6px; /* reduce padding so it looks compact on small screens */
+          font-size: 10px;
+          display: inline-block;
+          width: fit-content;
+          max-width: fit-content;
+          flex: none;
+          align-self: flex-start;
         }
 
         /* Controls row: place nav (telegram + theme) on a separate line below the brand */
@@ -2426,7 +2490,6 @@ body[data-theme="dark"] .logo {
         .brand-titles { gap: 4px; }
         .title { display:flex; align-items:center; gap:10px; }
         .title-logo { width:40px !important; height:40px !important; margin-top:0 !important; vertical-align:middle !important; }
-        .credits { font-size:10px !important; padding:2px 6px !important; }
       }
     </style>
 
@@ -2452,7 +2515,8 @@ body[data-theme="dark"] .logo {
           </p>
           <div style="display:flex;gap:12px;align-items:center">
             <button class="enter-btn" id="showResourcesBtn" onclick="openResources()"><span class="material-icons"
-                style="font-size:18px">arrow_forward</span> Enter </button>
+                style="font-size:18px">arrow_forward</span> ENTER — Kirish </button>
+                
           </div>
 
 
@@ -2561,8 +2625,9 @@ body[data-theme="dark"] .logo {
           <span id="galleryStat"
             style="color:var(--muted);font-size:13px;display:inline-block;margin-bottom:3px;"></span>
         </div>
-        <div style="display:flex; gap:7px;">
-          <input class="search-bar" id="searchWord" placeholder="So'z qidirish...">
+        <div class="search-container" style="max-width: 300px;">
+          <input class="search-bar" id="searchWord" placeholder="🔍 So'z qidiring ...">
+          <span class="search-icon material-icons">search</span>
         </div>
       </div>
 
@@ -2676,19 +2741,114 @@ body[data-theme="dark"] .logo {
 
 
 
+    /* Chiroyli footer link animatsiyalari */
+    .footer-contact {
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .footer-contact::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .footer-contact:hover::before {
+      left: 100%;
+    }
+
+    .footer-contact:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      border-color: rgba(255,255,255,0.3);
+    }
+
+    /* Telegram link - ko'k rang */
+    .footer-contact[href*="t.me"] {
+      background: linear-gradient(135deg, #0088cc, #229ED9);
+      color: white !important;
+    }
+
+    .footer-contact[href*="t.me"]:hover {
+      background: linear-gradient(135deg, #229ED9, #0088cc);
+      box-shadow: 0 8px 25px rgba(34, 158, 217, 0.4);
+    }
+
+    /* YouTube link - qizil rang */
+    .footer-contact[href*="youtube"] {
+      background: linear-gradient(135deg, #FF0000, #FF4444);
+      color: white !important;
+    }
+
+    .footer-contact[href*="youtube"]:hover {
+      background: linear-gradient(135deg, #FF4444, #FF0000);
+      box-shadow: 0 8px 25px rgba(255, 68, 68, 0.4);
+    }
+
+    /* Ikonka animatsiyasi */
+    .footer-contact img {
+      transition: transform 0.3s ease;
+    }
+
+    .footer-contact:hover img {
+      transform: rotate(360deg) scale(1.1);
+    }
+
+    /* Matn animatsiyasi */
+    .footer-contact span {
+      display: inline-block;
+      transition: transform 0.3s ease;
+    }
+
+    .footer-contact:hover span {
+      transform: translateX(2px);
+    }
+
+    /* Pulsatsiya effekti */
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(34, 158, 217, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(34, 158, 217, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(34, 158, 217, 0); }
+    }
+
+    .footer-contact[href*="t.me"]:hover {
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse-red {
+      0% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(255, 68, 68, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0); }
+    }
+
+    .footer-contact[href*="youtube"]:hover {
+      animation: pulse-red 1.5s infinite;
+    }
+
     /* Footer responsive tweaks: make footer text a bit smaller on phones for a more professional look */
     @media (max-width: 650px) {
       footer { font-size: 13px; }
-      footer .footer-contact { font-size: 13px !important; padding: 6px 8px !important; gap: 6px !important; }
+      footer .footer-contact { font-size: 13px !important; padding: 8px 12px !important; gap: 6px !important; }
       footer .footer-contact img { width: 16px !important; height: 16px !important; }
       /* handle both spellings just in case: .horazm and .khorazm */
       .horazm, .khorazm { font-size: 11px !important; margin-top: 8px !important; }
-      .footer-links { gap: 8px !important; }
+      .footer-links { gap: 10px !important; }
     }
 
     @media (max-width: 480px) {
       footer { font-size: 12px; }
-      footer .footer-contact { font-size: 12px !important; padding: 4px 6px !important; }
+      footer .footer-contact { font-size: 12px !important; padding: 6px 10px !important; }
       .horazm, .khorazm { font-size: 10px !important; }
     }
   </style>
@@ -2727,7 +2887,6 @@ body[data-theme="dark"] .logo {
   </style>
 
   <script>
-    let hideControlsTimeout;
 
     function hideControls() {
         const modal = document.getElementById('resourceModal');
@@ -4864,6 +5023,7 @@ body[data-theme="dark"] .logo {
       } else {
         setDarkMode(false);
       }
+      
       // set header height CSS var after initial layout
       try { updateHeaderHeightCSS(); } catch (e) { }
       // update on resize/orientation change
@@ -5276,8 +5436,132 @@ body[data-theme="dark"] .logo {
       }
     }
 
-    // Search
-    searchWord.oninput = () => renderGallery(words[currentSection]);
+    // Haqiqiy tarjima AI
+    async function searchWithChatGPT(query) {
+      try {
+        // Google Translate API
+        const response = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=uz&dt=t&q=${encodeURIComponent(query)}`);
+        const data = await response.json();
+        
+        if (data && data[0] && data[0][0] && data[0][0][0]) {
+          const translation = data[0][0][0];
+          return `${query} - ${translation}`;
+        }
+        
+        throw new Error('Tarjima topilmadi');
+        
+      } catch (error) {
+        // Fallback: MyMemory API
+        try {
+          const response2 = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(query)}&langpair=en|uz`);
+          const data2 = await response2.json();
+          
+          if (data2.responseStatus === 200 && data2.responseData) {
+            return `${query} - ${data2.responseData.translatedText}`;
+          }
+        } catch (e) {}
+        
+        // Agar hech narsa ishlamasa
+        return `${query} - tarjima topilmadi. Iltimos, internetni tekshiring.`;
+      }
+    }
+
+    // Qidirish maydoniga ChatGPT javobini ko'rsatish
+    let searchTimeout;
+    searchWord.oninput = async () => {
+      const query = searchWord.value.trim();
+      
+      // Agar input bo'sh bo'lsa, barcha so'zlarni ko'rsatish
+      if (query === '') {
+        clearTimeout(searchTimeout);
+        renderGallery(words[currentSection]);
+        return;
+      }
+      
+      // Agar so'z qidirilsa, oddiy qidirish
+      if (query && words[currentSection]) {
+        const filtered = words[currentSection].filter(w => 
+          w.toLowerCase().includes(query.toLowerCase())
+        );
+        
+        if (filtered.length > 0) {
+          clearTimeout(searchTimeout);
+          renderGallery(filtered);
+          return;
+        }
+      }
+      
+      // Agar so'z topilmasa yoki savol berilsa, ChatGPT dan javob olish
+      if (query.length > 3) {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(async () => {
+          const chatResponse = await searchWithChatGPT(query);
+          showChatGPTResponse(chatResponse);
+        }, 1000); // 1 soniya kutish
+      } else {
+        clearTimeout(searchTimeout);
+        renderGallery(words[currentSection]);
+      }
+    };
+
+    // ChatGPT javobini ko'rsatish
+    async function showChatGPTResponse(response) {
+      galleryGrid.innerHTML = `
+        <div style="
+          background: linear-gradient(145deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+          color: white;
+          padding: 25px;
+          border-radius: 20px;
+          margin: 15px 0;
+          box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3), 0 5px 15px rgba(0,0,0,0.1);
+          border: 1px solid rgba(255,255,255,0.2);
+          position: relative;
+          overflow: hidden;
+        ">
+          <div style="
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+          ">
+            <div style="
+              background: rgba(255,255,255,0.2);
+              border-radius: 50%;
+              width: 40px;
+              height: 40px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 20px;
+            ">🤖</div>
+            <h3 style="
+              margin: 0;
+              font-size: 18px;
+              font-weight: 600;
+              text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            ">✨ AI Yordamchi</h3>
+          </div>
+          <div style="
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 1;
+          ">
+            <p style="
+              margin: 0;
+              line-height: 1.7;
+              font-size: 16px;
+              text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            ">${response}</p>
+          </div>
+        </div>
+      `;
+    }
 
     // Favorites
     function toggleFavorite(word) {
@@ -5346,6 +5630,31 @@ body[data-theme="dark"] .logo {
       if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     } catch (e) { }
 
+    // safePush funksiyasini qo'shamiz
+    function safePush(state, hash) {
+      try {
+        // Video ochiq bo'lsa, history o'zgartirishni oldini olamiz
+        if (window.videoModalActive) {
+          console.log('Video ochiq, history push bekor qilindi');
+          return;
+        }
+        history.pushState(state, '', hash);
+      } catch (e) {
+        console.error('safePush error:', e);
+      }
+    }
+
+    // handleNavigationState funksiyasini qo'shamiz
+    function handleNavigationState(evt) {
+      // Video ochiq bo'lsa, navigatsiyani bekor qilamiz
+      if (window.videoModalActive) {
+        console.log('Video ochiq, navigation bekor qilindi');
+        return;
+      }
+      // Boshqa navigatsiya logikasi
+      goHome(false);
+    }
+
     // Handle page reload/refresh
     window.addEventListener('load', function(evt) {
       // Clear any existing hash to ensure clean state
@@ -5412,7 +5721,43 @@ body[data-theme="dark"] .logo {
         });
       }
 
-// Takrorlanuvchi funksiyalar olib tashlandi - playNextVideo va playPrevVideo ishlatiladi
+function playNextResource() {
+  try {
+    if (!inlineResourceList || inlineResourceList.length === 0) return;
+    if (inlineResourceIndex < inlineResourceList.length - 1) inlineResourceIndex++;
+    const id = inlineResourceList[inlineResourceIndex] && inlineResourceList[inlineResourceIndex].id;
+    if (!id) return;
+
+    if (_ytInlinePlayer && _ytInlinePlayer.loadVideoById) {
+      _ytInlinePlayer.loadVideoById({ videoId: id, startSeconds: 0 });
+    } else {
+      openInlineVideo(id);
+    }
+
+    updateInlineNavButtons();
+  } catch (e) {
+    console.error('playNextResource', e);
+  }
+}
+
+function playPrevResource() {
+  try {
+    if (!inlineResourceList || inlineResourceList.length === 0) return;
+    if (inlineResourceIndex > 0) inlineResourceIndex--;
+    const id = inlineResourceList[inlineResourceIndex] && inlineResourceList[inlineResourceIndex].id;
+    if (!id) return;
+
+    if (_ytInlinePlayer && _ytInlinePlayer.loadVideoById) {
+      _ytInlinePlayer.loadVideoById({ videoId: id, startSeconds: 0 });
+    } else {
+      openInlineVideo(id);
+    }
+
+    updateInlineNavButtons();
+  } catch (e) {
+    console.error('playPrevResource', e);
+  }
+}
 
 function closeInlineVideo() {
   const bg = document.getElementById('inlineVideoModalBg');
@@ -5542,117 +5887,116 @@ document.addEventListener('keydown', function (e) {
     // mapping section -> array of video objects (id,title,note)
     const resourceVideos = {
       1: [
-        { id: 'Uo3QarxA7NU', title: 'Video ', note: "" },
-        { id: 'FmJBY_SynY8', title: 'Video ', note: "" },
-        { id: '97GmvIJWXdE', title: 'Video ', note: "" },
-        { id: 'uKzvpopTFfM', title: 'Video ', note: "" },
-        { id: '2GrifNhxai0', title: 'Video ', note: "" },
-        { id: 'NQjGuye0jfo', title: 'Video ', note: "" },
-        { id: 'uEq6FWDCwSM', title: 'Video ', note: "" },
-        { id: 'pakPAOZNqmE', title: 'Video ', note: "" },
-        { id: '9a9qNLUpkV8', title: 'Video ', note: "" },
-        { id: 'uyw6ctsu_gw', title: 'Video ', note: "" },
-        { id: 'ZIgxOMiTPh0', title: 'Video ', note: "" },
-        { id: 'yb54VGUjHf8', title: 'Video ', note: "" },
-        { id: 'L0gHmgmevNc', title: 'Video ', note: "" },
-        { id: 'RSJoD5-73tM', title: 'Video ', note: "" },
-        { id: 'zs3Q3a4pHOM', title: 'Video ', note: "" },
-        { id: 'M9CLXs_7ups', title: 'Video ', note: "" },
-        { id: '42fapAkNXU0', title: 'Video ', note: "" },
-        { id: 'RvF_ZFcbofM', title: 'Video ', note: "" },
-        { id: 'oOSLR5IQklY', title: ' Video ', note: "" },
-        { id: 'ZD3ZaytFKiU', title: ' Video 1', note: "" },
-        { id: 'URM0-DQJ27Q', title: ' Video 2', note: "" }, 
-        { id: 'DvfTJqczEgM', title: ' Video 3', note: "" },
-        { id: 'X4B947IqV70', title: " Video 4", note: "" },
-        { id: 'IjfzWZdRbfo', title: " Video 5", note: "" },
-        { id: 'ZVzgfmqCwGQ', title: " Video 6", note: "" },
-        { id: 'bvoBy2J7vj0', title: " Video 7", note: "" },
-        { id: 'dMfsen6Dor4', title: " Video 8", note: "" },
-        { id: 'ndmjsf_DZtk', title: " Video 9", note: "" },
-        { id: 'llJtisztYdI', title: " Video 10", note: "" },
-        { id: 'qnbZF0--4GU', title: " Video 11", note: "" },
-        { id: '0FXfOR6gHOA', title: " Video 12", note: "" },
-        { id: 'SvJYznkdB9Y', title: " Video 13", note: "" },
-        { id: '702XzWEg_PY', title: " Video 14", note: "" },
-        { id: 'stmfj-JslcI', title: " Video 15", note: "" },
-        { id: '62br5UmqtSg', title: " Video 16", note: "" },
-        { id: 'bXbr9y6LPcc', title: " Video 17", note: "" },
-        { id: '4ZXTnqHg3L8', title: " Video 18", note: "" },
-        { id: '3lahqP3ZA7Y', title: " Video 19", note: "" },
-        { id: 'NnyNRnWFDEs', title: ' Video 20', note: '' },
-        { id: 'KyTkxPOWmp4', title: ' Video 21', note: '' },
-        { id: 'rwUAzKy4xT0', title: ' Video 22', note: '' },
-        { id: 'Mdvb_JpvMGo', title: ' Video 23', note: '' },
-        { id: 'mcJb04j_s74', title: ' Video 24', note: '' },
-        { id: 'bBqQUqdJTVU', title: ' Video 25', note: '' },
-        { id: 'OHc_ZH_pkhQ', title: ' Video 26', note: '' },
-        { id: '3iQsY4Bi510', title: ' Video 27', note: '' },
-        { id: 'Ia7LPksqlR0', title: ' Video 28', note: '' },
-        { id: 'RU4j1WsU3dw', title: ' Video 29', note: '' },
-        { id: 'W-Rm8yN_-9A', title: ' Video 30', note: '' },
-        { id: '-G2XkygH9fI', title: ' Video 31', note: '' },
-        { id: 'xhq-WrZf53A', title: ' Video 32', note: '' },
-        { id: 'e0LCeMTDxro', title: ' Video 33', note: '' },
-        { id: 'qIJdG3YcB48', title: ' Video 34', note: '' },
-        { id: 'EJ1QNP-AKzc', title: ' Video 35', note: '' },
-        { id: 'UQ2njZ89rvY', title: ' Video 36', note: '' },
-        { id: '-U7QMl76Ixg', title: ' Video 37', note: '' },
-        { id: '8ctAug8xT7M', title: ' Video 38', note: '' },
-        { id: 'uFThdXspww4', title: ' Video 39', note: '' },
-        { id: 'nJg1pavURCU', title: ' Video 40', note: '' },
-        { id: 'X8dXWT85uhQ', title: ' Video 41', note: '' },
-        { id: 'gpQwPUyOSE0', title: ' Video 42', note: '' },
-        { id: 'YaoOjURVKgE', title: ' Video 43', note: '' }
+        
+        { id: 'FmJBY_SynY8', title: 'Video 1', note: "" },
+        { id: '97GmvIJWXdE', title: 'Video 2', note: "" },
+        { id: 'uKzvpopTFfM', title: 'Video 3', note: "" },
+        { id: '2GrifNhxai0', title: 'Video 4', note: "" },
+        { id: 'NQjGuye0jfo', title: 'Video 5', note: "" },
+        { id: 'uEq6FWDCwSM', title: 'Video 6', note: "" },
+        { id: 'pakPAOZNqmE', title: 'Video 7', note: "" },
+        { id: '9a9qNLUpkV8', title: 'Video 8', note: "" },
+        { id: 'ZIgxOMiTPh0', title: 'Video 9', note: "" },
+        { id: 'yb54VGUjHf8', title: 'Video 10', note: "" },
+        { id: 'RSJoD5-73tM', title: 'Video 11', note: "" },
+        { id: 'zs3Q3a4pHOM', title: 'Video 12', note: "" },
+        { id: 'M9CLXs_7ups', title: 'Video 13', note: "" },
+        { id: '42fapAkNXU0', title: 'Video 14', note: "" },
+        { id: 'RvF_ZFcbofM', title: 'Video 15', note: "" },
+        { id: 'oOSLR5IQklY', title: 'Video 16', note: "" },
+        { id: 'ZD3ZaytFKiU', title: 'Video 17', note: "" },
+        { id: 'URM0-DQJ27Q', title: 'Video 18', note: "" }, 
+        { id: 'DvfTJqczEgM', title: 'Video 19', note: "" },
+        { id: 'X4B947IqV70', title: "Video 20", note: "" },
+        { id: 'IjfzWZdRbfo', title: "Video 21", note: "" },
+        { id: 'bvoBy2J7vj0', title: "Video 22", note: "" },
+        { id: 'dMfsen6Dor4', title: "Video 23", note: "" },
+        { id: 'ndmjsf_DZtk', title: "Video 24", note: "" },
+        { id: 'llJtisztYdI', title: "Video 25", note: "" },
+        { id: 'qnbZF0--4GU', title: "Video 26", note: "" },
+        { id: '0FXfOR6gHOA', title: "Video 27", note: "" },
+        { id: 'SvJYznkdB9Y', title: "Video 28", note: "" },
+        { id: '702XzWEg_PY', title: "Video 29", note: "" },
+        { id: 'stmfj-JslcI', title: "Video 30", note: "" },
+        { id: '62br5UmqtSg', title: "Video 31", note: "" },
+        { id: 'bXbr9y6LPcc', title: "Video 32", note: "" },
+        { id: '4ZXTnqHg3L8', title: "Video 33", note: "" },
+        { id: '3lahqP3ZA7Y', title: "Video 34", note: "" },
+        { id: 'NnyNRnWFDEs', title: 'Video 35', note: '' },
+        { id: 'rwUAzKy4xT0', title: 'Video 36', note: '' },
+        { id: 'mcJb04j_s74', title: 'Video 37', note: '' },
+        { id: 'bBqQUqdJTVU', title: 'Video 38', note: '' },
+        { id: 'OHc_ZH_pkhQ', title: 'Video 39', note: '' },
+        { id: '3iQsY4Bi510', title: 'Video 40', note: '' },
+        { id: 'Ia7LPksqlR0', title: 'Video 41', note: '' },
+        { id: 'RU4j1WsU3dw', title: 'Video 42', note: '' },
+        { id: 'W-Rm8yN_-9A', title: 'Video 43', note: '' },
+        { id: '-G2XkygH9fI', title: 'Video 44', note: '' },
+        { id: 'xhq-WrZf53A', title: 'Video 45', note: '' },
+        { id: 'e0LCeMTDxro', title: 'Video 46', note: '' },
+        { id: 'qIJdG3YcB48', title: 'Video 47', note: '' },
+        { id: 'EJ1QNP-AKzc', title: 'Video 48', note: '' },
+        { id: 'UQ2njZ89rvY', title: 'Video 49', note: '' },
+        { id: '-U7QMl76Ixg', title: 'Video 50', note: '' },
+        { id: '8ctAug8xT7M', title: 'Video 51', note: '' },
+        { id: 'uFThdXspww4', title: 'Video 52', note: '' },
+        { id: 'nJg1pavURCU', title: 'Video 53', note: '' },
+        { id: 'X8dXWT85uhQ', title: 'Video 54', note: '' },
+        { id: 'gpQwPUyOSE0', title: 'Video 55', note: '' },
+        { id: 'YaoOjURVKgE', title: 'Video 56', note: '' }
       ]
     };
 
-    // Yagona video indeksi va ro'yxat
+    // Global o'zgaruvchi video indeksi uchun
     let currentVideoIndex = 0;
-    let currentVideoList = [];
+  // currently active list shown in the modal (either resourceVideos[currentSection] or window.videos)
+  window.activeResourceList = null;
 
     function playVideoFromCard(videoId, title, note, index) {
       currentVideoIndex = index;
-      currentVideoList = resourceVideos[currentSection] || [];
-      
-      try { 
-        openInlineVideo(videoId); 
-      } catch (e) { 
-        console.error('Video ochishda xatolik:', e);
-      }
+      // set active list to the current section mapping (fallback to window.videos)
+      window.activeResourceList = (resourceVideos[currentSection] && resourceVideos[currentSection].length) ? resourceVideos[currentSection] : (window.videos || []);
+      // open namespaced inline modal (copied behavior from oddiy.html, namespaced with iv_ to avoid conflicts)
+      try { iv_openInlineVideo(videoId); } catch (e) { playVideoModal(videoId); }
       updateNavigationButtons();
     }
 
-// iv_ funksiyasi olib tashlandi - to'g'ridan-to'g'ri openInlineVideo ishlatiladi
-
-    function playNextVideo() {
-      if (currentVideoIndex < currentVideoList.length - 1) {
-        currentVideoIndex++;
-        const nextVideo = currentVideoList[currentVideoIndex];
-        if (nextVideo) {
-          try { 
-            openInlineVideo(nextVideo.id); 
-          } catch (e) { 
-            console.error('Keyingi video ochishda xatolik:', e);
-          }
-          updateNavigationButtons();
-        }
+    // iv_ namespaced wrapper: prepare inlineResourceList/index then open the inline player
+    function iv_openInlineVideo(videoId) {
+      // populate inlineResourceList from the currently active list so prev/next work
+      try {
+        inlineResourceList = (window.activeResourceList && window.activeResourceList.length) ? window.activeResourceList : (resourceVideos[currentSection] || window.videos || []);
+        inlineResourceIndex = typeof currentVideoIndex === 'number' ? currentVideoIndex : 0;
+      } catch (e) {
+        inlineResourceList = (resourceVideos[currentSection] || window.videos || []);
+        inlineResourceIndex = 0;
       }
+      // call existing inline player open (defined later in file)
+      return openInlineVideo(videoId);
     }
 
-    function playPrevVideo() {
-      if (currentVideoIndex > 0) {
-        currentVideoIndex--;
-        const prevVideo = currentVideoList[currentVideoIndex];
-        if (prevVideo) {
-          try { 
-            openInlineVideo(prevVideo.id); 
-          } catch (e) { 
-            console.error('Oldingi video ochishda xatolik:', e);
-          }
-          updateNavigationButtons();
-        }
-      }
+    function playNextVideo() {
+      const videos = (window.activeResourceList && window.activeResourceList.length) ? window.activeResourceList : (resourceVideos[currentSection] || window.videos || []);
+      if (currentVideoIndex >= videos.length - 1) return;
+      
+      currentVideoIndex++;
+      const nextVideo = videos[currentVideoIndex];
+      if (!nextVideo || !nextVideo.id) return;
+      
+      try { iv_openInlineVideo(nextVideo.id); } catch (e) { playVideoModal(nextVideo.id); }
+      updateNavigationButtons();
+    }
+
+    function playPreviousVideo() {
+      const videos = (window.activeResourceList && window.activeResourceList.length) ? window.activeResourceList : (resourceVideos[currentSection] || window.videos || []);
+      if (currentVideoIndex <= 0) return;
+      
+      currentVideoIndex--;
+      const prevVideo = videos[currentVideoIndex];
+      if (!prevVideo || !prevVideo.id) return;
+      
+      try { iv_openInlineVideo(prevVideo.id); } catch (e) { playVideoModal(prevVideo.id); }
+      updateNavigationButtons();
     }
 
 
@@ -5664,19 +6008,46 @@ document.addEventListener('keydown', function (e) {
       }
 
       function updateNavigationButtons() {
+        const videos = (window.activeResourceList && window.activeResourceList.length) ? window.activeResourceList : (resourceVideos[currentSection] || window.videos || []);
         const prevBtn = document.getElementById('prevVideoBtn');
         const nextBtn = document.getElementById('nextVideoBtn');
+        const prevBtnBottom = document.getElementById('prevVideoBtnBottom');
+        const nextBtnBottom = document.getElementById('nextVideoBtnBottom');
         
         const showPrev = currentVideoIndex > 0;
-        const showNext = currentVideoIndex < currentVideoList.length - 1;
+        const showNext = currentVideoIndex < videos.length - 1;
 
-        if (prevBtn) {
-          prevBtn.style.display = showPrev ? 'flex' : 'none';
-          prevBtn.disabled = !showPrev;
+        // always hide either side OR bottom based on device - never show both
+        const useSideButtons = !isMobileOrTouch();
+
+        // for desktop, show side buttons
+        if (useSideButtons) {
+          if (prevBtn) {
+            prevBtn.style.display = showPrev ? 'flex' : 'none';
+            prevBtn.style.pointerEvents = showPrev ? 'auto' : 'none';
+          }
+          if (nextBtn) {
+            nextBtn.style.display = showNext ? 'flex' : 'none';
+            nextBtn.style.pointerEvents = showNext ? 'auto' : 'none';
+          }
+          // hide bottom controls
+          if (prevBtnBottom) prevBtnBottom.style.display = 'none';
+          if (nextBtnBottom) nextBtnBottom.style.display = 'none';
         }
-        if (nextBtn) {
-          nextBtn.style.display = showNext ? 'flex' : 'none';
-          nextBtn.disabled = !showNext;
+        // for mobile/touch, show bottom buttons
+        else {
+          // hide side buttons
+          if (prevBtn) prevBtn.style.display = 'none';
+          if (nextBtn) nextBtn.style.display = 'none';
+          // show/hide bottom controls based on availability
+          if (prevBtnBottom) {
+            prevBtnBottom.style.display = showPrev ? 'flex' : 'none';
+            prevBtnBottom.style.pointerEvents = showPrev ? 'auto' : 'none';
+          }
+          if (nextBtnBottom) {
+            nextBtnBottom.style.display = showNext ? 'flex' : 'none';
+            nextBtnBottom.style.pointerEvents = showNext ? 'auto' : 'none';
+          }
         }
       }
 
@@ -5956,36 +6327,257 @@ document.addEventListener('keydown', function (e) {
       }
       #inlineVideoPlayerWrap { height: 100% !important; }
     }
-    /* Prev/Next buttons: YouTube-like small circular controls near center-bottom */
-    #inlinePrevBtn, #inlineNextBtn {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: rgba(0,0,0,0.55);
+    /* Chiroyli tugmalar */
+    #inlinePrevBtn, #inlineNextBtn, #inlineCloseBtn {
+      position: absolute;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    
+    /* Prev/Next/Pause tugmalari - premium dizayn */
+    #inlinePrevBtn, #inlineNextBtn, #inlinePauseBtn {
+      width: 55px;
+      height: 35px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, 
+        rgba(255,255,255,0.1) 0%, 
+        rgba(255,255,255,0.05) 50%, 
+        rgba(0,0,0,0.1) 100%);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: #fff;
+      font-size: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
-      bottom: 6% !important;
-      top: auto !important;
-      transform: translateY(0) !important;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.35);
-      border: none;
-      color: #fff;
-      cursor: pointer;
-      font-size: 18px;
+      position: absolute;
+      bottom: 8%;
+      box-shadow: 
+        0 8px 32px rgba(0,0,0,0.4),
+        0 2px 8px rgba(0,0,0,0.3),
+        inset 0 1px 0 rgba(255,255,255,0.2),
+        inset 0 -1px 0 rgba(0,0,0,0.2);
+      opacity: 0.4;
+      visibility: visible;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      backdrop-filter: blur(15px) saturate(1.5);
+      -webkit-backdrop-filter: blur(15px) saturate(1.5);
+      overflow: hidden;
     }
-    /* Position them closer to center (left/right from center) */
-    #inlinePrevBtn { left: calc(50% - 90px) !important; }
-    #inlineNextBtn { left: calc(50% + 42px) !important; }
+    
+    #inlinePrevBtn::before, #inlineNextBtn::before, #inlinePauseBtn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255,255,255,0.2), 
+        transparent);
+      transition: left 0.5s;
+    }
+    
+    #inlinePrevBtn:hover, #inlineNextBtn:hover {
+      opacity: 1;
+      background: linear-gradient(135deg, 
+        rgba(255,255,255,0.2) 0%, 
+        rgba(255,255,255,0.1) 50%, 
+        rgba(0,0,0,0.05) 100%);
+      border-color: rgba(255,255,255,0.5);
+    }
+    
+    #inlinePauseBtn:hover {
+      opacity: 1;
+      background: linear-gradient(135deg, 
+        rgba(255,255,255,0.2) 0%, 
+        rgba(255,255,255,0.1) 50%, 
+        rgba(0,0,0,0.05) 100%);
+      border-color: rgba(255,255,255,0.5);
+    }
+    
+    #inlinePrevBtn:hover::before, #inlineNextBtn:hover::before, #inlinePauseBtn:hover::before {
+      left: 100%;
+    }
+    
+    #inlinePrevBtn::before, #inlineNextBtn::before, #inlinePauseBtn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255,255,255,0.2), 
+        transparent);
+      transition: left 0.5s;
+    }
+    
+    #inlinePrevBtn {
+      left: 30px;
+      padding-right: 3px;
+    }
+    
+    #inlinePauseBtn {
+      left: 110px;
+    }
+    
+    #inlineNextBtn {
+      left: 190px;
+      padding-left: 3px;
+    }
+    
+    /* Close tugmasi - premium dizayn */
+    #inlineCloseBtn {
+      right: 20px;
+      top: 20px;
+      width: 55px;
+      height: 55px;
+      border-radius: 30px;
+      background: linear-gradient(135deg, 
+        rgba(255,255,255,0.1) 0%, 
+        rgba(255,255,255,0.05) 50%, 
+        rgba(0,0,0,0.1) 100%);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: #fff;
+      font-size: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 15;
+      box-shadow: 
+        0 8px 32px rgba(0,0,0,0.4),
+        0 2px 8px rgba(0,0,0,0.3),
+        inset 0 1px 0 rgba(255,255,255,0.2),
+        inset 0 -1px 0 rgba(0,0,0,0.2);
+      opacity: 0.4;
+      visibility: visible;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      backdrop-filter: blur(15px) saturate(1.5);
+      -webkit-backdrop-filter: blur(15px) saturate(1.5);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    #inlineCloseBtn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255,255,255,0.2), 
+        transparent);
+      transition: left 0.5s;
+    }
+    
+    #inlineCloseBtn:hover {
+      opacity: 1;
+      transform: translateY(-4px) scale(1.08);
+      background: linear-gradient(135deg, 
+        rgba(255,255,255,0.25) 0%, 
+        rgba(255,255,255,0.15) 50%, 
+        rgba(200,200,200,0.1) 100%);
+      box-shadow: 
+        0 15px 40px rgba(0,0,0,0.5),
+        0 5px 15px rgba(0,0,0,0.4),
+        inset 0 2px 0 rgba(255,255,255,0.4),
+        inset 0 -2px 0 rgba(0,0,0,0.1),
+        0 0 25px rgba(255,255,255,0.4);
+      border-color: rgba(255,255,255,0.6);
+      text-shadow: 0 0 15px rgba(255,255,255,0.9);
+    }
+    
+    #inlineCloseBtn:hover::before {
+      left: 100%;
+    }
+    
+    #inlineCloseBtn:hover {
+      background: rgba(255,0,0,0.7);
+      border-color: rgba(255,255,255,0.4);
+      transform: scale(1.1);
+    }
 
-    /* Slightly different for small screens so buttons stay above mobile controls and a bit lower */
-    @media (max-width: 480px) {
-      #inlinePrevBtn, #inlineNextBtn {
-        bottom: 5% !important;
-        width: 44px; height:44px; font-size:16px;
+    /* Telefon rejimi - tugmalarni pastki o'rtaga joylashtirish */
+    @media (max-width: 768px) {
+      #inlinePrevBtn, #inlinePauseBtn, #inlineNextBtn {
+        position: absolute !important;
+        bottom: 50px !important;
+        width: 55px !important;
+        height: 40px !important;
+        font-size: 18px !important;
+        z-index: 15 !important;
+        border-radius: 20px !important;
       }
-      #inlinePrevBtn { left: calc(50% - 76px) !important; }
-      #inlineNextBtn { left: calc(50% + 28px) !important; }
+      
+      #inlinePrevBtn {
+        left: calc(50% - 90px) !important;
+      }
+      
+      #inlinePauseBtn {
+        left: calc(50% - 27px) !important;
+      }
+      
+      #inlineNextBtn {
+        left: calc(50% + 35px) !important;
+      }
+      
+      #inlineCloseBtn {
+        position: absolute !important;
+        right: 15px !important;
+        top: 30px !important;
+        width: 50px !important;
+        height: 50px !important;
+        font-size: 20px !important;
+        z-index: 15 !important;
+      }
+    }
+
+    /* YouTube barcha ortiqcha elementlarini yashirish */
+    .ytp-watermark,
+    .ytp-show-cards-title,
+    .ytp-ce-element,
+    .ytp-cards-teaser,
+    .ytp-endscreen-element,
+    .ytp-share-button,
+    .ytp-watch-later-button,
+    .ytp-endscreen-content,
+    .ytp-videowall-still,
+    .ytp-pause-overlay,
+    .html5-endscreen,
+    .ytp-related-on-error-overlay,
+    .ytp-endscreen,
+    .ytp-ce-covering-overlay,
+    .ytp-ce-element-shadow,
+    .ytp-ce-video,
+    .ytp-ce-playlist,
+    .ytp-ce-channel,
+    .ytp-ce-subscribe,
+    .ytp-ce-website,
+    .ytp-ce-size-853,
+    .ytp-ce-size-640,
+    .ytp-ce-size-480,
+    .ytp-ce-size-320,
+    .ytp-ce-top-left-quad,
+    .ytp-ce-top-right-quad,
+    .ytp-ce-bottom-left-quad,
+    .ytp-ce-bottom-right-quad,
+    .ytp-cards-button,
+    .ytp-cards-teaser-box,
+    .iv-branding,
+    .annotation {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      width: 0 !important;
+      height: 0 !important;
     }
   </style>
 
@@ -5994,6 +6586,7 @@ document.addEventListener('keydown', function (e) {
     <button id="inlinePrevBtn" aria-label="Previous video" title="Prev" style="position:absolute;z-index:12;">◀</button>
     <button id="inlineCloseBtn" aria-label="Close video" style="position:absolute;right:10px;top:10px;z-index:12;background:rgba(255,255,255,0.06);border:none;color:#fff;padding:8px;border-radius:8px;cursor:pointer;font-size:18px">✖</button>
     <button id="inlineNextBtn" aria-label="Next video" title="Next" style="position:absolute;z-index:12;">▶</button>
+    <button id="inlinePauseBtn" aria-label="Pause/Play video" title="Pause" style="position:absolute;z-index:12;">❚❚</button>
     <div id="inlineCover" style="position:absolute;inset:0;z-index:11;display:none;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,0.0),rgba(0,0,0,0.6));"></div>
   <div id="inlineVideoPlayerWrap" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#000;"></div>
     </div>
@@ -6001,6 +6594,8 @@ document.addEventListener('keydown', function (e) {
 
   <div id="modalBg" style="display:none;"></div>
 
+
+  
 </body>
 
 </html>
@@ -6009,9 +6604,35 @@ document.addEventListener('keydown', function (e) {
     // Inline YouTube player using IFrame API with controls disabled.
     let _ytInlineApiLoaded = false;
     let _ytInlinePlayer = null;
-    // track the current resource list and index so prev/next work
+    let videoModalOpen = false;
     let inlineResourceList = [];
     let inlineResourceIndex = -1;
+    let hideControlsTimeout;
+
+    // Tugmalarni ko'rsatish/yashirish funksiyalari
+    function showVideoControls() {
+      const prev = document.getElementById('inlinePrevBtn');
+      const next = document.getElementById('inlineNextBtn');
+      const close = document.getElementById('inlineCloseBtn');
+      const pause = document.getElementById('inlinePauseBtn');
+      
+      if (prev) prev.style.opacity = '0.8';
+      if (next) next.style.opacity = '0.8';
+      if (close) close.style.opacity = '0.8';
+      if (pause) pause.style.opacity = '0.8';
+    }
+    
+    function hideVideoControls() {
+      const prev = document.getElementById('inlinePrevBtn');
+      const next = document.getElementById('inlineNextBtn');
+      const close = document.getElementById('inlineCloseBtn');
+      const pause = document.getElementById('inlinePauseBtn');
+      
+      if (prev) prev.style.opacity = '0.4';
+      if (next) next.style.opacity = '0.4';
+      if (close) close.style.opacity = '0.4';
+      if (pause) pause.style.opacity = '0.4';
+    }
 
     // cover helpers: show/hide the inline cover that hides YouTube end-screen thumbnails
     function showInlineCover() {
@@ -6041,13 +6662,28 @@ document.addEventListener('keydown', function (e) {
         next.disabled = inlineResourceIndex >= inlineResourceList.length - 1;
       } catch (e) { }
     }
-
-    function openInlineVideo(videoId) {
+    
+    function openInlineVideo(videoId, videoList = null, startIndex = 0) {
       if (!videoId) return;
+      
+      // Agar video list berilgan bo'lsa, uni o'rnatamiz
+      if (videoList && Array.isArray(videoList)) {
+        inlineResourceList = videoList;
+        inlineResourceIndex = startIndex;
+      }
+      
       const bg = document.getElementById('inlineVideoModalBg');
       const wrap = document.getElementById('inlineVideoPlayerWrap');
       bg.style.display = 'flex';
       wrap.innerHTML = '<div id="ivPlayer" style="width:100%;height:100%"></div>';
+      
+      videoModalOpen = true;
+      document.body.style.overflow = 'hidden';
+      
+      // Video modal ochilganini belgilash
+      window.videoModalActive = true;
+      
+      // Tugmalar CSS hover bilan boshqariladi
 
       loadYouTubeAPIInline(function(){
         try {
@@ -6065,114 +6701,314 @@ document.addEventListener('keydown', function (e) {
             modestbranding: 1,
             playsinline: 1,
             disablekb: 1,
-            fs: 0
+            fs: 0,
+            iv_load_policy: 3,
+            cc_load_policy: 0,
+            showinfo: 0,
+            end: 1
           },
           events: {
             onReady: function(e){
               try { e.target.playVideo(); } catch (err) { }
-              // hide our cover so video area is visible
               try { hideInlineCover(); } catch (er) {}
-              // update nav buttons once player is ready
               updateInlineNavButtons();
             },
             onStateChange: function(e){
               try {
-                // 0 = ended
                 if (e.data === YT.PlayerState.ENDED) {
-                  // show cover immediately to hide end-screen
                   try { showInlineCover(); } catch (er) {}
-                  // advance to next video after 800ms (longer delay to ensure cover hides recommendations)
+                  // End screen elementlarini o'chirish
                   setTimeout(function(){
-                    try { 
-                      if (inlineResourceIndex < inlineResourceList.length - 1) {
-                        playNextResource();
-                      } else {
-                        // at end of list - close modal
-                        closeInlineVideo();
+                    try {
+                      const iframe = document.querySelector('#ivPlayer iframe');
+                      if (iframe && iframe.contentDocument) {
+                        const endScreens = iframe.contentDocument.querySelectorAll('.ytp-endscreen-element, .ytp-ce-element, .ytp-endscreen-content');
+                        endScreens.forEach(el => el.style.display = 'none');
                       }
-                    } catch (err) {}
-                  }, 800);
+                    } catch(e) {}
+                    closeInlineVideo();
+                  }, 1000);
                 }
-                // when playing, hide cover after a delay to avoid showing any pre-roll
                 if (e.data === YT.PlayerState.PLAYING) {
                   setTimeout(function() {
                     try { hideInlineCover(); } catch (er) {}
                   }, 800);
+                  // Tugma holatini yangilash
+                  const pauseBtn = document.getElementById('inlinePauseBtn');
+                  if (pauseBtn) pauseBtn.innerHTML = '❚❚';
+                }
+                if (e.data === YT.PlayerState.PAUSED) {
+                  // Tugma holatini yangilash
+                  const pauseBtn = document.getElementById('inlinePauseBtn');
+                  if (pauseBtn) pauseBtn.innerHTML = '●';
                 }
               } catch (err) { }
             }
           }
         });
       });
-      // update nav immediately for visual feedback
       updateInlineNavButtons();
     }
+
+    function closeInlineVideo() {
+      try {
+        const bg = document.getElementById('inlineVideoModalBg');
+        if (bg) bg.style.display = 'none';
+        if (_ytInlinePlayer && _ytInlinePlayer.destroy) {
+          _ytInlinePlayer.destroy();
+          _ytInlinePlayer = null;
+        }
+        const wrap = document.getElementById('inlineVideoPlayerWrap');
+        if (wrap) wrap.innerHTML = '';
+        
+        // Reset qilish
+        inlineResourceList = [];
+        inlineResourceIndex = -1;
+        videoModalOpen = false;
+        document.body.style.overflow = '';
+        
+        // Video modal yopilganini belgilash
+        window.videoModalActive = false;
+        console.log('Video modal yopildi - manual close');
+      } catch (e) { }
+    }
+
+    // Orqaga qaytish tugmasini intercept qilish - OLIB TASHLANDI
+    // Bu kod video avtomatik yopilishiga sabab bo'lgan
+    /*
+    (function() {
+      let originalPushState = history.pushState;
+      let originalReplaceState = history.replaceState;
+      
+      history.pushState = function() {
+        if (window.videoModalActive) {
+          closeInlineVideo();
+          return;
+        }
+        return originalPushState.apply(history, arguments);
+      };
+      
+      window.addEventListener('popstate', function(e) {
+        if (window.videoModalActive) {
+          e.stopPropagation();
+          e.preventDefault();
+          closeInlineVideo();
+          history.pushState(null, '', window.location.href);
+          return false;
+        }
+      }, true);
+    })();
+    */
 
     function playNextResource() {
       try {
         if (!inlineResourceList || inlineResourceList.length === 0) return;
-        if (inlineResourceIndex < inlineResourceList.length - 1) {
-          inlineResourceIndex++;
-          const id = inlineResourceList[inlineResourceIndex] && inlineResourceList[inlineResourceIndex].id;
-          if (!id) return;
-          // Always show cover before loading next video
-          try { showInlineCover(); } catch (er) {}
-          if (_ytInlinePlayer && _ytInlinePlayer.loadVideoById) {
-            _ytInlinePlayer.loadVideoById({ videoId: id, startSeconds: 0 });
-          } else {
-            openInlineVideo(id);
-          }
-          updateInlineNavButtons();
+        if (inlineResourceIndex >= inlineResourceList.length - 1) return;
+        
+        inlineResourceIndex++;
+        const video = inlineResourceList[inlineResourceIndex];
+        if (!video || !video.id) return;
+        
+        try { showInlineCover(); } catch (er) {}
+        
+        if (_ytInlinePlayer && _ytInlinePlayer.loadVideoById) {
+          _ytInlinePlayer.loadVideoById({ videoId: video.id, startSeconds: 0 });
+        } else {
+          openInlineVideo(video.id);
         }
-      } catch (e) { console.error('playNextResource', e); }
+        updateInlineNavButtons();
+      } catch (e) {
+        console.error('playNextResource xatosi:', e);
+      }
     }
 
     function playPrevResource() {
       try {
         if (!inlineResourceList || inlineResourceList.length === 0) return;
-        if (inlineResourceIndex > 0) inlineResourceIndex--;
-        const id = inlineResourceList[inlineResourceIndex] && inlineResourceList[inlineResourceIndex].id;
-        if (!id) return;
+        if (inlineResourceIndex <= 0) return;
+        
+        inlineResourceIndex--;
+        const video = inlineResourceList[inlineResourceIndex];
+        if (!video || !video.id) return;
+        
         if (_ytInlinePlayer && _ytInlinePlayer.loadVideoById) {
-          _ytInlinePlayer.loadVideoById({ videoId: id, startSeconds: 0 });
+          _ytInlinePlayer.loadVideoById({ videoId: video.id, startSeconds: 0 });
         } else {
-          openInlineVideo(id);
+          openInlineVideo(video.id);
         }
         updateInlineNavButtons();
-      } catch (e) { console.error('playPrevResource', e); }
+      } catch (e) {
+        console.error('playPrevResource', e);
+      }
     }
 
-    function closeInlineVideo() {
-      const bg = document.getElementById('inlineVideoModalBg');
-      const wrap = document.getElementById('inlineVideoPlayerWrap');
-      try { if (_ytInlinePlayer && _ytInlinePlayer.destroy) { _ytInlinePlayer.destroy(); _ytInlinePlayer = null; } } catch (e) { }
-      wrap.innerHTML = '';
-      bg.style.display = 'none';
-      // reset inline list/index
-      inlineResourceList = [];
-      inlineResourceIndex = -1;
-    }
-
-    // button wiring
+    // Event listeners
     document.addEventListener('click', function(e){
       if (!e.target) return;
       if (e.target.id === 'inlineCloseBtn') closeInlineVideo();
       if (e.target.id === 'inlineNextBtn') playNextResource();
       if (e.target.id === 'inlinePrevBtn') playPrevResource();
+      if (e.target.id === 'inlinePauseBtn') togglePauseVideo();
+      // Qora fon bosilganda video yopish
+      if (e.target.id === 'inlineVideoModalBg') closeInlineVideo();
     });
 
-    // keyboard: left/right to navigate, ESC to close
+    // Pauza/Play funksiyasi
+    function togglePauseVideo() {
+      try {
+        if (_ytInlinePlayer) {
+          const state = _ytInlinePlayer.getPlayerState();
+          const pauseBtn = document.getElementById('inlinePauseBtn');
+          
+          if (state === YT.PlayerState.PLAYING) {
+            // Video pauza qilish
+            _ytInlinePlayer.pauseVideo();
+            if (pauseBtn) {
+              pauseBtn.style.transform = 'scale(0.8)';
+              setTimeout(() => {
+                pauseBtn.innerHTML = '▶';
+                pauseBtn.style.transform = 'scale(1)';
+              }, 150);
+            }
+          } else {
+            // Video davom ettirish
+            _ytInlinePlayer.playVideo();
+            if (pauseBtn) {
+              pauseBtn.style.transform = 'scale(0.8)';
+              setTimeout(() => {
+                pauseBtn.innerHTML = '❚❚';
+                pauseBtn.style.transform = 'scale(1)';
+              }, 150);
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Pauza xatosi:', e);
+      }
+    }
+
+    // Keyboard navigation
     document.addEventListener('keydown', function(e){
       const bg = document.getElementById('inlineVideoModalBg');
       const open = bg && bg.style.display === 'flex';
       if (!open) return;
-      if (e.key === 'Escape') { closeInlineVideo(); return; }
-      if (e.key === 'ArrowRight') { playNextResource(); return; }
-      if (e.key === 'ArrowLeft') { playPrevResource(); return; }
+      
+      if (e.key === 'Escape') {
+        closeInlineVideo();
+        return;
+      }
+      if (e.key === 'ArrowRight') {
+        playNextResource();
+        return;
+      }
+      if (e.key === 'ArrowLeft') {
+        playPrevResource();
+        return;
+      }
     });
 
 
 
-    
+    // Bepul tarjima funksiyasi
+    async function translateText(text, targetLang = 'uz') {
+      try {
+        // MyMemory bepul tarjima API
+        const sourceLang = targetLang === 'uz' ? 'en' : 'uz';
+        const targetL = targetLang === 'uz' ? 'uz' : 'en';
+        
+        const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sourceLang}|${targetL}`);
+        const data = await response.json();
+        
+        if (data.responseStatus === 200 && data.responseData) {
+          return data.responseData.translatedText;
+        }
+        
+        // Fallback: Google Translate bepul API
+        const googleResponse = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetL}&dt=t&q=${encodeURIComponent(text)}`);
+        const googleData = await googleResponse.json();
+        
+        if (googleData && googleData[0] && googleData[0][0]) {
+          return googleData[0][0][0];
+        }
+        
+        return text;
+      } catch (error) {
+        console.error('Tarjima xatosi:', error);
+        return text;
+      }
+    }
+
+    // Footer link animatsiyalarini ishga tushirish
+    document.addEventListener('DOMContentLoaded', function() {
+      const footerLinks = document.querySelectorAll('.footer-contact');
+      footerLinks.forEach(link => {
+        // Matnlarni emoji bilan yangilash
+        const span = link.querySelector('span');
+        if (span) {
+          const text = span.textContent.trim();
+          if (text.includes('TAKLIF uchun')) {
+            span.textContent = '✨ TAKLIF uchun bog\'laning ✨';
+          } else if (text.includes('Your opinion important')) {
+            span.textContent = '💬 Your opinion important for us !!! 💬';
+          } else if (text.includes('If you subscribe')) {
+            span.textContent = '🔔 If you subscribe our YouTube channel, we will be so much happy! 🔔';
+          }
+        }
+        
+        // Hover effektini kuchaytirish
+        link.addEventListener('mouseenter', function() {
+          this.style.transform = 'translateY(-5px) scale(1.05)';
+        });
+        
+        link.addEventListener('mouseleave', function() {
+          this.style.transform = 'translateY(0) scale(1)';
+        });
+      });
+    });
+
+    // Matnni tanlash va tarjima qilish
+    document.addEventListener('mouseup', async function() {
+      const selectedText = window.getSelection().toString().trim();
+      if (selectedText.length > 0) {
+        const translated = await translateText(selectedText);
+        
+        // Tarjimani ko'rsatish uchun tooltip yaratish
+        const tooltip = document.createElement('div');
+        tooltip.innerHTML = `<strong>Tarjima:</strong> ${translated}`;
+        tooltip.style.cssText = `
+          position: fixed;
+          background: #333;
+          color: white;
+          padding: 8px 12px;
+          border-radius: 6px;
+          font-size: 14px;
+          z-index: 9999;
+          max-width: 300px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        `;
+        
+        // Mouse pozitsiyasiga tooltip joylashtirish
+        const rect = window.getSelection().getRangeAt(0).getBoundingClientRect();
+        tooltip.style.left = rect.left + 'px';
+        tooltip.style.top = (rect.bottom + 5) + 'px';
+        
+        document.body.appendChild(tooltip);
+        
+        // 5 soniyadan keyin tooltip ni o'chirish
+        setTimeout(() => {
+          if (tooltip.parentNode) tooltip.parentNode.removeChild(tooltip);
+        }, 5000);
+      }
+    });
+
+
+
+
+
+
+
+
   </script>
 
+</body>
+</html>
