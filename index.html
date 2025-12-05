@@ -253,8 +253,7 @@ body[data-theme="dark"] .logo {
       </div>
     `;
           modalBg.style.display = 'flex';
-          // Remove auto-close on background click to prevent accidental closing
-          // modalBg.onclick = function (e) { if (e.target === modalBg) closeModal(); };
+          modalBg.onclick = function (e) { if (e.target === modalBg) closeModal(); };
           try { document.body.style.overflow = 'hidden'; } catch (e) {}
         };
 
@@ -315,37 +314,14 @@ body[data-theme="dark"] .logo {
           try{ origClose(); }catch(e){} 
         };
 
-        // Video navigation variables
-        var currentVideoList = [];
-        var currentVideoIndex = 0;
-        
-        // Prev/Next video navigation
-        window.playNextVideo = function(){
-          if (currentVideoList.length === 0) return;
-          if (currentVideoIndex < currentVideoList.length - 1) {
-            currentVideoIndex++;
-            var nextVideo = currentVideoList[currentVideoIndex];
-            if (nextVideo && nextVideo.id) {
-              showModal(nextVideo.title || 'Video', '', nextVideo.id);
-            }
-          }
+        // Prev/Next stubs (user's existing handlers may replace these)
+        window.playNextVideo = window.playNextVideo || function(){
+          // default: close overlay so user sees playlist or we can navigate
+          try{ if (player) { player.stopVideo(); } }catch(e){}
+          // user can override this function to actually load the next id
         };
-        
-        window.playPrevVideo = function(){
-          if (currentVideoList.length === 0) return;
-          if (currentVideoIndex > 0) {
-            currentVideoIndex--;
-            var prevVideo = currentVideoList[currentVideoIndex];
-            if (prevVideo && prevVideo.id) {
-              showModal(prevVideo.title || 'Video', '', prevVideo.id);
-            }
-          }
-        };
-        
-        // Function to set current video context
-        window.setVideoContext = function(videoList, videoIndex) {
-          currentVideoList = videoList || [];
-          currentVideoIndex = videoIndex || 0;
+        window.playPrevVideo = window.playPrevVideo || function(){
+          try{ if (player) { player.stopVideo(); } }catch(e){}
         };
 
       })();
@@ -5871,62 +5847,62 @@ document.addEventListener('keydown', function (e) {
     const resourceVideos = {
       1: [
         
-        { id: 'FmJBY_SynY8', title: '1. Video', note: "" },
-        { id: '97GmvIJWXdE', title: '2. Video', note: "" },
-        { id: 'uKzvpopTFfM', title: '3. Video', note: "" },
-        { id: '2GrifNhxai0', title: '4. Video', note: "" },
-        { id: 'NQjGuye0jfo', title: '5. Video', note: "" },
-        { id: 'uEq6FWDCwSM', title: '6. Video', note: "" },
-        { id: 'pakPAOZNqmE', title: '7. Video', note: "" },
-        { id: '9a9qNLUpkV8', title: '8. Video', note: "" },
-        { id: 'ZIgxOMiTPh0', title: '9. Video', note: "" },
-        { id: 'yb54VGUjHf8', title: '10. Video', note: "" },
-        { id: 'RSJoD5-73tM', title: '11. Video', note: "" },
-        { id: 'zs3Q3a4pHOM', title: '12. Video', note: "" },
-        { id: 'M9CLXs_7ups', title: '13. Video', note: "" },
-        { id: '42fapAkNXU0', title: '14. Video', note: "" },
-        { id: 'RvF_ZFcbofM', title: '15. Video', note: "" },
-        { id: 'oOSLR5IQklY', title: '16. Video', note: "" },
-        { id: 'ZD3ZaytFKiU', title: '17. Video', note: "" },
-        { id: 'URM0-DQJ27Q', title: '18. Video', note: "" }, 
-        { id: 'DvfTJqczEgM', title: '19. Video', note: "" },
-        { id: 'X4B947IqV70', title: "20. Video", note: "" },
-        { id: 'IjfzWZdRbfo', title: "21. Video", note: "" },
-        { id: 'bvoBy2J7vj0', title: "22. Video", note: "" },
-        { id: 'dMfsen6Dor4', title: "23. Video", note: "" },
-        { id: 'ndmjsf_DZtk', title: "24. Video", note: "" },
-        { id: 'llJtisztYdI', title: "25. Video", note: "" },
-        { id: 'qnbZF0--4GU', title: "26. Video", note: "" },
-        { id: '0FXfOR6gHOA', title: "27. Video", note: "" },
-        { id: 'SvJYznkdB9Y', title: "28. Video", note: "" },
-        { id: '702XzWEg_PY', title: "29. Video", note: "" },
-        { id: 'stmfj-JslcI', title: "30. Video", note: "" },
-        { id: '62br5UmqtSg', title: "31. Video", note: "" },
-        { id: 'bXbr9y6LPcc', title: "32. Video", note: "" },
-        { id: '4ZXTnqHg3L8', title: "33. Video", note: "" },
-        { id: '3lahqP3ZA7Y', title: "34. Video", note: "" },
-        { id: 'NnyNRnWFDEs', title: '35. Video', note: '' },
-        { id: 'rwUAzKy4xT0', title: '36. Video', note: '' },
-        { id: 'mcJb04j_s74', title: '37. Video', note: '' },
-        { id: 'bBqQUqdJTVU', title: '38. Video', note: '' },
-        { id: 'OHc_ZH_pkhQ', title: '39. Video', note: '' },
-        { id: '3iQsY4Bi510', title: '40. Video', note: '' },
-        { id: 'Ia7LPksqlR0', title: '41. Video', note: '' },
-        { id: 'RU4j1WsU3dw', title: '42. Video', note: '' },
-        { id: 'W-Rm8yN_-9A', title: '43. Video', note: '' },
-        { id: '-G2XkygH9fI', title: '44. Video', note: '' },
-        { id: 'xhq-WrZf53A', title: '45. Video', note: '' },
-        { id: 'e0LCeMTDxro', title: '46. Video', note: '' },
-        { id: 'qIJdG3YcB48', title: '47. Video', note: '' },
-        { id: 'EJ1QNP-AKzc', title: '48. Video', note: '' },
-        { id: 'UQ2njZ89rvY', title: '49. Video', note: '' },
-        { id: '-U7QMl76Ixg', title: '50. Video', note: '' },
-        { id: '8ctAug8xT7M', title: '51. Video', note: '' },
-        { id: 'uFThdXspww4', title: '52. Video', note: '' },
-        { id: 'nJg1pavURCU', title: '53. Video', note: '' },
-        { id: 'X8dXWT85uhQ', title: '54. Video', note: '' },
-        { id: 'gpQwPUyOSE0', title: '55. Video', note: '' },
-        { id: 'YaoOjURVKgE', title: '56. Video', note: '' }
+        { id: 'FmJBY_SynY8', title: 'Video 1', note: "" },
+        { id: '97GmvIJWXdE', title: 'Video 2', note: "" },
+        { id: 'uKzvpopTFfM', title: 'Video 3', note: "" },
+        { id: '2GrifNhxai0', title: 'Video 4', note: "" },
+        { id: 'NQjGuye0jfo', title: 'Video 5', note: "" },
+        { id: 'uEq6FWDCwSM', title: 'Video 6', note: "" },
+        { id: 'pakPAOZNqmE', title: 'Video 7', note: "" },
+        { id: '9a9qNLUpkV8', title: 'Video 8', note: "" },
+        { id: 'ZIgxOMiTPh0', title: 'Video 9', note: "" },
+        { id: 'yb54VGUjHf8', title: 'Video 10', note: "" },
+        { id: 'RSJoD5-73tM', title: 'Video 11', note: "" },
+        { id: 'zs3Q3a4pHOM', title: 'Video 12', note: "" },
+        { id: 'M9CLXs_7ups', title: 'Video 13', note: "" },
+        { id: '42fapAkNXU0', title: 'Video 14', note: "" },
+        { id: 'RvF_ZFcbofM', title: 'Video 15', note: "" },
+        { id: 'oOSLR5IQklY', title: 'Video 16', note: "" },
+        { id: 'ZD3ZaytFKiU', title: 'Video 17', note: "" },
+        { id: 'URM0-DQJ27Q', title: 'Video 18', note: "" }, 
+        { id: 'DvfTJqczEgM', title: 'Video 19', note: "" },
+        { id: 'X4B947IqV70', title: "Video 20", note: "" },
+        { id: 'IjfzWZdRbfo', title: "Video 21", note: "" },
+        { id: 'bvoBy2J7vj0', title: "Video 22", note: "" },
+        { id: 'dMfsen6Dor4', title: "Video 23", note: "" },
+        { id: 'ndmjsf_DZtk', title: "Video 24", note: "" },
+        { id: 'llJtisztYdI', title: "Video 25", note: "" },
+        { id: 'qnbZF0--4GU', title: "Video 26", note: "" },
+        { id: '0FXfOR6gHOA', title: "Video 27", note: "" },
+        { id: 'SvJYznkdB9Y', title: "Video 28", note: "" },
+        { id: '702XzWEg_PY', title: "Video 29", note: "" },
+        { id: 'stmfj-JslcI', title: "Video 30", note: "" },
+        { id: '62br5UmqtSg', title: "Video 31", note: "" },
+        { id: 'bXbr9y6LPcc', title: "Video 32", note: "" },
+        { id: '4ZXTnqHg3L8', title: "Video 33", note: "" },
+        { id: '3lahqP3ZA7Y', title: "Video 34", note: "" },
+        { id: 'NnyNRnWFDEs', title: 'Video 35', note: '' },
+        { id: 'rwUAzKy4xT0', title: 'Video 36', note: '' },
+        { id: 'mcJb04j_s74', title: 'Video 37', note: '' },
+        { id: 'bBqQUqdJTVU', title: 'Video 38', note: '' },
+        { id: 'OHc_ZH_pkhQ', title: 'Video 39', note: '' },
+        { id: '3iQsY4Bi510', title: 'Video 40', note: '' },
+        { id: 'Ia7LPksqlR0', title: 'Video 41', note: '' },
+        { id: 'RU4j1WsU3dw', title: 'Video 42', note: '' },
+        { id: 'W-Rm8yN_-9A', title: 'Video 43', note: '' },
+        { id: '-G2XkygH9fI', title: 'Video 44', note: '' },
+        { id: 'xhq-WrZf53A', title: 'Video 45', note: '' },
+        { id: 'e0LCeMTDxro', title: 'Video 46', note: '' },
+        { id: 'qIJdG3YcB48', title: 'Video 47', note: '' },
+        { id: 'EJ1QNP-AKzc', title: 'Video 48', note: '' },
+        { id: 'UQ2njZ89rvY', title: 'Video 49', note: '' },
+        { id: '-U7QMl76Ixg', title: 'Video 50', note: '' },
+        { id: '8ctAug8xT7M', title: 'Video 51', note: '' },
+        { id: 'uFThdXspww4', title: 'Video 52', note: '' },
+        { id: 'nJg1pavURCU', title: 'Video 53', note: '' },
+        { id: 'X8dXWT85uhQ', title: 'Video 54', note: '' },
+        { id: 'gpQwPUyOSE0', title: 'Video 55', note: '' },
+        { id: 'YaoOjURVKgE', title: 'Video 56', note: '' }
       ]
     };
 
@@ -5939,14 +5915,8 @@ document.addEventListener('keydown', function (e) {
       currentVideoIndex = index;
       // set active list to the current section mapping (fallback to window.videos)
       window.activeResourceList = (resourceVideos[currentSection] && resourceVideos[currentSection].length) ? resourceVideos[currentSection] : (window.videos || []);
-      
-      // Set video context for navigation
-      if (window.setVideoContext) {
-        window.setVideoContext(window.activeResourceList, index);
-      }
-      
-      // open video modal
-      showModal(title || 'Video', note || '', videoId);
+      // open namespaced inline modal (copied behavior from oddiy.html, namespaced with iv_ to avoid conflicts)
+      try { iv_openInlineVideo(videoId); } catch (e) { playVideoModal(videoId); }
       updateNavigationButtons();
     }
 
