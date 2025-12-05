@@ -232,13 +232,13 @@ body[data-theme="dark"] .logo {
 
           // Use youtube-nocookie and parameters to minimize YouTube chrome.
           // Note: YouTube does not allow removing all branding/overlays; these params only reduce visible UI.
-          var params = 'autoplay=1&rel=0&playsinline=1&controls=1&modestbranding=1&iv_load_policy=3';
+          var params = 'autoplay=1&rel=0&playsinline=1&controls=0&modestbranding=1&iv_load_policy=3&fs=0&disablekb=1&enablejsapi=1';
           var iframeSrc = videoId ? 'https://www.youtube-nocookie.com/embed/' + escapeHtml(videoId) + '?' + params : '';
             modalBg.innerHTML = `
       <div class="modal">
         <button class="modal-close" onclick="closeModal()"><span class="material-icons">close</span></button>
         <div class="video-container">
-          <iframe id="videoPlayer" src="${iframeSrc}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe>
+          <iframe id="videoPlayer" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe>
           <div class="nav-controls">
             <button class="nav-btn" id="prevBtn" onclick="playPrevVideo()">
               <span class="material-icons">arrow_back</span>
@@ -252,9 +252,10 @@ body[data-theme="dark"] .logo {
         </div>
       </div>
     `;
+            // Initialize the player via IFrame API after inserting the iframe
+            try { window.initPlayerWithId && window.initPlayerWithId(videoId); } catch(e) { console.error(e); }
           modalBg.style.display = 'flex';
-          // Modal foniga bosilganda yopilmasin - faqat X tugmasiga bosilganda yopilsin
-          modalBg.onclick = null;
+          modalBg.onclick = function (e) { if (e.target === modalBg) closeModal(); };
           try { document.body.style.overflow = 'hidden'; } catch (e) {}
         };
 
@@ -267,16 +268,8 @@ body[data-theme="dark"] .logo {
         window.playNextVideo = window.playNextVideo || function(){};
         window.playPrevVideo = window.playPrevVideo || function(){};
 
-        // Close modal on ESC only
-        window.addEventListener('keydown', function(e){ 
-          if (e.key === 'Escape') closeModal();
-        });
-      })();
-    </script>ddEventListener('keydown', function(e){ 
-          if (e.key === 'Escape') closeModal();
-        });
-      })();
-    </script>f (e.key === 'Escape') { try { closeModal(); } catch (er){} } });
+        // Close modal on ESC
+        window.addEventListener('keydown', function(e){ if (e.key === 'Escape') { try { closeModal(); } catch (er){} } });
       })();
       
       /* YouTube IFrame API integration: create/destroy player when modal opens/closes */
@@ -298,8 +291,24 @@ body[data-theme="dark"] .logo {
         }
 
         window.initPlayerWithId = function(vid) {
-          // Don't use YouTube API - just use simple iframe
-          console.log('Video ID:', vid);
+          // ensure API loaded then attach player; if a previous player exists, destroy it
+          ensureApi().then(function(){
+            try { if (player && player.destroy) { player.destroy(); player = null; } } catch(e){}
+            try {
+              player = new YT.Player('videoPlayer', {
+                videoId: vid,
+                playerVars: { autoplay: 1, controls: 0, modestbranding: 1, rel: 0, iv_load_policy: 3, playsinline: 1 },
+                events: {
+                  onReady: function(e){ try{ e.target.playVideo(); hideOverlay(); }catch(err){} },
+                  onStateChange: function(e){
+                    // 0 = ended
+                    if (e.data === YT.PlayerState.ENDED) { showOverlay(); }
+                    if (e.data === YT.PlayerState.PLAYING) { hideOverlay(); }
+                  }
+                }
+              });
+            } catch (err) { console.error('YT player init error', err); }
+          }).catch(function(err){ console.error('YT API load failed', err); });
         };
 
         function showOverlay(){
@@ -316,12 +325,9 @@ body[data-theme="dark"] .logo {
         window._cefrHidePlayerOverlay = hideOverlay;
         window._cefrShowPlayerOverlay = showOverlay;
 
-        // Hook closeModal to clean up player - remove auto-close timer
+        // Hook closeModal to clean up player
         var origClose = window.closeModal;
-        window.closeModal = function(){ 
-          try{ if (player && player.destroy) player.destroy(); player = null; }catch(e){} 
-          try{ origClose(); }catch(e){} 
-        };
+        window.closeModal = function(){ try{ if (player && player.destroy) player.destroy(); player = null; }catch(e){} try{ origClose(); }catch(e){} };
 
         // Prev/Next stubs (user's existing handlers may replace these)
         window.playNextVideo = window.playNextVideo || function(){
@@ -5623,6 +5629,31 @@ body[data-theme="dark"] .logo {
       if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     } catch (e) { }
 
+    // safePush funksiyasini qo'shamiz
+    function safePush(state, hash) {
+      try {
+        // Video ochiq bo'lsa, history o'zgartirishni oldini olamiz
+        if (window.videoModalActive) {
+          console.log('Video ochiq, history push bekor qilindi');
+          return;
+        }
+        history.pushState(state, '', hash);
+      } catch (e) {
+        console.error('safePush error:', e);
+      }
+    }
+
+    // handleNavigationState funksiyasini qo'shamiz
+    function handleNavigationState(evt) {
+      // Video ochiq bo'lsa, navigatsiyani bekor qilamiz
+      if (window.videoModalActive) {
+        console.log('Video ochiq, navigation bekor qilindi');
+        return;
+      }
+      // Boshqa navigatsiya logikasi
+      goHome(false);
+    }
+
     // Handle page reload/refresh
     window.addEventListener('load', function(evt) {
       // Clear any existing hash to ensure clean state
@@ -6737,10 +6768,13 @@ document.addEventListener('keydown', function (e) {
         
         // Video modal yopilganini belgilash
         window.videoModalActive = false;
+        console.log('Video modal yopildi - manual close');
       } catch (e) { }
     }
 
-    // Orqaga qaytish tugmasini intercept qilish
+    // Orqaga qaytish tugmasini intercept qilish - OLIB TASHLANDI
+    // Bu kod video avtomatik yopilishiga sabab bo'lgan
+    /*
     (function() {
       let originalPushState = history.pushState;
       let originalReplaceState = history.replaceState;
@@ -6763,6 +6797,7 @@ document.addEventListener('keydown', function (e) {
         }
       }, true);
     })();
+    */
 
     function playNextResource() {
       try {
