@@ -253,7 +253,8 @@ body[data-theme="dark"] .logo {
       </div>
     `;
           modalBg.style.display = 'flex';
-          modalBg.onclick = function (e) { if (e.target === modalBg) closeModal(); };
+          // Modal foniga bosilganda yopilmasin - faqat X tugmasiga bosilganda yopilsin
+          modalBg.onclick = null;
           try { document.body.style.overflow = 'hidden'; } catch (e) {}
         };
 
@@ -266,8 +267,16 @@ body[data-theme="dark"] .logo {
         window.playNextVideo = window.playNextVideo || function(){};
         window.playPrevVideo = window.playPrevVideo || function(){};
 
-        // Close modal on ESC
-        window.addEventListener('keydown', function(e){ if (e.key === 'Escape') { try { closeModal(); } catch (er){} } });
+        // Close modal on ESC only
+        window.addEventListener('keydown', function(e){ 
+          if (e.key === 'Escape') closeModal();
+        });
+      })();
+    </script>ddEventListener('keydown', function(e){ 
+          if (e.key === 'Escape') closeModal();
+        });
+      })();
+    </script>f (e.key === 'Escape') { try { closeModal(); } catch (er){} } });
       })();
       
       /* YouTube IFrame API integration: create/destroy player when modal opens/closes */
