@@ -6278,8 +6278,8 @@ document.addEventListener('keydown', function (e) {
       // Video modal ochilganini belgilash - orqaga tugmasi video yopsin
       window.videoModalActive = true;
 
-      // show controls briefly when opening
-      try { showControls(); setTimeout(hideControls, 2500); } catch (e) {}
+      // show controls when opening (do NOT auto-hide after 2.5s to prevent playback issues)
+      try { showControls(); } catch (e) {}
 
       // update prev/next UI based on current index/list
       try { updateNavigationButtons(); } catch (e) {}
@@ -6290,23 +6290,25 @@ document.addEventListener('keydown', function (e) {
         try { if (_ytPlayer && _ytPlayer.destroy) _ytPlayer.destroy(); } catch (e) { }
         _ytPlayer = new YT.Player('ytPlayerWrap', {
           height: '100%', width: '100%', videoId: videoId,
-          playerVars: { autoplay: 1, controls: 1, rel: 0, modestbranding: 1, playsinline: 1, disablekb: 0, fs: 1 },
+          playerVars: { autoplay: 0, controls: 1, rel: 0, modestbranding: 1, playsinline: 1, disablekb: 0, fs: 1 },
           events: {
             'onReady': function(e) {
-              try { e.target.playVideo(); } catch (err) {}
+              try { 
+                // Delay play slightly to ensure player is fully ready
+                setTimeout(() => { 
+                  try { e.target.playVideo(); } catch (err) { console.error('[YT Modal] Play error:', err); }
+                }, 100);
+              } catch (err) {}
             },
             'onStateChange': function (e) {
               try {
-                // Video tugagach o'chirmay qoling - foydalanuvchi o'zi yopsin
-                // if (e.data === YT.PlayerState.ENDED) {
-                //   setTimeout(() => {
-                //     try { if (_ytPlayer && _ytPlayer.destroy) { _ytPlayer.destroy(); _ytPlayer = null; } } catch (e) { }
-                //     document.getElementById('resourceModalBg').style.display = 'none';
-                //   }, 200);
-                // }
+                // Log state for debugging: 0=unstarted, 1=playing, 2=paused, 3=buffering, 5=cued
+                console.log('[YT Modal] State:', e.data);
               } catch (err) {}
             },
             'onError': function(err) {
+              // Log error codes: 2=invalid param, 5=HTML5 player, 100=not found, 101=not allowed, 150=restricted
+              try { console.error('[YT Modal] Player error code:', err.data); } catch (e) {}
               // If embedding is blocked or configuration error occurs, replace modal with a simple fallback
               try {
                 if (_ytPlayer && _ytPlayer.destroy) { _ytPlayer.destroy(); _ytPlayer = null; }
