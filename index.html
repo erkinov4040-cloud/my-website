@@ -273,43 +273,32 @@ body[data-theme="dark"] .logo {
         window.addEventListener('keydown', function(e){ if (e.key === 'Escape') { try { closeModal(); } catch (er){} } });
       })();
       
-      /* YouTube IFrame API integration: create/destroy player when modal opens/closes */
+      /* Video modal: using simple iframe embeds (no YT.Player API) */
       (function(){
-        var YT_API_LOADED = false;
         var pendingInit = null;
-        var player = null;
 
         // load API once
-        function ensureApi() {
-          if (window.YT && window.YT.Player) { YT_API_LOADED = true; return Promise.resolve(); }
-          if (window._ytApiLoading) return window._ytApiLoading;
-          var p = new Promise(function(res){
-            window.onYouTubeIframeAPIReady = function(){ YT_API_LOADED = true; res(); };
-            var s = document.createElement('script'); s.src = 'https://www.youtube.com/iframe_api'; s.async = true; document.head.appendChild(s);
-          });
-          window._ytApiLoading = p;
-          return p;
-        }
+        // ensureApi removed — using simple iframe embeds instead of YT.Player API
 
         window.initPlayerWithId = function(vid) {
-          // ensure API loaded then attach player; if a previous player exists, destroy it
-          ensureApi().then(function(){
-            try { if (player && player.destroy) { player.destroy(); player = null; } } catch(e){}
-            try {
-              player = new YT.Player('videoPlayer', {
-                videoId: vid,
-                playerVars: { autoplay: 1, controls: 1, modestbranding: 1, rel: 0, iv_load_policy: 3, playsinline: 1 },
-                events: {
-                  onReady: function(e){ try{ e.target.playVideo(); hideOverlay(); }catch(err){} },
-                  onStateChange: function(e){
-                    // 0 = ended
-                    if (e.data === YT.PlayerState.ENDED) { showOverlay(); }
-                    if (e.data === YT.PlayerState.PLAYING) { hideOverlay(); }
-                  }
-                }
-              });
-            } catch (err) { console.error('YT player init error', err); }
-          }).catch(function(err){ console.error('YT API load failed', err); });
+          // Simple iframe embed for video modal (no complex YT.Player API)
+          try {
+            const modalContent = document.getElementById('resourceModalContent');
+            if (modalContent) {
+              modalContent.innerHTML = `<iframe 
+                width="100%" 
+                height="100%" 
+                src="https://www.youtube.com/embed/${encodeURIComponent(vid)}?autoplay=1&controls=1&rel=0&modestbranding=1&playsinline=1" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen 
+                style="border:none;">
+              </iframe>`;
+            }
+            hideOverlay();
+          } catch (err) { 
+            console.error('Video modal error', err); 
+          }
         };
 
         function showOverlay(){
@@ -6084,8 +6073,8 @@ document.addEventListener('keydown', function (e) {
         inlineResourceList = (resourceVideos[currentSection] || window.videos || []);
         inlineResourceIndex = 0;
       }
-      // call existing inline player open (defined later in file)
-      return openInlineVideo(videoId);
+      // call existing inline player open with list and index so navigation works
+      return openInlineVideo(videoId, inlineResourceList, inlineResourceIndex);
     }
 
     function playNextVideo() {
@@ -6861,13 +6850,8 @@ document.addEventListener('keydown', function (e) {
         const video = inlineResourceList[inlineResourceIndex];
         if (!video || !video.id) return;
         
-        try { showInlineCover(); } catch (er) {}
-        
-        if (_ytInlinePlayer && _ytInlinePlayer.loadVideoById) {
-          _ytInlinePlayer.loadVideoById({ videoId: video.id, startSeconds: 0 });
-        } else {
-          openInlineVideo(video.id);
-        }
+        // Refresh iframe with new video
+        openInlineVideo(video.id, inlineResourceList, inlineResourceIndex);
         updateInlineNavButtons();
       } catch (e) {
         console.error('playNextResource xatosi:', e);
@@ -6883,11 +6867,8 @@ document.addEventListener('keydown', function (e) {
         const video = inlineResourceList[inlineResourceIndex];
         if (!video || !video.id) return;
         
-        if (_ytInlinePlayer && _ytInlinePlayer.loadVideoById) {
-          _ytInlinePlayer.loadVideoById({ videoId: video.id, startSeconds: 0 });
-        } else {
-          openInlineVideo(video.id);
-        }
+        // Refresh iframe with new video
+        openInlineVideo(video.id, inlineResourceList, inlineResourceIndex);
         updateInlineNavButtons();
       } catch (e) {
         console.error('playPrevResource', e);
