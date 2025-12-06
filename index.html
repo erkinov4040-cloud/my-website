@@ -5841,23 +5841,11 @@ function playNextResource() {
   try {
     if (!inlineResourceList || inlineResourceList.length === 0) return;
     if (inlineResourceIndex < inlineResourceList.length - 1) inlineResourceIndex++;
-    const id = inlineResourceList[inlineResourceIndex] && inlineResourceList[inlineResourceIndex].id;
-    if (!id) return;
+    const video = inlineResourceList[inlineResourceIndex];
+    if (!video || !video.id) return;
 
-    if (_ytInlinePlayer && _ytInlinePlayer.loadVideoById) {
-      _ytInlinePlayer.loadVideoById({ videoId: id, startSeconds: 0 });
-      // Tugma holatini reset qilish
-      try { 
-        const pauseBtn = document.getElementById('inlinePauseBtn');
-        if (pauseBtn) pauseBtn.innerHTML = '❚❚';
-        setTimeout(() => {
-          if (_ytInlinePlayer && _ytInlinePlayer.playVideo) _ytInlinePlayer.playVideo();
-        }, 100);
-      } catch(e) {}
-    } else {
-      openInlineVideo(id);
-    }
-
+    // Refresh iframe with new video
+    openInlineVideo(video.id, inlineResourceList, inlineResourceIndex);
     updateInlineNavButtons();
   } catch (e) {
     console.error('playNextResource', e);
@@ -5868,23 +5856,11 @@ function playPrevResource() {
   try {
     if (!inlineResourceList || inlineResourceList.length === 0) return;
     if (inlineResourceIndex > 0) inlineResourceIndex--;
-    const id = inlineResourceList[inlineResourceIndex] && inlineResourceList[inlineResourceIndex].id;
-    if (!id) return;
+    const video = inlineResourceList[inlineResourceIndex];
+    if (!video || !video.id) return;
 
-    if (_ytInlinePlayer && _ytInlinePlayer.loadVideoById) {
-      _ytInlinePlayer.loadVideoById({ videoId: id, startSeconds: 0 });
-      // Tugma holatini reset qilish
-      try { 
-        const pauseBtn = document.getElementById('inlinePauseBtn');
-        if (pauseBtn) pauseBtn.innerHTML = '❚❚';
-        setTimeout(() => {
-          if (_ytInlinePlayer && _ytInlinePlayer.playVideo) _ytInlinePlayer.playVideo();
-        }, 100);
-      } catch(e) {}
-    } else {
-      openInlineVideo(id);
-    }
-
+    // Refresh iframe with new video
+    openInlineVideo(video.id, inlineResourceList, inlineResourceIndex);
     updateInlineNavButtons();
   } catch (e) {
     console.error('playPrevResource', e);
@@ -5894,12 +5870,7 @@ function playPrevResource() {
 function closeInlineVideo() {
   const bg = document.getElementById('inlineVideoModalBg');
   const wrap = document.getElementById('inlineVideoPlayerWrap');
-  try {
-    if (_ytInlinePlayer && _ytInlinePlayer.destroy) {
-      _ytInlinePlayer.destroy();
-      _ytInlinePlayer = null;
-    }
-  } catch (e) {}
+  // iframe will auto-stop when hidden
   wrap.innerHTML = '';
   bg.style.display = 'none';
   inlineResourceList = [];
@@ -6126,7 +6097,8 @@ document.addEventListener('keydown', function (e) {
       const nextVideo = videos[inlineResourceIndex];
       if (!nextVideo || !nextVideo.id) return;
       
-      try { iv_openInlineVideo(nextVideo.id); } catch (e) { playVideoModal(nextVideo.id); }
+      // Refresh iframe with new video
+      openInlineVideo(nextVideo.id, videos, inlineResourceIndex);
       updateNavigationButtons();
     }
 
@@ -6139,7 +6111,8 @@ document.addEventListener('keydown', function (e) {
       const prevVideo = videos[inlineResourceIndex];
       if (!prevVideo || !prevVideo.id) return;
       
-      try { iv_openInlineVideo(prevVideo.id); } catch (e) { playVideoModal(prevVideo.id); }
+      // Refresh iframe with new video
+      openInlineVideo(prevVideo.id, videos, inlineResourceIndex);
       updateNavigationButtons();
     }
 
@@ -6257,72 +6230,32 @@ document.addEventListener('keydown', function (e) {
     }
 
     // Play a video inside modal
-    // Load YouTube IFrame API (if not loaded)
-    let _ytApiLoaded = false;
-    let _ytPlayer = null;
-    function loadYouTubeAPI(cb) {
-      if (window.YT && window.YT.Player) { _ytApiLoaded = true; return cb && cb(); }
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-      window.onYouTubeIframeAPIReady = function () { _ytApiLoaded = true; cb && cb(); };
-    }
-
+    // Video modal — uses simple iframe embed (no complex player initialization)
     function playVideoModal(videoId) {
       if (!videoId) return showToast('Video ID mavjud emas');
       const modalContent = document.getElementById('resourceModalContent');
-      modalContent.innerHTML = `<div id="ytPlayerWrap" style="width:100%;height:100%;"></div>`;
+      
+      // Use simple iframe embed — no complex player initialization, no timeouts
+      modalContent.innerHTML = `<iframe 
+        width="100%" 
+        height="100%" 
+        src="https://www.youtube.com/embed/${encodeURIComponent(videoId)}?autoplay=1&controls=1&rel=0&modestbranding=1&playsinline=1" 
+        frameborder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+        allowfullscreen 
+        style="border:none;border-radius:8px;">
+      </iframe>`;
+      
       document.getElementById('resourceModalBg').style.display = 'flex';
       
       // Video modal ochilganini belgilash - orqaga tugmasi video yopsin
       window.videoModalActive = true;
 
-      // show controls when opening (do NOT auto-hide after 2.5s to prevent playback issues)
+      // show controls when opening
       try { showControls(); } catch (e) {}
 
       // update prev/next UI based on current index/list
       try { updateNavigationButtons(); } catch (e) {}
-
-      // ensure API loaded then create player
-      loadYouTubeAPI(function () {
-        // destroy previous
-        try { if (_ytPlayer && _ytPlayer.destroy) _ytPlayer.destroy(); } catch (e) { }
-        _ytPlayer = new YT.Player('ytPlayerWrap', {
-          height: '100%', width: '100%', videoId: videoId,
-          playerVars: { autoplay: 0, controls: 1, rel: 0, modestbranding: 1, playsinline: 1, disablekb: 0, fs: 1 },
-          events: {
-            'onReady': function(e) {
-              try { 
-                // Delay play slightly to ensure player is fully ready
-                setTimeout(() => { 
-                  try { e.target.playVideo(); } catch (err) { console.error('[YT Modal] Play error:', err); }
-                }, 100);
-              } catch (err) {}
-            },
-            'onStateChange': function (e) {
-              try {
-                // Log state for debugging: 0=unstarted, 1=playing, 2=paused, 3=buffering, 5=cued
-                console.log('[YT Modal] State:', e.data);
-              } catch (err) {}
-            },
-            'onError': function(err) {
-              // Log error codes: 2=invalid param, 5=HTML5 player, 100=not found, 101=not allowed, 150=restricted
-              try { console.error('[YT Modal] Player error code:', err.data); } catch (e) {}
-              // If embedding is blocked or configuration error occurs, replace modal with a simple fallback
-              try {
-                if (_ytPlayer && _ytPlayer.destroy) { _ytPlayer.destroy(); _ytPlayer = null; }
-              } catch (e) {}
-              try {
-                var content = document.getElementById('resourceModalContent');
-                if (content) {
-                  content.innerHTML = '<div style="padding:24px;color:var(--muted);text-align:center;">\n                    <h3 style="margin-top:0;color:var(--accent2);">Video yuklanmadi</h3>\n                    <p>Bu videoni bevosita YouTube saytida ko\'rishingiz mumkin.</p>\n                    <a href="https://youtu.be/' + encodeURIComponent(videoId) + '" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:12px;padding:10px 14px;background:var(--accent);color:#000;border-radius:8px;text-decoration:none;font-weight:700;">YouTube-da ko\'rish</a>\n                  </div>';
-                }
-              } catch (e) {}
-            }
-          }
-        });
-      });
     }
 
     // back button for resource window (guarded)
@@ -6344,7 +6277,7 @@ document.addEventListener('keydown', function (e) {
       // hide modal and destroy player but do NOT navigate history — keep user inside the same section/view
       document.getElementById('resourceModalBg').style.display = 'none';
       window.videoModalActive = false;
-      try { if (_ytPlayer && _ytPlayer.destroy) { _ytPlayer.destroy(); _ytPlayer = null; } } catch (e) { }
+      // iframe will auto-stop when hidden; no need to manually destroy anything
     }
 
     // safe pushState fallback (use hash when pushState unavailable)
@@ -6772,12 +6705,8 @@ document.addEventListener('keydown', function (e) {
 
   <script>
     // Inline YouTube player using IFrame API with controls disabled.
-    let _ytInlineApiLoaded = false;
-    let _ytInlinePlayer = null;
-    let videoModalOpen = false;
     let inlineResourceList = [];
     let inlineResourceIndex = -1;
-    let hideControlsTimeout;
 
     // Tugmalarni ko'rsatish/yashirish funksiyalari
     function showVideoControls() {
@@ -6812,14 +6741,6 @@ document.addEventListener('keydown', function (e) {
       try { const c = document.getElementById('inlineCover'); if (c) c.style.display = 'none'; } catch (e) {}
     }
 
-    function loadYouTubeAPIInline(cb) {
-      if (window.YT && window.YT.Player) { _ytInlineApiLoaded = true; return cb && cb(); }
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      document.head.appendChild(tag);
-      window.onYouTubeIframeAPIReady = function() { _ytInlineApiLoaded = true; cb && cb(); };
-    }
-
     function updateInlineNavButtons() {
       try {
         const prev = document.getElementById('inlinePrevBtn');
@@ -6845,78 +6766,24 @@ document.addEventListener('keydown', function (e) {
       const bg = document.getElementById('inlineVideoModalBg');
       const wrap = document.getElementById('inlineVideoPlayerWrap');
       bg.style.display = 'flex';
-      wrap.innerHTML = '<div id="ivPlayer" style="width:100%;height:100%"></div>';
+      wrap.innerHTML = `<iframe 
+        width="100%" 
+        height="100%" 
+        src="https://www.youtube.com/embed/${encodeURIComponent(videoId)}?autoplay=1&controls=1&rel=0&modestbranding=1&playsinline=1" 
+        frameborder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+        allowfullscreen 
+        style="border:none;">
+      </iframe>`;
       
-      videoModalOpen = true;
+      // Show inline cover (blocks YouTube end-screen suggestions)
+      showInlineCover();
       document.body.style.overflow = 'hidden';
       
       // Video modal ochilganini belgilash
       window.videoModalActive = true;
       
       // Tugmalar CSS hover bilan boshqariladi
-
-      loadYouTubeAPIInline(function(){
-        try {
-          if (_ytInlinePlayer && _ytInlinePlayer.destroy) { _ytInlinePlayer.destroy(); _ytInlinePlayer = null; }
-        } catch (e) { }
-
-        _ytInlinePlayer = new YT.Player('ivPlayer', {
-          height: '100%',
-          width: '100%',
-          videoId: videoId,
-          playerVars: {
-            autoplay: 1,
-            controls: 1,
-            rel: 0,
-            modestbranding: 1,
-            playsinline: 1,
-            disablekb: 0,
-            fs: 1,
-            iv_load_policy: 3,
-            cc_load_policy: 0,
-            showinfo: 0,
-            end: 1
-          },
-          events: {
-            onReady: function(e){
-              try { e.target.playVideo(); } catch (err) { }
-              try { hideInlineCover(); } catch (er) {}
-              updateInlineNavButtons();
-            },
-            onStateChange: function(e){
-              try {
-                if (e.data === YT.PlayerState.ENDED) {
-                  try { showInlineCover(); } catch (er) {}
-                  // Video tugagach avtomatik yopmaslik - foydalanuvchi o'zi yopsin
-                  // setTimeout(function(){
-                  //   try {
-                  //     const iframe = document.querySelector('#ivPlayer iframe');
-                  //     if (iframe && iframe.contentDocument) {
-                  //       const endScreens = iframe.contentDocument.querySelectorAll('.ytp-endscreen-element, .ytp-ce-element, .ytp-endscreen-content');
-                  //       endScreens.forEach(el => el.style.display = 'none');
-                  //     }
-                  //   } catch(e) {}
-                  //   closeInlineVideo();
-                  // }, 1000);
-                }
-                if (e.data === YT.PlayerState.PLAYING) {
-                  setTimeout(function() {
-                    try { hideInlineCover(); } catch (er) {}
-                  }, 800);
-                  // Tugma holatini yangilash
-                  const pauseBtn = document.getElementById('inlinePauseBtn');
-                  if (pauseBtn) pauseBtn.innerHTML = '❚❚';
-                }
-                if (e.data === YT.PlayerState.PAUSED) {
-                  // Tugma holatini yangilash
-                  const pauseBtn = document.getElementById('inlinePauseBtn');
-                  if (pauseBtn) pauseBtn.innerHTML = '●';
-                }
-              } catch (err) { }
-            }
-          }
-        });
-      });
       updateInlineNavButtons();
     }
 
@@ -6929,11 +6796,7 @@ document.addEventListener('keydown', function (e) {
         const resourceBg = document.getElementById('resourceModalBg');
         if (resourceBg) resourceBg.style.display = 'none';
         
-        // YouTube playerini tugatamiz
-        if (_ytInlinePlayer && _ytInlinePlayer.destroy) {
-          _ytInlinePlayer.destroy();
-          _ytInlinePlayer = null;
-        }
+        // Iframe will auto-stop when hidden; no need to manually destroy
         
         const wrap = document.getElementById('inlineVideoPlayerWrap');
         if (wrap) wrap.innerHTML = '';
@@ -7042,34 +6905,17 @@ document.addEventListener('keydown', function (e) {
       if (e.target.id === 'inlineVideoModalBg') closeInlineVideo();
     });
 
-    // Pauza/Play funksiyasi
+    // Pauza/Play funksiyasi (simplified for iframe)
     function togglePauseVideo() {
       try {
-        if (_ytInlinePlayer) {
-          const state = _ytInlinePlayer.getPlayerState();
-          const pauseBtn = document.getElementById('inlinePauseBtn');
-          
-          if (state === YT.PlayerState.PLAYING) {
-            // Video pauza qilish
-            _ytInlinePlayer.pauseVideo();
-            if (pauseBtn) {
-              pauseBtn.style.transform = 'scale(0.8)';
-              setTimeout(() => {
-                pauseBtn.innerHTML = '▶';
-                pauseBtn.style.transform = 'scale(1)';
-              }, 150);
-            }
-          } else {
-            // Video davom ettirish
-            _ytInlinePlayer.playVideo();
-            if (pauseBtn) {
-              pauseBtn.style.transform = 'scale(0.8)';
-              setTimeout(() => {
-                pauseBtn.innerHTML = '❚❚';
-                pauseBtn.style.transform = 'scale(1)';
-              }, 150);
-            }
-          }
+        // iframe da pause/play kontrolleri YouTube player tomonidan boshqariladi
+        // Foydalanuvchi o'ziga kontrol tugmasini bosishi mumkin
+        const pauseBtn = document.getElementById('inlinePauseBtn');
+        if (pauseBtn) {
+          pauseBtn.style.transform = 'scale(0.8)';
+          setTimeout(() => {
+            pauseBtn.style.transform = 'scale(1)';
+          }, 150);
         }
       } catch (e) {
         console.error('Pauza xatosi:', e);
