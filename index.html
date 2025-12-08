@@ -233,23 +233,14 @@ body[data-theme="dark"] .logo {
 
           // Use youtube-nocookie and parameters to minimize YouTube chrome.
           // Note: YouTube does not allow removing all branding/overlays; these params only reduce visible UI.
-          var params = 'autoplay=1&rel=0&playsinline=1&controls=0&modestbranding=1&iv_load_policy=3&fs=0&disablekb=1&enablejsapi=1';
+          var params = 'autoplay=1&rel=0&playsinline=1&controls=1&modestbranding=1&iv_load_policy=3&fs=0&disablekb=1&enablejsapi=1';
           var iframeSrc = videoId ? 'https://www.youtube-nocookie.com/embed/' + escapeHtml(videoId) + '?' + params : '';
             modalBg.innerHTML = `
       <div class="modal">
         <button class="modal-close" onclick="closeModal()"><span class="material-icons">close</span></button>
         <div class="video-container">
           <iframe id="videoPlayer" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe>
-          <div class="nav-controls">
-            <button class="nav-btn" id="prevBtn" onclick="playPrevVideo()">
-              <span class="material-icons">arrow_back</span>
-              Oldingi
-            </button>
-            <button class="nav-btn" id="nextBtn" onclick="playNextVideo()">
-              Keyingisi
-              <span class="material-icons">arrow_forward</span>
-            </button>
-          </div>
+
         </div>
       </div>
     `;
@@ -3154,21 +3145,7 @@ body[data-theme="dark"] .logo {
       <div id="resourceModalContent"
         style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"></div>
 
-      <!-- Bottom-centered controls (YouTube-style) -->
-      <div id="resourceModalBottomControls" style="position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:center;align-items:center;z-index:4010;opacity:1;pointer-events:none;background:linear-gradient(to top, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.2) 60%, transparent 100%);padding:40px 20px 20px;">
-        <div style="display:flex;justify-content:center;gap:16px;align-items:center;width:100%;max-width:400px;">
-          <button id="prevVideoBtn" onclick="playPreviousVideo()" class="nav-btn"
-            style="pointer-events:auto;display:flex;align-items:center;justify-content:center;background:rgba(28,28,28,0.9);color:#fff;border:none;border-radius:8px;padding:8px 12px;height:36px;font-size:15px;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);">
-            <span class="material-icons" style="font-size:18px;margin:-1px 0;">arrow_back_ios</span>
-            <span style="margin-left:4px"></span>
-          </button>
-          <button id="nextVideoBtn" onclick="playNextVideo()" class="nav-btn"
-            style="pointer-events:auto;display:flex;align-items:center;justify-content:center;background:rgba(28,28,28,0.9);color:#fff;border:none;border-radius:8px;padding:8px 12px;height:36px;font-size:15px;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);">
-            <span style="margin-right:4px"></span>
-            <span class="material-icons" style="font-size:18px;margin:-1px 0;">arrow_forward_ios</span>
-          </button>
-        </div>
-      </div>
+
 
     </div>
   </div>
@@ -5051,16 +5028,7 @@ body[data-theme="dark"] .logo {
         <button class="modal-close" onclick="closeModal()"><span class="material-icons">close</span></button>
         <div class="video-container">
           <iframe id="videoPlayer" allowfullscreen></iframe>
-          <div class="nav-controls">
-            <button class="nav-btn" id="prevBtn" onclick="playPrevVideo()">
-              <span class="material-icons">arrow_back</span>
-              Oldingisi
-            </button>
-            <button class="nav-btn" id="nextBtn" onclick="playNextVideo()">
-              Keyingisi
-              <span class="material-icons">arrow_forward</span>
-            </button>
-          </div>
+
         </div>
       </div>
     `;
@@ -5826,103 +5794,22 @@ body[data-theme="dark"] .logo {
         });
       }
 
-    // Simple video modal state — track current video ID and available video list
-    let currentModalVideoId = null;
-    let currentModalVideoList = [];
-    let currentModalVideoIdx = 0;
 
-    function playVideo(videoIndex) {
-      const videos = (window.activeResourceList && window.activeResourceList.length) 
-        ? window.activeResourceList 
-        : (resourceVideos[currentSection] || window.videos || []);
-      
-      if (!videos || videos.length === 0) return;
-      if (videoIndex < 0 || videoIndex >= videos.length) return;
-      
-      const video = videos[videoIndex];
-      if (!video || !video.id) return;
-      
-      // Store current state
-      currentModalVideoId = video.id;
-      currentModalVideoList = videos;
-      currentModalVideoIdx = videoIndex;
-      
-      openInlineVideo(video.id);
-      updateInlineNavButtons();
-    }
 
-    function playNextResource() {
-      try {
-        if (!currentModalVideoList || currentModalVideoList.length === 0) return;
-        if (currentModalVideoIdx >= currentModalVideoList.length - 1) return;
-        
-        currentModalVideoIdx++;
-        const video = currentModalVideoList[currentModalVideoIdx];
-        if (!video || !video.id) return;
-        
-        currentModalVideoId = video.id;
-        openInlineVideo(video.id);
-        updateInlineNavButtons();
-      } catch (e) {
-        console.error('playNextResource error:', e);
-      }
-    }
+function closeInlineVideo() {
+  const bg = document.getElementById('inlineVideoModalBg');
+  const wrap = document.getElementById('inlineVideoPlayerWrap');
+  // iframe will auto-stop when hidden
+  wrap.innerHTML = '';
+  bg.style.display = 'none';
+  inlineResourceList = [];
+  inlineResourceIndex = -1;
+}
 
-    function playPrevResource() {
-      try {
-        if (!currentModalVideoList || currentModalVideoList.length === 0) return;
-        if (currentModalVideoIdx <= 0) return;
-        
-        currentModalVideoIdx--;
-        const video = currentModalVideoList[currentModalVideoIdx];
-        if (!video || !video.id) return;
-        
-        currentModalVideoId = video.id;
-        openInlineVideo(video.id);
-        updateInlineNavButtons();
-      } catch (e) {
-        console.error('playPrevResource error:', e);
-      }
-    }
-
-    function updateInlineNavButtons() {
-      try {
-        const prev = document.getElementById('inlinePrevBtn');
-        const next = document.getElementById('inlineNextBtn');
-        if (!prev || !next) return;
-        
-        if (!currentModalVideoList || currentModalVideoList.length === 0) {
-          prev.disabled = true;
-          next.disabled = true;
-          return;
-        }
-        
-        prev.disabled = currentModalVideoIdx <= 0;
-        next.disabled = currentModalVideoIdx >= currentModalVideoList.length - 1;
-      } catch (e) {
-        console.error('updateInlineNavButtons error:', e);
-      }
-    }
-
-    function closeInlineVideo() {
-      const bg = document.getElementById('inlineVideoModalBg');
-      const wrap = document.getElementById('inlineVideoPlayerWrap');
-      
-      wrap.innerHTML = '';
-      bg.style.display = 'none';
-      
-      // Reset state
-      currentModalVideoId = null;
-      currentModalVideoList = [];
-      currentModalVideoIdx = 0;
-      window.videoModalActive = false;
-    }
-
-    document.addEventListener('click', function (e) {
-      if (!e.target) return;
+document.addEventListener('click', function (e) {
+  if (!e.target) return;
   if (e.target.id === 'inlineCloseBtn') closeInlineVideo();
-  if (e.target.id === 'inlineNextBtn') playNextResource();
-  if (e.target.id === 'inlinePrevBtn') playPrevResource();
+
 });
 
 document.addEventListener('keydown', function (e) {
@@ -5934,14 +5821,7 @@ document.addEventListener('keydown', function (e) {
     closeInlineVideo();
     return;
   }
-  if (e.key === 'ArrowRight') {
-    playNextResource();
-    return;
-  }
-  if (e.key === 'ArrowLeft') {
-    playPrevResource();
-    return;
-  }
+
 });
 
       showBtn.addEventListener('click', function () {
@@ -5972,13 +5852,13 @@ document.addEventListener('keydown', function (e) {
           const div = document.createElement('div');
           div.className = 'video-item';
           div.tabIndex = 0;
-          div.setAttribute('data-src', `https://www.youtube.com/embed/${v.id}?rel=0`);
+          div.setAttribute('data-src', `https://www.youtube.com/embed/${v.id}?rel=0&controls=1`);
           div.setAttribute('data-title', v.title);
           div.innerHTML = `<img class="video-thumb" src="https://i.ytimg.com/vi/${v.id}/hqdefault.jpg" alt="thumb">
             <div class="title-col"><div class="small-title">${v.title}</div><div class="small-meta">${v.note}</div></div>`;
           div.addEventListener('click', ()=>{
             const src = div.getAttribute('data-src');
-            if(player) player.innerHTML = `<iframe src="${src}" title="${v.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+            if(player) player.innerHTML = `<iframe src="${src}&controls=1" title="${v.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
             if(resourceNote) resourceNote.textContent = v.note;
           });
           videoList.appendChild(div);
@@ -5987,7 +5867,7 @@ document.addEventListener('keydown', function (e) {
         // set first
         if(samples[0] && player){
           const v = samples[0];
-          player.innerHTML = `<iframe src="https://www.youtube.com/embed/${v.id}?rel=0" title="${v.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+          player.innerHTML = `<iframe src="https://www.youtube.com/embed/${v.id}?rel=0&controls=1" title="${v.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
           if(resourceNote) resourceNote.textContent = samples[0].note;
         }
       }catch(e){console.error(e)}
@@ -6015,23 +5895,22 @@ document.addEventListener('keydown', function (e) {
       try { const old = document.querySelectorAll('#resourceSectionsGrid .no-videos'); old.forEach(n => n.remove()); } catch (e) { }
       const container = document.getElementById('resourceSectionsGrid');
       container.innerHTML = '';
-      // Render only the first resource section per user request.
-      // This intentionally omits Bo'lim 2..30 so only Bo'lim 1 appears.
-      const i = 1;
-      const div = document.createElement('div');
-      div.className = 'section-card';
-      div.tabIndex = 0;
-      div.dataset.section = String(i);
-      div.innerHTML = `<div class="section-title">Bo'lim ${i}</div><div class="section-desc">Open the section, and enjoy with it</div>`;
-      div.onclick = () => openResourceSection(i);
-      div.onkeyup = (e) => { if (e.key === 'Enter') openResourceSection(i); };
-      container.appendChild(div);
+      // Render Bo'lim 1 and Bo'lim 2
+      for(let i = 1; i <= 2; i++) {
+        const div = document.createElement('div');
+        div.className = 'section-card';
+        div.tabIndex = 0;
+        div.dataset.section = String(i);
+        div.innerHTML = `<div class="section-title">Bo'lim ${i}</div><div class="section-desc">Open the section, and enjoy with it</div>`;
+        div.onclick = () => openResourceSection(i);
+        div.onkeyup = (e) => { if (e.key === 'Enter') openResourceSection(i); };
+        container.appendChild(div);
+      }
     }
 
     // mapping section -> array of video objects (id,title,note)
     const resourceVideos = {
       1: [
-        
         { id: 'FmJBY_SynY8', title: 'Video 1', note: "" },
         { id: '97GmvIJWXdE', title: 'Video 2', note: "" },
         { id: 'uKzvpopTFfM', title: 'Video 3', note: "" },
@@ -6040,6 +5919,12 @@ document.addEventListener('keydown', function (e) {
         { id: 'uEq6FWDCwSM', title: 'Video 6', note: "" },
         { id: 'pakPAOZNqmE', title: 'Video 7', note: "" },
         { id: '9a9qNLUpkV8', title: 'Video 8', note: "" },
+        { id: 'ZD3ZaytFKiU', title: 'Video 17', note: "" },
+        { id: 'URM0-DQJ27Q', title: 'Video 18', note: "" },
+        { id: 'DvfTJqczEgM', title: 'Video 19', note: "" },
+        { id: 'X4B947IqV70', title: "Video 20", note: "" },
+      ],
+      2: [
         { id: 'ZIgxOMiTPh0', title: 'Video 9', note: "" },
         { id: 'yb54VGUjHf8', title: 'Video 10', note: "" },
         { id: 'RSJoD5-73tM', title: 'Video 11', note: "" },
@@ -6048,10 +5933,6 @@ document.addEventListener('keydown', function (e) {
         { id: '42fapAkNXU0', title: 'Video 14', note: "" },
         { id: 'RvF_ZFcbofM', title: 'Video 15', note: "" },
         { id: 'oOSLR5IQklY', title: 'Video 16', note: "" },
-        { id: 'ZD3ZaytFKiU', title: 'Video 17', note: "" },
-        { id: 'URM0-DQJ27Q', title: 'Video 18', note: "" }, 
-        { id: 'DvfTJqczEgM', title: 'Video 19', note: "" },
-        { id: 'X4B947IqV70', title: "Video 20", note: "" },
         { id: 'IjfzWZdRbfo', title: "Video 21", note: "" },
         { id: 'bvoBy2J7vj0', title: "Video 22", note: "" },
         { id: 'dMfsen6Dor4', title: "Video 23", note: "" },
@@ -6091,88 +5972,23 @@ document.addEventListener('keydown', function (e) {
       ]
     };
 
-  // currently active list shown in the modal (either resourceVideos[currentSection] or window.videos)
-  window.activeResourceList = null;
+
+
+
 
     function playVideoFromCard(videoId, title, note, index) {
-      // Use playVideo function which manages video state correctly
-      playVideo(index);
-      // set active list to the current section mapping (fallback to window.videos)
-      window.activeResourceList = (resourceVideos[currentSection] && resourceVideos[currentSection].length) ? resourceVideos[currentSection] : (window.videos || []);
-      // Use new video state management
-      try { 
-        const videos = window.activeResourceList || window.videos || [];
-        const idx = videos.findIndex(v => v && v.id === videoId);
-        playVideo(idx >= 0 ? idx : 0);
-      } catch (e) { 
-        playVideoModal(videoId); 
-      }
-      updateNavigationButtons();
+      // open video modal
+      try { iv_openInlineVideo(videoId); } catch (e) { playVideoModal(videoId); }
     }
 
-    // iife for side/bottom video navigation controls
-    (function() {
-      // create mobile/touch detect helper
-      function isMobileOrTouch() {
-        return window.matchMedia('(hover: none), (pointer: coarse)').matches;
-      }
+    // iv_ namespaced wrapper: open the inline player
+    function iv_openInlineVideo(videoId) {
+      // call existing inline player open
+      return openInlineVideo(videoId);
+    }
 
-      function updateNavigationButtons() {
-        const videos = (window.activeResourceList && window.activeResourceList.length) ? window.activeResourceList : (resourceVideos[currentSection] || window.videos || []);
-        const prevBtn = document.getElementById('prevVideoBtn');
-        const nextBtn = document.getElementById('nextVideoBtn');
-        const prevBtnBottom = document.getElementById('prevVideoBtnBottom');
-        const nextBtnBottom = document.getElementById('nextVideoBtnBottom');
-        
-        const showPrev = currentVideoIndex > 0;
-        const showNext = currentVideoIndex < videos.length - 1;
 
-        // always hide either side OR bottom based on device - never show both
-        const useSideButtons = !isMobileOrTouch();
 
-        // for desktop, show side buttons
-        if (useSideButtons) {
-          if (prevBtn) {
-            prevBtn.style.display = showPrev ? 'flex' : 'none';
-            prevBtn.style.pointerEvents = showPrev ? 'auto' : 'none';
-          }
-          if (nextBtn) {
-            nextBtn.style.display = showNext ? 'flex' : 'none';
-            nextBtn.style.pointerEvents = showNext ? 'auto' : 'none';
-          }
-          // hide bottom controls
-          if (prevBtnBottom) prevBtnBottom.style.display = 'none';
-          if (nextBtnBottom) nextBtnBottom.style.display = 'none';
-        }
-        // for mobile/touch, show bottom buttons
-        else {
-          // hide side buttons
-          if (prevBtn) prevBtn.style.display = 'none';
-          if (nextBtn) nextBtn.style.display = 'none';
-          // show/hide bottom controls based on availability
-          if (prevBtnBottom) {
-            prevBtnBottom.style.display = showPrev ? 'flex' : 'none';
-            prevBtnBottom.style.pointerEvents = showPrev ? 'auto' : 'none';
-          }
-          if (nextBtnBottom) {
-            nextBtnBottom.style.display = showNext ? 'flex' : 'none';
-            nextBtnBottom.style.pointerEvents = showNext ? 'auto' : 'none';
-          }
-        }
-      }
-
-      // expose updateNavigationButtons in window scope for external calls
-      window.updateNavigationButtons = updateNavigationButtons;
-
-      // run initial update
-      try { updateNavigationButtons(); } catch (e) { }
-
-      // update on orientation change (may switch between mobile/desktop)
-      window.addEventListener('orientationchange', function() {
-        try { setTimeout(updateNavigationButtons, 150); } catch (e) { }
-      });
-
-    })();
 
     function openResourceSection(section, push = true) {
       currentSection = section;
@@ -6679,10 +6495,10 @@ document.addEventListener('keydown', function (e) {
 
   <div id="inlineVideoModalBg" style="display:none;position:fixed;inset:0;z-index:6000;align-items:center;justify-content:center;background:rgba(0,0,0,0.85);">
     <div id="inlineVideoModal">
-    <button id="inlinePrevBtn" aria-label="Previous video" title="Prev" style="position:absolute;z-index:12;">◀</button>
+   
     <button id="inlineCloseBtn" aria-label="Close video" style="position:absolute;right:10px;top:10px;z-index:12;background:rgba(255,255,255,0.06);border:none;color:#fff;padding:8px;border-radius:8px;cursor:pointer;font-size:18px">✖</button>
-    <button id="inlineNextBtn" aria-label="Next video" title="Next" style="position:absolute;z-index:12;">▶</button>
-    <button id="inlinePauseBtn" aria-label="Pause/Play video" title="Pause" style="position:absolute;z-index:12;">❚❚</button>
+    
+    
     <div id="inlineCover" style="position:absolute;inset:0;z-index:11;display:none;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,0.0),rgba(0,0,0,0.6));"></div>
   <div id="inlineVideoPlayerWrap" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#000;"></div>
     </div>
@@ -6703,27 +6519,25 @@ document.addEventListener('keydown', function (e) {
 
     // Tugmalarni ko'rsatish/yashirish funksiyalari
     function showVideoControls() {
-      const prev = document.getElementById('inlinePrevBtn');
-      const next = document.getElementById('inlineNextBtn');
-      const close = document.getElementById('inlineCloseBtn');
-      const pause = document.getElementById('inlinePauseBtn');
       
-      if (prev) prev.style.opacity = '0.8';
-      if (next) next.style.opacity = '0.8';
+     
+      const close = document.getElementById('inlineCloseBtn');
+      
+      
+      
+      
       if (close) close.style.opacity = '0.8';
-      if (pause) pause.style.opacity = '0.8';
+      
     }
     
     function hideVideoControls() {
-      const prev = document.getElementById('inlinePrevBtn');
-      const next = document.getElementById('inlineNextBtn');
+     
       const close = document.getElementById('inlineCloseBtn');
-      const pause = document.getElementById('inlinePauseBtn');
       
-      if (prev) prev.style.opacity = '0.4';
-      if (next) next.style.opacity = '0.4';
+      
+      
       if (close) close.style.opacity = '0.4';
-      if (pause) pause.style.opacity = '0.4';
+      
     }
 
     // cover helpers: show/hide the inline cover that hides YouTube end-screen thumbnails
@@ -6747,30 +6561,36 @@ document.addEventListener('keydown', function (e) {
       } catch (e) { }
     }
     
-    function openInlineVideo(videoId) {
+    function openInlineVideo(videoId, videoList = null, startIndex = 0) {
       if (!videoId) return;
+      
+      // Agar video list berilgan bo'lsa, uni o'rnatamiz
+      if (videoList && Array.isArray(videoList)) {
+        inlineResourceList = videoList;
+        inlineResourceIndex = startIndex;
+      }
       
       const bg = document.getElementById('inlineVideoModalBg');
       const wrap = document.getElementById('inlineVideoPlayerWrap');
-      
-      if (!bg || !wrap) return;
-      
-      // Create iframe with autoplay
+      bg.style.display = 'flex';
       wrap.innerHTML = `<iframe 
         width="100%" 
         height="100%" 
         src="https://www.youtube.com/embed/${encodeURIComponent(videoId)}?autoplay=1&controls=1&rel=0&modestbranding=1&playsinline=1" 
         frameborder="0" 
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
         allowfullscreen 
-        style="border:none;border-radius:8px;">
+        style="border:none;">
       </iframe>`;
       
-      bg.style.display = 'flex';
+      // Show inline cover (blocks YouTube end-screen suggestions)
+      showInlineCover();
       document.body.style.overflow = 'hidden';
+      
+      // Video modal ochilganini belgilash
       window.videoModalActive = true;
       
-      // Update navigation buttons state
+      // Tugmalar CSS hover bilan boshqariladi
       updateInlineNavButtons();
     }
 
