@@ -91,6 +91,9 @@
       .phone {
         max-width: 100% !important;
         width: 100% !important;
+        /* Use a viewport-relative max height so the phone preview stays visible
+           but still allows an internal scroll for long content on small screens. */
+        max-height: 70vh !important;
         height: auto !important;
         border-radius: 16px;
         border: 1px solid #e0e0e0;
@@ -110,12 +113,18 @@
         border: 1px solid #ddd;
       }
 
+      /* On small screens we want the phone content to be a single vertical
+         column with its own scroll. Previously this used a two-column grid
+         which split content and hid words. Switch to a column flex layout
+         and cap the internal height so overflow-y works as expected. */
       .phone-screen {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: 10px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
         padding: 10px !important;
-        max-height: none !important;
+        overflow-y: auto !important;
+        /* Allow the inner screen to grow but not exceed the phone container */
+        max-height: calc(70vh - 56px) !important; /* account for phone-top/header */
       }
 
       .preview {
@@ -244,11 +253,33 @@ body[data-theme="dark"] .logo {
         </div>
       </div>
     `;
-            // Initialize the player via IFrame API after inserting the iframe
-            try { window.initPlayerWithId && window.initPlayerWithId(videoId); } catch(e) { console.error(e); }
-          modalBg.style.display = 'flex';
-          modalBg.onclick = function (e) { if (e.target === modalBg) closeModal(); };
-          try { document.body.style.overflow = 'hidden'; } catch (e) {}
+        // Initialize the player via IFrame API after inserting the iframe
+        try { window.initPlayerWithId && window.initPlayerWithId(videoId); } catch(e) { console.error(e); }
+        // Inject desktop layout tweaks as a <style> element (CSS accidentally placed inside JS previously)
+        (function(){
+          if (!document.getElementById('cefr-desktop-tweaks')) {
+            var css = [
+              ".wrap .hero { grid-template-columns: minmax(0, 1fr) 260px !important; }",
+              ".hero .preview, .hero .preview .phone { max-width: 260px !important; width: 100% !important; }",
+              "/* Nudge the left cards slightly to the left on desktop so they visually",
+              "   shift toward the left side (affects only large screens). Small, subtle",
+              "   transform to avoid layout jumps. */",
+              ".hero-left .card-hero {",
+              "  transform: translateX(-12px);",
+              "}",
+              "/* Slightly more for the secondary card so both look aligned */",
+              ".hero-left .card-hero-secondary {",
+              "  transform: translateX(-8px);",
+              "}"
+            ].join("\n");
+            var s = document.createElement('style');
+            s.id = 'cefr-desktop-tweaks';
+            s.type = 'text/css';
+            s.appendChild(document.createTextNode(css));
+            (document.head || document.documentElement).appendChild(s);
+          }
+        })();
+      try { document.body.style.overflow = 'hidden'; } catch (e) {}
         };
 
         window.closeModal = function() {
@@ -739,12 +770,13 @@ body[data-theme="dark"] .logo {
     /* hero */
     .hero {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 320px; /* Reduced from 400px */
-      /* left flexible, right fixed */
-      gap: 24px; /* Slightly reduced gap */
+      /* Make the right preview column flexible but constrained so layout
+         adapts smoothly across screen sizes. Left column takes remaining
+         space while preview stays readable. */
+      grid-template-columns: 1fr minmax(260px, 360px);
+      gap: 24px;
       margin-top: 36px;
       align-items: start;
-      /* align to top so columns don't vertically center */
       position: relative;
       z-index: 1;
     }
@@ -827,7 +859,8 @@ body[data-theme="dark"] .logo {
     /* Ensure preview (right column) stays a column and sits at top */
     .preview {
       align-self: start;
-      max-width: 400px;
+      /* keep preview constrained but responsive: no huge empty margins on very wide screens */
+      max-width: min(420px, 32vw);
       width: 100%;
     }
 
@@ -1035,6 +1068,15 @@ body[data-theme="dark"] .logo {
       font-weight: 500;
     }
 
+    /* Desktop-only: slightly extend the right preview phone height so the
+       phone column reaches lower to better match the left cards. Mobile is
+       intentionally unaffected. Adjust the value below if you want more/less. */
+    @media (min-width: 900px) {
+      .phone {
+        height: 510px; /* slightly reduced (barely noticeable) per user request */
+      }
+    }
+
 
 
     #resourceWindowGrid .small-title {
@@ -1174,6 +1216,51 @@ body[data-theme="dark"] .logo {
     .video-item .small-meta { font-size:12px; color:var(--muted) }
 
     .video-item:hover { transform:translateY(-3px); box-shadow:0 6px 18px rgba(2,6,23,0.08) }
+
+    /* Ensure resource/video grid items are visually centered within their grid cells
+       especially on small screens where padding and negative margins elsewhere
+       could shift content to the right. */
+    #resourceWindowGrid {
+      justify-items: center; /* center children inside each grid cell */
+    }
+
+    /* Resource card wrapper inserted by JS (each grid child). Make it full-width
+       but constrained so items inside are centered and responsive. */
+    #resourceWindowGrid > .resource-card {
+      width: 100%;
+      max-width: 760px;
+      box-sizing: border-box;
+      margin: 0 auto;
+    }
+
+    /* Video item should fill its parent card and be centered; remove stray margins */
+    #resourceWindowGrid .video-item {
+      width: 100%;
+      margin: 0 auto;
+      left: 0; /* reset any absolute offsets */
+    }
+
+    /* Play button: center over thumbnail on wide cards, but on narrow (row) layout
+       move it to the right side so it doesn't overlap text awkwardly. */
+    #resourceWindowGrid .play-button {
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    @media (max-width: 768px) {
+      #resourceWindowGrid {
+        justify-items: stretch; /* let items fill the available width on mobile */
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+      }
+      #resourceWindowGrid > .resource-card { max-width: none; }
+      #resourceWindowGrid .play-button {
+        left: auto !important;
+        right: 14px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+      }
+    }
 
     /* Dark mode overrides (strong, scoped) */
     body[data-theme="dark"] .video-player { background: #1c1f26 !important; box-shadow:none }
@@ -1323,9 +1410,25 @@ body[data-theme="dark"] .logo {
 
     #resourceWindowGrid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      /* Auto-fit columns so items reflow responsively across widths */
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 15px;
       margin-top: 20px;
+      align-items: start;
+    }
+
+    /* Responsive helpers: ensure media and images scale to container width */
+    img, video, iframe {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* Ensure thumbnails and video items do not create overflow on very wide screens */
+    .video-item, .resource-card, .section-card {
+      box-sizing: border-box;
+      width: 100%;
+      max-width: 100%;
     }
 
     .video-item {
@@ -1801,22 +1904,23 @@ body[data-theme="dark"] .logo {
       background: var(--surface);
       color: inherit;
       border-radius: var(--radius-lg);
-      padding: 28px 22px 22px 22px;
-      width: 90vw;
-      height: 85vh;
-      min-width: 800px;
-      min-height: 600px;
+      padding: 20px 18px 18px 18px;
+      /* responsive sizing: don't force huge fixed minimums that stretch on some screens */
+      width: min(1100px, 92vw);
+      max-width: 1100px;
+      max-height: 92vh;
+      height: auto;
+      min-width: 300px;
       position: relative;
       border: 1px solid #e6e6e9;
       display: flex;
       flex-direction: column;
+      overflow: hidden;
     }
 
     .modal .video-container {
-      flex: 1;
       width: 100%;
-      height: 100%;
-      min-height: 500px;
+      /* keep aspect-ratio for video area so it doesn't stretch vertically */
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1826,9 +1930,13 @@ body[data-theme="dark"] .logo {
     .modal iframe,
     .modal .video-player {
       width: 100%;
-      height: 100%;
       border: none;
       border-radius: 8px;
+      /* Use a safe 16:9 aspect ratio and cap height so modal never overflows viewport */
+      aspect-ratio: 16 / 9;
+      max-height: calc(80vh - 80px);
+      height: auto;
+      display: block;
     }
 
     .modal-close {
@@ -2534,6 +2642,31 @@ body[data-theme="dark"] .logo {
 </style>
 
 <body>
+  <style>
+    /* Force desktop-only phone preview to be taller so right column matches left cards.
+       Using higher specificity and !important to override earlier declarations; mobile
+       sizes remain untouched because of the media query. */
+    @media (min-width: 901px) {
+      .hero .preview .phone {
+        height: 510px !important;
+      }
+      /* Ensure the inner phone-screen on desktop can scroll when content is long */
+      .hero .preview .phone .phone-screen {
+        max-height: 460px !important; /* leave room for phone-top/header */
+        overflow-y: auto !important;
+        padding: 12px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+      }
+      /* Move the right preview (phone column) slightly to the LEFT by pulling it with
+         negative margin-left so it shifts visibly leftward on desktop. Adjusted. */
+      .wrap .hero .preview {
+        margin-left: -20px !important;
+        margin-right: 0 !important;
+      }
+    }
+  </style>
   <!-- Video Modal Container -->
   <div id="videoPlayerModal" class="video-modal" style="display: none;">
     <div class="video-player">
@@ -2670,7 +2803,7 @@ body[data-theme="dark"] .logo {
 
           <button class="enter-btn" id="enterBtn"><span class="material-icons"
               style="font-size:18px">arrow_forward</span>ENTER — Kirish</button>
-          <div class="note">Har kuni bir bo‘limni o‘qing, natijani sezilarli o‘zgaradi! 🚀</div>
+    <div class="note">Har kuni bir bo‘limni o‘qing, natijani sezilarli o‘zgaradi! 🚀</div>
         </div>
 
         <!-- Secondary card: identical look, different text -->
@@ -2694,45 +2827,25 @@ body[data-theme="dark"] .logo {
 
       <div class="preview">
         <div class="phone" aria-hidden>
-          <div class="phone-top mini-card">CEFR — Reading</div>
-          <div class="phone-screen">
-            <div class="mini-card">Bo'lim 1</div>
-            <div class="mini-card">Bo'lim 2</div>
-            <div class="mini-card">Bo'lim 3</div>
-            <div class="mini-card">Bo'lim 4</div>
-            <div class="mini-card">Bo'lim 5</div>
-            <div class="mini-card">Bo'lim 6</div>
-            <div class="mini-card">Bo'lim 7</div>
-            <div class="mini-card">Bo'lim 8</div>
-            <div class="mini-card">Bo'lim 9</div>
-            <div class="mini-card">Bo'lim 10</div>
-            <div class="mini-card">Bo'lim 11</div>
-            <div class="mini-card">Bo'lim 12</div>
-            <div class="mini-card">Bo'lim 13</div>
-            <div class="mini-card">Bo'lim 14</div>
-            <div class="mini-card">Bo'lim 15</div>
-            <div class="mini-card">Bo'lim 16</div>
-            <div class="mini-card">Bo'lim 17</div>
-            <div class="mini-card">Bo'lim 18</div>
-            <div class="mini-card">Bo'lim 19</div>
-            <div class="mini-card">Bo'lim 20</div>
-            <div class="mini-card">Bo'lim 21</div>
-            <div class="mini-card">Bo'lim 22</div>
-            <div class="mini-card">Bo'lim 23</div>
-            <div class="mini-card">Bo'lim 24</div>
-            <div class="mini-card">Bo'lim 25</div>
-            <div class="mini-card">Bo'lim 26</div>
-            <div class="mini-card">Bo'lim 27</div>
-            <div class="mini-card">Bo'lim 28</div>
-            <div class="mini-card">Bo'lim 29</div>
-            <div class="mini-card">Bo'lim 30</div>
-            <div class="mini-card">Bo'lim 31</div>
-            <div class="mini-card">Bo'lim 32</div>
-            <div class="mini-card">Bo'lim 33</div>
-            <div class="mini-card">Bo'lim 34</div>
-            <div class="mini-card">Bo'lim 35</div>
-            <div class="mini-card">Bo'lim 36</div>
-            <div class="mini-card">Bo'lim 37</div> 
+          <div class="phone-top mini-card">Sayt haqida</div>
+          <div class="phone-screen" style="font-size: 13px; line-height: 1.5; padding: 12px; text-align: left; color: #333; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">
+            <p style="margin: 0; font-weight: 700;">Sayt haqida</p>
+            <p style="margin: 0;">
+              Ushbu sayt CEFR Reading bo‘limidagi matnlardan uchraydigan eng muhim lug‘atlar do‘stlarimiz bilan bir joyga jamlangan platformadir. Maqsad — ingliz tilini o‘rganayotganlar uchun amaliy, sodda va tez eslab qolishga yordam beradigan qulay manba yaratish.
+            </p>
+            <p style="margin: 0; font-weight: 600;">Bu yerda siz:</p>
+            <ul style="margin: 0 0 0 18px; padding: 0;">
+              <li>Reading matnlarida ishlatiladigan asosiy so‘zlar bilan tanishasiz</li>
+              <li>Har bir bo‘lim bo‘yicha tartiblangan lug‘atlar ro‘yxatini topasiz</li>
+              <li>Ingliz tilini yanada qiziqarli o‘rganishingiz uchun foydali videolarni tomosha qilasiz</li>
+              <li>Imtihonga tayyorlanishda kerak bo‘ladigan eng zarur so‘zlarni bir joydan o‘qib chiqasiz</li>
+            </ul>
+            <p style="margin: 0;">
+              Saytning asosiy vazifasi — o‘rganish jarayonini yengillashtirish, sizga mustahkam lug‘at bazasini yaratishda yordam berish va ingliz tiliga bo‘lgan qiziqishni oshirish.
+            </p>
+            <p style="margin: 0; font-style: italic; color: #666;">
+              Har kuni atigi bir necha daqiqa vaqt ajratib o‘qib borsangiz, natija qisqa fursatda sezila boshlaydi.
+            </p>
           </div>
         </div>
       </div>
@@ -6860,3 +6973,4 @@ document.addEventListener('keydown', function (e) {
 
 </body>
 </html>
+
