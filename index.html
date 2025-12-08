@@ -616,11 +616,27 @@ body[data-theme="dark"] .logo {
       gap: 2px
     }
 
+    @keyframes titleGlow {
+      0%, 100% {
+        text-shadow: 0 0 10px rgba(135, 206, 235, 0.6), 0 0 20px rgba(135, 206, 235, 0.4), 0 0 30px rgba(135, 206, 235, 0.2);
+      }
+      50% {
+        text-shadow: 0 0 15px rgba(135, 206, 235, 0.8), 0 0 25px rgba(135, 206, 235, 0.6), 0 0 35px rgba(135, 206, 235, 0.4);
+      }
+    }
+
     .title {
       font-size: 22px;
       font-weight: 800;
       letter-spacing: 0.03em;
       color: #2c3e50;
+      animation: titleGlow 2s ease-in-out infinite;
+    }
+
+    /* Dark mode */
+    body[data-theme="dark"] .title {
+      color: #ffffff;
+      text-shadow: 0 0 10px rgba(135, 206, 235, 0.8), 0 0 20px rgba(135, 206, 235, 0.6);
     }
 
     .subtitle {
@@ -945,30 +961,67 @@ body[data-theme="dark"] .logo {
       font-weight: 500;
     }
 
+    @keyframes buttonPulse {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(135, 206, 235, 0.4);
+        border-color: #cbd5e1;
+      }
+      50% {
+        box-shadow: 0 0 0 8px rgba(135, 206, 235, 0);
+        border-color: #87CEEB;
+      }
+    }
+
     .enter-btn {
       display: inline-flex;
       align-items: center;
-      gap: 12px;
-      padding: 14px 28px;
-      border-radius: var(--radius-md);
-      background: var(--accent);
-      color: var(--text);
-      font-weight: 700;
-      border: none;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 6px;
+      background: #e0f2fe;
+      color: #0f172a;
+      font-weight: 600;
+      border: 1px solid #7dd3fc;
       cursor: pointer;
-      font-size: 17px;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 4px 12px rgba(135, 206, 235, 0.15);
-      position: relative;
+      font-size: 15px;
+      transition: all 0.2s ease;
+      animation: buttonPulse 2s infinite;
     }
 
     .enter-btn:hover {
-      box-shadow: 
-        0 0 20px rgba(135, 206, 235, 0.5),
-        0 0 40px rgba(135, 206, 235, 0.25),
-        0 4px 16px rgba(135, 206, 235, 0.2);
-      background: linear-gradient(135deg, var(--accent), rgba(135, 206, 235, 0.9));
-      filter: brightness(1.08);
+      background: #e2e8f0;
+      border-color: #87CEEB;
+      color: #1e293b;
+      animation: none;
+    }
+
+    /* Dark mode */
+    body[data-theme="dark"] .enter-btn {
+      background: #334155;
+      border-color: #475569;
+      color: #f1f5f9;
+    }
+
+    body[data-theme="dark"] .enter-btn:hover {
+      background: #475569;
+      border-color: #87CEEB;
+      color: #ffffff;
+      animation: none;
+    }
+
+    @keyframes buttonPulseDark {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(135, 206, 235, 0.3);
+        border-color: #475569;
+      }
+      50% {
+        box-shadow: 0 0 0 8px rgba(135, 206, 235, 0);
+        border-color: #87CEEB;
+      }
+    }
+
+    body[data-theme="dark"] .enter-btn {
+      animation: buttonPulseDark 2s infinite;
     }
 
 
@@ -1075,30 +1128,41 @@ body[data-theme="dark"] .logo {
 
     @media (max-width: 768px) {
       #resourceWindowGrid {
-        grid-template-columns: repeat(2, 1fr) !important;
+        grid-template-columns: 1fr !important;
         padding: 10px !important;
+        gap: 15px !important;
       }
       
       .video-item {
-        flex-direction: column !important;
+        flex-direction: row !important;
         height: auto !important;
-        min-height: 160px !important;
+        min-height: 100px !important;
+        align-items: center !important;
       }
       
       .video-item img {
-        width: 100% !important;
+        width: 180px !important;
         height: 100px !important;
-        margin-bottom: 8px !important;
+        margin-right: 10px !important;
+        margin-bottom: 0 !important;
+        flex-shrink: 0 !important;
       }
       
       .title-col {
-        padding: 0 5px !important;
+        flex: 0.6 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
       }
       
       .small-title {
-        font-size: 11px !important;
+        font-size: 12px !important;
         line-height: 1.2 !important;
-        text-align: center !important;
+        text-align: left !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2 !important;
+        line-clamp: 2 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
       }
     }
 
@@ -1978,13 +2042,26 @@ body[data-theme="dark"] .logo {
       }
 
       .sections {
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        grid-template-columns: repeat(2, 1fr);
         gap: 8px
       }
 
       .gallery {
         grid-template-columns: 1fr !important;
         gap: 10px !important
+      }
+    }
+    
+    /* Kompyuter rejimida lug'atlar uchun 2 ustun */
+    .gallery {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 15px !important;
+    }
+    
+    @media (max-width: 768px) {
+      .gallery {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
       }
     }
 
@@ -2478,7 +2555,7 @@ body[data-theme="dark"] .logo {
 
         <div class="brand-titles">
           <div class="title">CEFR Reading — Lug‘atlar</div>
-          <div class="subtitle">“Building your English, word by word”</div>
+          <div class="subtitle">“Learn today, succeed tomorrow”</div>
           <div class="credits">Coder: M.Erkinov &nbsp;|&nbsp; Designer: T.Ramatov &amp; X.Ramatov</div>
         </div>
       </div>
@@ -2831,102 +2908,77 @@ body[data-theme="dark"] .logo {
 
 
 
-    /* Chiroyli footer link animatsiyalari */
+    /* Academic style footer links */
     .footer-contact {
-      position: relative;
-      overflow: hidden;
-      transition: all 0.3s ease;
-      border-radius: 12px;
-      background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-      border: 1px solid rgba(255,255,255,0.1);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-    }
-
-    .footer-contact::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transition: left 0.5s ease;
-    }
-
-    .footer-contact:hover::before {
-      left: 100%;
+      transition: all 0.2s ease;
+      border-radius: 4px;
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      color: #495057 !important;
+      text-decoration: none;
+      font-weight: 500;
+      cursor: pointer;
     }
 
     .footer-contact:hover {
-      transform: translateY(-0.5px) scale(1.005);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      border-color: rgba(255,255,255,0.3);
+      background: #e9ecef;
+      border-color: #6c757d;
+      color: #212529 !important;
     }
 
-    /* Telegram link - yumshoq turquoise/cyan */
+    /* Telegram links */
     .footer-contact[href*="t.me"] {
-      /* Softer, gentle cyan-turquoise gradient */
-      background: linear-gradient(135deg, #5fc9e0, #8ddce6);
-      color: white !important;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+      background: #e3f2fd;
+      border-color: #90caf9;
     }
 
     .footer-contact[href*="t.me"]:hover {
-      background: linear-gradient(135deg, #8ddce6, #5fc9e0);
-      box-shadow: 0 8px 25px rgba(95, 201, 224, 0.3);
+      background: #bbdefb;
+      border-color: #64b5f6;
     }
 
-    /* YouTube link - yumshoq, sarayin qizil */
+    /* YouTube links */
     .footer-contact[href*="youtube"] {
-      background: linear-gradient(135deg, #E07856, #F09070);
-      color: white !important;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+      background: #ffebee;
+      border-color: #ffcdd2;
     }
 
     .footer-contact[href*="youtube"]:hover {
-      background: linear-gradient(135deg, #F09070, #E07856);
-      box-shadow: 0 8px 25px rgba(224, 120, 86, 0.35);
+      background: #ffcdd2;
+      border-color: #ef9a9a;
     }
 
-    /* Ikonka animatsiyasi */
-    .footer-contact img {
-      transition: transform 0.3s ease;
+    /* Dark mode */
+    body[data-theme="dark"] .footer-contact {
+      background: #343a40;
+      border-color: #495057;
+      color: #f8f9fa !important;
     }
 
-    .footer-contact:hover img {
-      transform: rotate(360deg) scale(1.1);
+    body[data-theme="dark"] .footer-contact:hover {
+      background: #495057;
+      border-color: #adb5bd;
+      color: #ffffff !important;
     }
 
-    /* Matn animatsiyasi */
-    .footer-contact span {
-      display: inline-block;
-      transition: transform 0.3s ease;
+    body[data-theme="dark"] .footer-contact[href*="t.me"] {
+      background: #1e3a8a;
+      border-color: #3b82f6;
     }
 
-    .footer-contact:hover span {
-      transform: translateX(2px);
+    body[data-theme="dark"] .footer-contact[href*="t.me"]:hover {
+      background: #1d4ed8;
+      border-color: #60a5fa;
     }
 
-    /* Pulsatsiya effekti */
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(34, 158, 217, 0.4); }
-      70% { box-shadow: 0 0 0 10px rgba(34, 158, 217, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(34, 158, 217, 0); }
+    body[data-theme="dark"] .footer-contact[href*="youtube"] {
+      background: #7f1d1d;
+      border-color: #dc2626;
     }
 
-    .footer-contact[href*="t.me"]:hover {
-      animation: pulse 1.5s infinite;
-    }
-
-    @keyframes pulse-red {
-      0% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.4); }
-      70% { box-shadow: 0 0 0 10px rgba(255, 68, 68, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0); }
-    }
-
-    .footer-contact[href*="youtube"]:hover {
-      animation: pulse-red 1.5s infinite;
+    body[data-theme="dark"] .footer-contact[href*="youtube"]:hover {
+      background: #991b1b;
+      border-color: #ef4444;
     }
 
     /* Footer responsive tweaks: make footer text a bit smaller on phones for a more professional look */
@@ -5901,7 +5953,11 @@ document.addEventListener('keydown', function (e) {
         div.className = 'section-card';
         div.tabIndex = 0;
         div.dataset.section = String(i);
-        div.innerHTML = `<div class="section-title">Bo'lim ${i}</div><div class="section-desc">Open the section, and enjoy with it</div>`;
+        const descriptions = {
+          1: 'Uzun videolar',
+          2: 'Qisqa videolar'
+        };
+        div.innerHTML = `<div class="section-title">Bo'lim ${i}</div><div class="section-desc">${descriptions[i] || 'Open the section, and enjoy with it'}</div>`;
         div.onclick = () => openResourceSection(i);
         div.onkeyup = (e) => { if (e.key === 'Enter') openResourceSection(i); };
         container.appendChild(div);
@@ -5919,56 +5975,56 @@ document.addEventListener('keydown', function (e) {
         { id: 'uEq6FWDCwSM', title: 'Video 6', note: "" },
         { id: 'pakPAOZNqmE', title: 'Video 7', note: "" },
         { id: '9a9qNLUpkV8', title: 'Video 8', note: "" },
-        { id: 'ZD3ZaytFKiU', title: 'Video 17', note: "" },
-        { id: 'URM0-DQJ27Q', title: 'Video 18', note: "" },
-        { id: 'DvfTJqczEgM', title: 'Video 19', note: "" },
-        { id: 'X4B947IqV70', title: "Video 20", note: "" },
+        { id: 'ZD3ZaytFKiU', title: 'Video 9', note: "" },
+        { id: 'URM0-DQJ27Q', title: 'Video 10', note: "" },
+        { id: 'DvfTJqczEgM', title: 'Video 11', note: "" },
+        { id: 'X4B947IqV70', title: "Video 12", note: "" },
       ],
       2: [
-        { id: 'ZIgxOMiTPh0', title: 'Video 9', note: "" },
-        { id: 'yb54VGUjHf8', title: 'Video 10', note: "" },
-        { id: 'RSJoD5-73tM', title: 'Video 11', note: "" },
-        { id: 'zs3Q3a4pHOM', title: 'Video 12', note: "" },
-        { id: 'M9CLXs_7ups', title: 'Video 13', note: "" },
-        { id: '42fapAkNXU0', title: 'Video 14', note: "" },
-        { id: 'RvF_ZFcbofM', title: 'Video 15', note: "" },
-        { id: 'oOSLR5IQklY', title: 'Video 16', note: "" },
-        { id: 'IjfzWZdRbfo', title: "Video 21", note: "" },
-        { id: 'bvoBy2J7vj0', title: "Video 22", note: "" },
-        { id: 'dMfsen6Dor4', title: "Video 23", note: "" },
-        { id: 'ndmjsf_DZtk', title: "Video 24", note: "" },
-        { id: 'llJtisztYdI', title: "Video 25", note: "" },
-        { id: 'qnbZF0--4GU', title: "Video 26", note: "" },
-        { id: '0FXfOR6gHOA', title: "Video 27", note: "" },
-        { id: 'SvJYznkdB9Y', title: "Video 28", note: "" },
-        { id: '702XzWEg_PY', title: "Video 29", note: "" },
-        { id: 'stmfj-JslcI', title: "Video 30", note: "" },
-        { id: '62br5UmqtSg', title: "Video 31", note: "" },
-        { id: 'bXbr9y6LPcc', title: "Video 32", note: "" },
-        { id: '4ZXTnqHg3L8', title: "Video 33", note: "" },
-        { id: '3lahqP3ZA7Y', title: "Video 34", note: "" },
-        { id: 'NnyNRnWFDEs', title: 'Video 35', note: '' },
-        { id: 'rwUAzKy4xT0', title: 'Video 36', note: '' },
-        { id: 'mcJb04j_s74', title: 'Video 37', note: '' },
-        { id: 'bBqQUqdJTVU', title: 'Video 38', note: '' },
-        { id: 'OHc_ZH_pkhQ', title: 'Video 39', note: '' },
-        { id: '3iQsY4Bi510', title: 'Video 40', note: '' },
-        { id: 'Ia7LPksqlR0', title: 'Video 41', note: '' },
-        { id: 'RU4j1WsU3dw', title: 'Video 42', note: '' },
-        { id: 'W-Rm8yN_-9A', title: 'Video 43', note: '' },
-        { id: '-G2XkygH9fI', title: 'Video 44', note: '' },
-        { id: 'xhq-WrZf53A', title: 'Video 45', note: '' },
-        { id: 'e0LCeMTDxro', title: 'Video 46', note: '' },
-        { id: 'qIJdG3YcB48', title: 'Video 47', note: '' },
-        { id: 'EJ1QNP-AKzc', title: 'Video 48', note: '' },
-        { id: 'UQ2njZ89rvY', title: 'Video 49', note: '' },
-        { id: '-U7QMl76Ixg', title: 'Video 50', note: '' },
-        { id: '8ctAug8xT7M', title: 'Video 51', note: '' },
-        { id: 'uFThdXspww4', title: 'Video 52', note: '' },
-        { id: 'nJg1pavURCU', title: 'Video 53', note: '' },
-        { id: 'X8dXWT85uhQ', title: 'Video 54', note: '' },
-        { id: 'gpQwPUyOSE0', title: 'Video 55', note: '' },
-        { id: 'YaoOjURVKgE', title: 'Video 56', note: '' }
+        { id: 'ZIgxOMiTPh0', title: 'Video 1', note: "" },
+        { id: 'yb54VGUjHf8', title: 'Video 2', note: "" },
+        { id: 'RSJoD5-73tM', title: 'Video 3', note: "" },
+        { id: 'zs3Q3a4pHOM', title: 'Video 4', note: "" },
+        { id: 'M9CLXs_7ups', title: 'Video 5', note: "" },
+        { id: '42fapAkNXU0', title: 'Video 6', note: "" },
+        { id: 'RvF_ZFcbofM', title: 'Video 7', note: "" },
+        { id: 'oOSLR5IQklY', title: 'Video 8', note: "" },
+        { id: 'IjfzWZdRbfo', title: "Video 9", note: "" },
+        { id: 'bvoBy2J7vj0', title: "Video 10", note: "" },
+        { id: 'dMfsen6Dor4', title: "Video 11", note: "" },
+        { id: 'ndmjsf_DZtk', title: "Video 12", note: "" },
+        { id: 'llJtisztYdI', title: "Video 13", note: "" },
+        { id: 'qnbZF0--4GU', title: "Video 14", note: "" },
+        { id: '0FXfOR6gHOA', title: "Video 15", note: "" },
+        { id: 'SvJYznkdB9Y', title: "Video 16", note: "" },
+        { id: '702XzWEg_PY', title: "Video 17", note: "" },
+        { id: 'stmfj-JslcI', title: "Video 18", note: "" },
+        { id: '62br5UmqtSg', title: "Video 19", note: "" },
+        { id: 'bXbr9y6LPcc', title: "Video 20", note: "" },
+        { id: '4ZXTnqHg3L8', title: "Video 21", note: "" },
+        { id: '3lahqP3ZA7Y', title: "Video 22", note: "" },
+        { id: 'NnyNRnWFDEs', title: 'Video 23', note: '' },
+        { id: 'rwUAzKy4xT0', title: 'Video 24', note: '' },
+        { id: 'mcJb04j_s74', title: 'Video 25', note: '' },
+        { id: 'bBqQUqdJTVU', title: 'Video 26', note: '' },
+        { id: 'OHc_ZH_pkhQ', title: 'Video 27', note: '' },
+        { id: '3iQsY4Bi510', title: 'Video 28', note: '' },
+        { id: 'Ia7LPksqlR0', title: 'Video 29', note: '' },
+        { id: 'RU4j1WsU3dw', title: 'Video 30', note: '' },
+        { id: 'W-Rm8yN_-9A', title: 'Video 31', note: '' },
+        { id: '-G2XkygH9fI', title: 'Video 32', note: '' },
+        { id: 'xhq-WrZf53A', title: 'Video 33', note: '' },
+        { id: 'e0LCeMTDxro', title: 'Video 34', note: '' },
+        { id: 'qIJdG3YcB48', title: 'Video 35', note: '' },
+        { id: 'EJ1QNP-AKzc', title: 'Video 36', note: '' },
+        { id: 'UQ2njZ89rvY', title: 'Video 37', note: '' },
+        { id: '-U7QMl76Ixg', title: 'Video 38', note: '' },
+        { id: '8ctAug8xT7M', title: 'Video 39', note: '' },
+        { id: 'uFThdXspww4', title: 'Video 40', note: '' },
+        { id: 'nJg1pavURCU', title: 'Video 41', note: '' },
+        { id: 'X8dXWT85uhQ', title: 'Video 42', note: '' },
+        { id: 'gpQwPUyOSE0', title: 'Video 43', note: '' },
+        { id: 'YaoOjURVKgE', title: 'Video 44', note: '' }
       ]
     };
 
@@ -6389,30 +6445,26 @@ document.addEventListener('keydown', function (e) {
       transition: left 0.5s;
     }
     
-    #inlineCloseBtn:hover {
-      opacity: 1;
+    #inlineCloseBtn {
+      opacity: 1 !important;
       transform: translateY(-4px) scale(1.08);
       background: linear-gradient(135deg, 
         rgba(255,255,255,0.25) 0%, 
         rgba(255,255,255,0.15) 50%, 
-        rgba(200,200,200,0.1) 100%);
+        rgba(200,200,200,0.1) 100%) !important;
       box-shadow: 
         0 15px 40px rgba(0,0,0,0.5),
         0 5px 15px rgba(0,0,0,0.4),
         inset 0 2px 0 rgba(255,255,255,0.4),
         inset 0 -2px 0 rgba(0,0,0,0.1),
         0 0 25px rgba(255,255,255,0.4);
-      border-color: rgba(255,255,255,0.6);
+      border-color: rgba(255,255,255,0.6) !important;
       text-shadow: 0 0 15px rgba(255,255,255,0.9);
     }
     
-    #inlineCloseBtn:hover::before {
-      left: 100%;
-    }
-    
     #inlineCloseBtn:hover {
-      background: rgba(255,0,0,0.7);
-      border-color: rgba(255,255,255,0.4);
+      background: rgba(255,0,0,0.7) !important;
+      border-color: rgba(255,255,255,0.4) !important;
       transform: scale(1.1);
     }
 
@@ -6519,25 +6571,13 @@ document.addEventListener('keydown', function (e) {
 
     // Tugmalarni ko'rsatish/yashirish funksiyalari
     function showVideoControls() {
-      
-     
       const close = document.getElementById('inlineCloseBtn');
-      
-      
-      
-      
-      if (close) close.style.opacity = '0.8';
-      
+      if (close) close.style.opacity = '1';
     }
     
     function hideVideoControls() {
-     
       const close = document.getElementById('inlineCloseBtn');
-      
-      
-      
-      if (close) close.style.opacity = '0.4';
-      
+      if (close) close.style.opacity = '1';
     }
 
     // cover helpers: show/hide the inline cover that hides YouTube end-screen thumbnails
@@ -6772,33 +6812,7 @@ document.addEventListener('keydown', function (e) {
       }
     }
 
-    // Footer link animatsiyalarini ishga tushirish
-    document.addEventListener('DOMContentLoaded', function() {
-      const footerLinks = document.querySelectorAll('.footer-contact');
-      footerLinks.forEach(link => {
-        // Matnlarni emoji bilan yangilash
-        const span = link.querySelector('span');
-        if (span) {
-          const text = span.textContent.trim();
-          if (text.includes('TAKLIF uchun')) {
-            span.textContent = ' TAKLIF uchun bog\'laning ';
-          } else if (text.includes('Your opinion important')) {
-            span.textContent = ' Your opinion important for us !!! ';
-          } else if (text.includes('If you subscribe')) {
-            span.textContent = ' If you subscribe our YouTube channel, we will be so much happy! ';
-          }
-        }
-        
-        // Hover effektini kuchaytirish
-        link.addEventListener('mouseenter', function() {
-          this.style.transform = 'translateY(-5px) scale(1.05)';
-        });
-        
-        link.addEventListener('mouseleave', function() {
-          this.style.transform = 'translateY(0) scale(1)';
-        });
-      });
-    });
+
 
     // Matnni tanlash va tarjima qilish
     document.addEventListener('mouseup', async function() {
