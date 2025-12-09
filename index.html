@@ -2883,8 +2883,8 @@ body[data-theme="dark"] .logo {
             Har bir video sizga tilni yanada tabiiyroq o‘rganishga yordam beradi!
           </p>
           <div style="display:flex;gap:12px;align-items:center">
-            <button class="enter-btn" id="showResourcesBtn" onclick="openResources()"><span class="material-icons"
-                style="font-size:18px">arrow_forward</span> ENTER — Kirish </button>
+      <button class="enter-btn" id="showResourcesBtn"><span class="material-icons"
+        style="font-size:18px">arrow_forward</span> ENTER — Kirish </button>
                 
           </div>
 
@@ -5390,9 +5390,7 @@ body[data-theme="dark"] .logo {
 
 
 
-    if (enter) {
-      try { enter.addEventListener('click', () => openSections()); } catch (e) { enter.onclick = () => openSections(); }
-    }
+    // Enter button binding is handled during DOMContentLoaded initialization above.
 
     function renderSections() {
       sectionsGrid.innerHTML = '';
