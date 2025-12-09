@@ -247,12 +247,14 @@ body[data-theme="dark"] .logo {
             modalBg.innerHTML = `
       <div class="modal">
         <button class="modal-close" onclick="closeModal()"><span class="material-icons">close</span></button>
-        <div class="video-container">
-          <iframe id="videoPlayer" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe>
-
+        <!-- Container where the iframe will be injected by initPlayerWithId -->
+        <div id="resourceModalContent" class="video-container" style="width:90vw; height:85vh; max-width:1400px; background:#000; border-radius:12px; overflow:hidden;">
+          <!-- iframe will be placed here -->
         </div>
       </div>
     `;
+            // Make modal visible and prevent body scroll
+            try { modalBg.style.display = 'flex'; modalBg.onclick = function (e) { if (e.target === modalBg) closeModal(); }; document.body.style.overflow = 'hidden'; } catch(e){}
         // Initialize the player via IFrame API after inserting the iframe
         try { window.initPlayerWithId && window.initPlayerWithId(videoId); } catch(e) { console.error(e); }
         // Inject desktop layout tweaks as a <style> element (CSS accidentally placed inside JS previously)
@@ -282,7 +284,10 @@ body[data-theme="dark"] .logo {
       try { document.body.style.overflow = 'hidden'; } catch (e) {}
         };
 
-        window.closeModal = function() {
+  // Save preferred modal show function (protect against later duplicate overrides)
+  try { window.__preferredShowModal = window.showModal; } catch(e){}
+
+  window.closeModal = function() {
           modalBg = modalBg || document.getElementById('modalBg');
           try { if (modalBg) { modalBg.style.display = 'none'; modalBg.innerHTML = ''; } document.body.style.overflow = ''; } catch (e) {}
         };
@@ -307,15 +312,22 @@ body[data-theme="dark"] .logo {
           try {
             const modalContent = document.getElementById('resourceModalContent');
             if (modalContent) {
+              // Defensive cleanup: remove any existing iframes to avoid layering issues
+              try { Array.from(modalContent.querySelectorAll('iframe')).forEach(f => f.remove()); } catch(e){}
+
+              const src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(vid) + '?autoplay=1&controls=1&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3';
               modalContent.innerHTML = `<iframe 
                 width="100%" 
                 height="100%" 
-                src="https://www.youtube.com/embed/${encodeURIComponent(vid)}?autoplay=1&controls=1&rel=0&modestbranding=1&playsinline=1" 
+                src="${src}" 
                 frameborder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" 
                 allowfullscreen 
-                style="border:none;">
+                style="border:none;width:100%;height:100%;display:block;">
               </iframe>`;
+
+              // make sure modalBg is visible
+              try { const mb = document.getElementById('modalBg'); if (mb) mb.style.display = 'flex'; } catch(e){}
             }
             hideOverlay();
           } catch (err) { 
@@ -1250,10 +1262,24 @@ body[data-theme="dark"] .logo {
     @media (max-width: 768px) {
       #resourceWindowGrid {
         justify-items: stretch; /* let items fill the available width on mobile */
-        padding-left: 10px !important;
-        padding-right: 10px !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        width: 100vw !important;
+        box-sizing: border-box;
       }
-      #resourceWindowGrid > .resource-card { max-width: none; }
+      #resourceWindowGrid > .resource-card { 
+        max-width: none !important; 
+        width: 100vw !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      #resourceWindowGrid .video-item {
+        width: 100vw !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+      }
       #resourceWindowGrid .play-button {
         left: auto !important;
         right: 14px !important;
@@ -1406,6 +1432,17 @@ body[data-theme="dark"] .logo {
       padding: 20px;
       background: var(--surface);
       border-radius: 12px;
+    }
+
+    @media (max-width: 768px) {
+      #resourceWindow {
+        width: 100vw !important;
+        max-width: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        margin-left: calc(-50vw + 50%) !important;
+        border-radius: 0 !important;
+      }
     }
 
     #resourceWindowGrid {
@@ -2618,6 +2655,43 @@ body[data-theme="dark"] .logo {
     border-color: #2a2a2a !important;
   }
 
+  /* Modal iframe responsive rules to ensure the injected iframe fills the viewport on mobile
+     and doesn't leave stray thumbnails or tiny overlays visible behind it. */
+  #modalBg .modal, #resourceModal, #inlineVideoModal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Ensure injected iframes stretch correctly */
+  #resourceModalContent iframe,
+  #inlineVideoPlayerWrap iframe,
+  #modalBg iframe {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 100vh !important;
+    max-width: 100vw !important;
+    border: 0 !important;
+    display: block !important;
+  }
+
+  /* On small screens make the modal consume the full viewport so YouTube controls don't overlap */
+  @media (max-width: 768px) {
+    #modalBg .modal, #resourceModal, #inlineVideoModal {
+      width: 100vw !important;
+      height: 100vh !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      border-radius: 0 !important;
+    }
+    #resourceModalContent {
+      width: 100vw !important;
+      height: 100vh !important;
+      max-width: none !important;
+      max-height: none !important;
+    }
+  }
+
   /* External-open banner created dynamically */
   body[data-theme="dark"] #externalOpenBanner {
     background: linear-gradient(90deg,#121417,#1b2025) !important;
@@ -2667,12 +2741,7 @@ body[data-theme="dark"] .logo {
       }
     }
   </style>
-  <!-- Video Modal Container -->
-  <div id="videoPlayerModal" class="video-modal" style="display: none;">
-    <div class="video-player">
-      <div id="videoPlayer"></div>
-    </div>
-  </div>
+  <!-- Video Modal Container (handled dynamically via showModal) -->
 
   <div class="bg-anim"></div>
   <div class="wrap">
@@ -2919,18 +2988,7 @@ body[data-theme="dark"] .logo {
       </div>
     </main>
 
-  <!-- Video player modal window -->
-  <div id="videoPlayerModal" class="video-modal" style="display:none">
-    <div class="video-modal-content">
-      <div class="video-modal-header">
-        <h2 id="videoTitle">Video Bo'limi</h2>
-        <button class="close-btn" onclick="closeVideoModal()">✕</button>
-      </div>
-      <div class="video-player-container">
-        <div id="videoPlayer" class="video-player"></div>
-      </div>
-    </div>
-  </div>
+  <!-- Video player modal window (removed duplicate static modal; dynamic modal from showModal() is used) -->
 
   <!-- Full resource window (like lug'at gallery) -->
   <main id="resourceWindow" class="section-card" style="display:none">
@@ -5187,20 +5245,8 @@ body[data-theme="dark"] .logo {
 
 
 
-    function showModal(title, desc) {
-      modalBg.innerHTML = `
-      <div class="modal">
-        <button class="modal-close" onclick="closeModal()"><span class="material-icons">close</span></button>
-        <div class="video-container">
-          <iframe id="videoPlayer" allowfullscreen></iframe>
-
-        </div>
-      </div>
-    `;
-      modalBg.style.display = 'flex';
-      modalBg.onclick = function (e) { if (e.target === modalBg) closeModal(); };
-    }
-    function closeModal() { modalBg.style.display = 'none'; modalBg.innerHTML = ''; }
+    // Note: showModal and closeModal are defined dynamically in head script
+    // Do NOT redefine them here
 
     function escapeHtml(s) {
       if (!s) return '';
@@ -6017,13 +6063,16 @@ document.addEventListener('keydown', function (e) {
           const div = document.createElement('div');
           div.className = 'video-item';
           div.tabIndex = 0;
-          div.setAttribute('data-src', `https://www.youtube.com/embed/${v.id}?rel=0&controls=1`);
+          div.setAttribute('data-src', `https://www.youtube-nocookie.com/embed/${v.id}?rel=0&controls=1&playsinline=1&iv_load_policy=3`);
           div.setAttribute('data-title', v.title);
           div.innerHTML = `<img class="video-thumb" src="https://i.ytimg.com/vi/${v.id}/hqdefault.jpg" alt="thumb">
             <div class="title-col"><div class="small-title">${v.title}</div><div class="small-meta">${v.note}</div></div>`;
           div.addEventListener('click', ()=>{
             const src = div.getAttribute('data-src');
-            if(player) player.innerHTML = `<iframe src="${src}&controls=1" title="${v.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+            if(player) {
+            try { Array.from(player.querySelectorAll('iframe')).forEach(f=>f.remove()); } catch(e){}
+            player.innerHTML = `<iframe src="${src}&controls=1&playsinline=1&iv_load_policy=3" title="${escapeHtml(v.title)}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen style="width:100%;height:100%;border:0;display:block"></iframe>`;
+          }
             if(resourceNote) resourceNote.textContent = v.note;
           });
           videoList.appendChild(div);
@@ -6032,7 +6081,7 @@ document.addEventListener('keydown', function (e) {
         // set first
         if(samples[0] && player){
           const v = samples[0];
-          player.innerHTML = `<iframe src="https://www.youtube.com/embed/${v.id}?rel=0&controls=1" title="${v.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+          player.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${v.id}?rel=0&controls=1&playsinline=1&iv_load_policy=3" title="${escapeHtml(v.title)}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen style="width:100%;height:100%;border:0;display:block"></iframe>`;
           if(resourceNote) resourceNote.textContent = samples[0].note;
         }
       }catch(e){console.error(e)}
@@ -6214,17 +6263,17 @@ document.addEventListener('keydown', function (e) {
       const modalContent = document.getElementById('resourceModalContent');
       
       // Use simple iframe embed — no complex player initialization, no timeouts
+      try { Array.from(modalContent.querySelectorAll('iframe')).forEach(f=>f.remove()); } catch(e){}
       modalContent.innerHTML = `<iframe 
         width="100%" 
         height="100%" 
-        src="https://www.youtube.com/embed/${encodeURIComponent(videoId)}?autoplay=1&controls=1&rel=0&modestbranding=1&playsinline=1" 
+        src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}?autoplay=1&controls=1&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3" 
         frameborder="0" 
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" 
         allowfullscreen 
-        style="border:none;border-radius:8px;">
+        style="border:none;border-radius:8px;width:100%;height:100%;display:block;">
       </iframe>`;
-      
-      document.getElementById('resourceModalBg').style.display = 'flex';
+      try { document.getElementById('resourceModalBg').style.display = 'flex'; } catch(e){};
       
       // Video modal ochilganini belgilash - orqaga tugmasi video yopsin
       window.videoModalActive = true;
@@ -6725,15 +6774,19 @@ document.addEventListener('keydown', function (e) {
       
       const bg = document.getElementById('inlineVideoModalBg');
       const wrap = document.getElementById('inlineVideoPlayerWrap');
+      // Hide other resource modal if accidentally open to avoid overlapping players
+      try { const resBg = document.getElementById('resourceModalBg'); if (resBg) resBg.style.display = 'none'; } catch(e){}
       bg.style.display = 'flex';
+      // Defensive cleanup
+      try { Array.from(wrap.querySelectorAll('iframe')).forEach(f => f.remove()); } catch(e){}
       wrap.innerHTML = `<iframe 
         width="100%" 
         height="100%" 
-        src="https://www.youtube.com/embed/${encodeURIComponent(videoId)}?autoplay=1&controls=1&rel=0&modestbranding=1&playsinline=1" 
+        src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}?autoplay=1&controls=1&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3" 
         frameborder="0" 
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" 
         allowfullscreen 
-        style="border:none;">
+        style="border:none;width:100%;height:100%;display:block;">
       </iframe>`;
       
       // Show inline cover (blocks YouTube end-screen suggestions)
@@ -6971,6 +7024,14 @@ document.addEventListener('keydown', function (e) {
 
   </script>
 
+  <!-- Restore preferred modal implementation in case duplicates overwrote it -->
+  <script>
+    try {
+      if (window.__preferredShowModal && typeof window.__preferredShowModal === 'function') {
+        window.showModal = window.__preferredShowModal;
+      }
+    } catch (e) { console.error('restore showModal error', e); }
+  </script>
+
 </body>
 </html>
-
