@@ -2927,7 +2927,7 @@ body[data-theme="dark"] .logo {
         lug‘atlar mavjud.</p>
       <div class="sections" id="sectionsGrid"></div>
       <div style="margin-top:18px;display:flex;justify-content:center">
-        <button class="btn" onclick="goHome()"><span class="material-icons" style="font-size:18px">arrow_back</span>
+        <button class="btn" onclick="goHome(false)"><span class="material-icons" style="font-size:18px">arrow_back</span>
           Bosh sahifaga qaytish</button>
       </div>
     </main>
@@ -2963,7 +2963,7 @@ body[data-theme="dark"] .logo {
         <div id="resourceVideoGrid"
           style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px"></div>
         <div style="margin-top:14px;display:flex;justify-content:center"><button class="btn"
-            onclick="openResources()">⬅️ Orqaga</button></div>
+            onclick="openResources(false)">⬅️ Orqaga</button></div>
       </div>
     </main>
 
@@ -2983,7 +2983,7 @@ body[data-theme="dark"] .logo {
       <div class="gallery" id="galleryGrid"></div>
 
       <div class="controls" id="galleryControls">
-        <button class="btn" onclick="openSections()"><span class="material-icons"
+        <button class="btn" onclick="openSections(false)"><span class="material-icons"
             style="font-size:18px">arrow_back</span> Orqaga</button>
       </div>
     </main>
@@ -5917,8 +5917,8 @@ body[data-theme="dark"] .logo {
     // safePush funksiyasini qo'shamiz
     function safePush(state, hash) {
       try {
-        // Video ochiq bo'lsa, history o'zgartirishni oldini olamiz
-        if (window.videoModalActive) {
+        // If a video is already open, allow push only when pushing a video state
+        if (window.videoModalActive && !(state && state.view === 'video')) {
           console.log('Video ochiq, history push bekor qilindi');
           return;
         }
@@ -5926,17 +5926,6 @@ body[data-theme="dark"] .logo {
       } catch (e) {
         console.error('safePush error:', e);
       }
-    }
-
-    // handleNavigationState funksiyasini qo'shamiz
-    function handleNavigationState(evt) {
-      // Video ochiq bo'lsa, navigatsiyani bekor qilamiz
-      if (window.videoModalActive) {
-        console.log('Video ochiq, navigation bekor qilindi');
-        return;
-      }
-      // Boshqa navigatsiya logikasi
-      goHome(false);
     }
 
     // Handle page reload/refresh
@@ -6088,7 +6077,7 @@ document.addEventListener('keydown', function (e) {
     })();
 
     // Full resources view (second window) functions
-    function openResources() {
+    function openResources(push = true) {
       // hide other main views and ensure proper cleanup
       document.getElementById('sectionsView').style.display = 'none';
       document.getElementById('galleryView').style.display = 'none';
@@ -6098,7 +6087,7 @@ document.addEventListener('keydown', function (e) {
       
       // Render sections and handle navigation
       renderResourceSections();
-      safePush({ view: 'resources' }, '#resources');
+      if (push) { safePush({ view: 'resources' }, '#resources'); }
       
       // Smooth scroll to top with header offset
   setTimeout(() => { try { setScrollOffsetAndScroll(document.getElementById('resourcesView'), 'smooth', 0); } catch (e) { } }, 20);
@@ -6275,8 +6264,11 @@ document.addEventListener('keydown', function (e) {
       </iframe>`;
       try { document.getElementById('resourceModalBg').style.display = 'flex'; } catch(e){};
       
-      // Video modal ochilganini belgilash - orqaga tugmasi video yopsin
-      window.videoModalActive = true;
+  // Video modal ochilganini belgilash - orqaga tugmasi video yopsin
+  window.videoModalActive = true;
+
+  // push video state so back button will close modal first
+  try { safePush({ view: 'video', section: currentSection, id: videoId }, `#video-${videoId}`); } catch (e) {}
 
       // show controls when opening
       try { showControls(); } catch (e) {}
@@ -6307,11 +6299,7 @@ document.addEventListener('keydown', function (e) {
       // iframe will auto-stop when hidden; no need to manually destroy anything
     }
 
-    // safe pushState fallback (use hash when pushState unavailable)
-    function safePush(stateObj, hash) {
-      try { history.pushState(stateObj, '', hash); }
-      catch (e) { try { location.hash = hash; } catch (e) { } }
-    }
+    
 
     // central navigation handler used by popstate and hashchange
     function handleNavigationState(evt) {
@@ -6323,6 +6311,12 @@ document.addEventListener('keydown', function (e) {
 
       const state = (evt && evt.state) || {};
       const hash = (location && location.hash) ? location.hash : '';
+
+      // If navigating to any non-video view, ensure any open video modals are closed first
+      if (state.view !== 'video') {
+        try { closeInlineVideo(); } catch (e) {}
+        try { closeResourceModal(); } catch (e) {}
+      }
 
       // Default to home if no state/hash
       if (!state.view && !hash) {
@@ -6337,6 +6331,20 @@ document.addEventListener('keydown', function (e) {
         openSections(false);
       } else if (state.view === 'gallery' && state.section) {
         openGallery(state.section, false);
+      } else if (state.view === 'resources' || hash === '#resources') {
+        // navigate to resources view without pushing new history
+        openResources(false);
+        // ensure any open video modal is closed when navigating views
+        try { closeInlineVideo(); } catch (e) {}
+        try { closeResourceModal(); } catch (e) {}
+      } else if (state.view === 'video' && (state.id || state.index !== undefined)) {
+        // open video modal/inline player for deep-link or history restore
+        try {
+          const vid = state.id || (resourceVideos[state.section] && resourceVideos[state.section][state.index] && resourceVideos[state.section][state.index].id) || '';
+          if (vid) openInlineVideo(vid, null, state.index || 0, false);
+        } catch (e) { }
+      } else if (state.view === 'resourceWindow' && state.section) {
+        openResourceSection(state.section, false);
       } else {
         // If no matching route, go home
         goHome(false);
@@ -6609,25 +6617,27 @@ document.addEventListener('keydown', function (e) {
     
     #inlineCloseBtn {
       opacity: 1 !important;
-      transform: translateY(-4px) scale(1.08);
+      transform: none;
       background: linear-gradient(135deg, 
         rgba(255,255,255,0.25) 0%, 
         rgba(255,255,255,0.15) 50%, 
         rgba(200,200,200,0.1) 100%) !important;
       box-shadow: 
-        0 15px 40px rgba(0,0,0,0.5),
-        0 5px 15px rgba(0,0,0,0.4),
-        inset 0 2px 0 rgba(255,255,255,0.4),
-        inset 0 -2px 0 rgba(0,0,0,0.1),
-        0 0 25px rgba(255,255,255,0.4);
+        0 10px 30px rgba(0,0,0,0.45),
+        0 4px 12px rgba(0,0,0,0.35),
+        inset 0 2px 0 rgba(255,255,255,0.35),
+        inset 0 -2px 0 rgba(0,0,0,0.08);
       border-color: rgba(255,255,255,0.6) !important;
-      text-shadow: 0 0 15px rgba(255,255,255,0.9);
+      text-shadow: 0 0 6px rgba(255,255,255,0.6);
+      transition: background 220ms ease, box-shadow 220ms ease, transform 220ms ease;
     }
-    
+
+    /* Subtle, non-popping red hover effect */
     #inlineCloseBtn:hover {
-      background: rgba(255,0,0,0.7) !important;
-      border-color: rgba(255,255,255,0.4) !important;
-      transform: scale(1.1);
+      background: linear-gradient(90deg, rgba(255,70,70,0.95), rgba(220,30,60,0.95)) !important;
+      border-color: rgba(255,255,255,0.7) !important;
+      box-shadow: 0 10px 30px rgba(220,30,60,0.35), 0 4px 12px rgba(0,0,0,0.35);
+      transform: none; /* no popping/scale */
     }
 
     /* Telefon rejimi - tugmalarni pastki o'rtaga joylashtirish */
@@ -6658,10 +6668,13 @@ document.addEventListener('keydown', function (e) {
         position: absolute !important;
         right: 15px !important;
         top: 30px !important;
-        width: 50px !important;
-        height: 50px !important;
+        width: 56px !important;
+        height: 56px !important;
         font-size: 20px !important;
-        z-index: 15 !important;
+        z-index: 10020 !important;
+        background: rgba(255,255,255,0.18) !important;
+        border: 1px solid rgba(255,255,255,0.5) !important;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.45) !important;
       }
     }
 
@@ -6710,11 +6723,12 @@ document.addEventListener('keydown', function (e) {
   <div id="inlineVideoModalBg" style="display:none;position:fixed;inset:0;z-index:6000;align-items:center;justify-content:center;background:rgba(0,0,0,0.85);">
     <div id="inlineVideoModal">
    
-    <button id="inlineCloseBtn" aria-label="Close video" style="position:absolute;right:10px;top:10px;z-index:12;background:rgba(255,255,255,0.06);border:none;color:#fff;padding:8px;border-radius:8px;cursor:pointer;font-size:18px">✖</button>
+  <button id="inlineCloseBtn" aria-label="Close video" style="position:absolute;right:10px;top:10px;z-index:10010;background:rgba(255,255,255,0.12);border:none;color:#fff;padding:8px;border-radius:8px;cursor:pointer;font-size:18px">✖</button>
     
     
-    <div id="inlineCover" style="position:absolute;inset:0;z-index:11;display:none;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,0.0),rgba(0,0,0,0.6));"></div>
-  <div id="inlineVideoPlayerWrap" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#000;"></div>
+    <!-- semi-transparent bottom cover: blocks YouTube end-screen suggestions but keeps main video visible -->
+    <div id="inlineCover" style="position:absolute;left:0;right:0;bottom:0;height:28%;z-index:11;display:none;pointer-events:none;background:rgba(0,0,0,0.6);"></div>
+  <div id="inlineVideoPlayerWrap" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#000;z-index:12;"></div>
     </div>
   </div>
 
@@ -6763,7 +6777,7 @@ document.addEventListener('keydown', function (e) {
       } catch (e) { }
     }
     
-    function openInlineVideo(videoId, videoList = null, startIndex = 0) {
+    function openInlineVideo(videoId, videoList = null, startIndex = 0, push = true) {
       if (!videoId) return;
       
       // Agar video list berilgan bo'lsa, uni o'rnatamiz
@@ -6795,7 +6809,12 @@ document.addEventListener('keydown', function (e) {
       
       // Video modal ochilganini belgilash
       window.videoModalActive = true;
-      
+
+      // push a history state so back button closes the modal first
+      try {
+        if (push) safePush({ view: 'video', section: currentSection, index: inlineResourceIndex, id: videoId }, `#video-${videoId}`);
+      } catch (e) {}
+
       // Tugmalar CSS hover bilan boshqariladi
       updateInlineNavButtons();
     }
@@ -6826,44 +6845,7 @@ document.addEventListener('keydown', function (e) {
       } catch (e) { }
     }
 
-    // Orqaga qaytish tugmasini intercept qilish - VIDEO MODAL UCHUN
-    // Video ochiq bo'lganda "Orqaga" video yopadi, boshqa payti normal orqaga ishlaydi
-    (function() {
-      let originalPushState = history.pushState;
-      let originalReplaceState = history.replaceState;
-      
-      history.pushState = function() {
-        if (window.videoModalActive) {
-          // Ikki modaldan qaysi biri ochiq, shunga qarab yopamiz
-          const inlineBg = document.getElementById('inlineVideoModalBg');
-          const resourceBg = document.getElementById('resourceModalBg');
-          if (inlineBg && inlineBg.style.display === 'flex') {
-            closeInlineVideo();
-          } else if (resourceBg && resourceBg.style.display === 'flex') {
-            closeResourceModal();
-          }
-          return;
-        }
-        return originalPushState.apply(history, arguments);
-      };
-      
-      window.addEventListener('popstate', function(e) {
-        if (window.videoModalActive) {
-          e.stopPropagation();
-          e.preventDefault();
-          // Ikki modaldan qaysi biri ochiq, shunga qarab yopamiz
-          const inlineBg = document.getElementById('inlineVideoModalBg');
-          const resourceBg = document.getElementById('resourceModalBg');
-          if (inlineBg && inlineBg.style.display === 'flex') {
-            closeInlineVideo();
-          } else if (resourceBg && resourceBg.style.display === 'flex') {
-            closeResourceModal();
-          }
-          history.pushState(null, '', window.location.href);
-          return false;
-        }
-      }, true);
-    })();
+    // Video modal history interception removed: rely on explicit pushState when opening/closing modals
 
     function playNextResource() {
       try {
