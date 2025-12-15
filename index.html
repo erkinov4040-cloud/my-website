@@ -3,6 +3,7 @@
 <html lang="uz">
 
 <head>
+    
   <style>
 
     /* Custom overlay styles for modal video */
@@ -248,7 +249,7 @@ body[data-theme="dark"] .logo {
       <div class="modal">
         <button class="modal-close" onclick="closeModal()"><span class="material-icons">close</span></button>
         <!-- Container where the iframe will be injected by initPlayerWithId -->
-        <div id="resourceModalContent" class="video-container" style="width:90vw; height:85vh; max-width:1400px; background:#000; border-radius:12px; overflow:hidden;">
+              <div id="resourceModalContent" class="video-container" style="width:90vw; height:90vh; max-width:none; background:#000; border-radius:12px; overflow:hidden;">
           <!-- iframe will be placed here -->
         </div>
       </div>
@@ -2717,6 +2718,67 @@ body[data-theme="dark"] .logo {
 
 <body>
   <style>
+    /* Hide any visible close buttons in video/resource modals.
+       Targets common classes, scoped IDs, and buttons that call close handlers.
+       This keeps the JS intact but removes visible X controls.
+       If you later want to disable backdrop/ESC closing too, I can remove those handlers. */
+    .modal-close,
+    .close-video-btn,
+    #videoControls .control-btn,
+    #resourceModal #videoControls .control-btn,
+    #resourceModalBg .control-btn,
+    .control-btn[onclick*="closeResourceModal"],
+    .control-btn[onclick*="closeModal"],
+    button[onclick*="closeModal"],
+    button[onclick*="closeResourceModal"],
+    button[aria-label*="close" i],
+    .modal .modal-close,
+    #modalBg .modal-close,
+    .modal .control-btn {
+      display: none !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+
+    /* Force video/resource modals to use 90% of the viewport on all screens
+       — width: 90vw and height: 90vh regardless of viewport size. Use !important
+       to override other modal rules and inline styles. Also ensure the iframe
+       fills the modal. */
+    #modalBg .modal,
+    #modalBg .video-container,
+    #modalBg .video-player,
+    #resourceModal,
+    #resourceModalBg,
+    #resourceModalContent,
+    .video-modal,
+    .video-player,
+    .video-container,
+    .modal {
+      width: 90vw !important;
+      height: 90vh !important;
+      max-width: none !important;
+      max-height: none !important;
+      margin: 0 !important;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%) !important;
+      border-radius: 12px !important;
+      box-sizing: border-box !important;
+    }
+
+    /* Ensure injected iframes fill the modal area */
+    #modalBg iframe,
+    #resourceModalContent iframe,
+    .video-player iframe,
+    .video-container iframe {
+      width: 100% !important;
+      height: 100% !important;
+      max-width: none !important;
+      max-height: none !important;
+      border: 0 !important;
+      display: block !important;
+    }
+
     /* Force desktop-only phone preview to be taller so right column matches left cards.
        Using higher specificity and !important to override earlier declarations; mobile
        sizes remain untouched because of the media query. */
@@ -2932,13 +2994,7 @@ body[data-theme="dark"] .logo {
       </div>
     </main>
 
-    <!-- Video Player Modal -->
-    <div id="fullScreenVideo" class="fullscreen-video" style="display:none;">
-      <div class="video-container">
-        <button class="close-video" onclick="closeFullscreenVideo()">×</button>
-        <div id="videoPlayerWrapper" class="video-wrapper"></div>
-      </div>
-    </div>
+   
 
     <!-- Resources full view (second window) -->
     <main id="resourcesView" style="display:none">
@@ -3013,15 +3069,15 @@ body[data-theme="dark"] .logo {
     <br>
     <br>
 
-    <div>© CEFR Reading Vocabulary — Madeing for you</div>
+    <div>© CEFR Reading Vocabulary — Educational Project</div>
     <div class="footer-links" style="display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:10px;">
-      
+      <div style="font-weight:700; color:var(--text);">Contact:</div>
       <!-- Telegram 1 -->
       <a class="footer-contact" href="https://t.me/ErkinovTOP" target="_blank" rel="noopener noreferrer"
         style="display:inline-flex; align-items:center; gap:8px; width:auto;">
         <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram"
           style="width:20px;height:20px;display:inline-block;vertical-align:middle;" loading="lazy">
-        <span>TAKLIF uchun bog‘laning </span>
+        <span>For collaboration — <b class="admin-label admin-1">Admin 1 (Telegram)</b></span>
          <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram"
           style="width:20px;height:20px;display:inline-block;vertical-align:middle;" loading="lazy">
       </a>
@@ -3030,17 +3086,17 @@ body[data-theme="dark"] .logo {
         style="display:inline-flex; align-items:center; gap:8px; width:auto;">
         <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram"
           style="width:20px;height:20px;display:inline-block;vertical-align:middle;" loading="lazy">
-        <span>💬 Your opinion important for us !!! 💬</span>
+        <span>For feedback and suggestions — <b class="admin-label admin-2">Admin 2 (Telegram)</b></span>
         <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram"
           style="width:20px;height:20px;display:inline-block;vertical-align:middle;" loading="lazy">
       </a>
 
-      <!-- YouTube link (yangi qo‘shilgan qism) -->
+      <!-- YouTube link (official) -->
       <a class="footer-contact" href="http://www.youtube.com/@strimm5" target="_blank" rel="noopener noreferrer"
         style="display:inline-flex; align-items:center; gap:8px; width:auto;">
         <img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" alt="YouTube"
           style="width:22px;height:22px;display:inline-block;vertical-align:middle;" loading="lazy">
-        <span>🔔 If you subscribe our YouTube channel, we will be so much happy! 🔔</span>
+        <span>Official YouTube Channel — Subscribe !!!</span>
         <img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" alt="YouTube"
           style="width:22px;height:22px;display:inline-block;vertical-align:middle;" loading="lazy">
       </a>
@@ -3049,9 +3105,74 @@ body[data-theme="dark"] .logo {
     </div>
   </div>
 
-  <div class="horazm" style="margin-top:12px; margin-bottom:120px;">Madeing in Khorezm</div>
+  <div class="horazm" style="margin-top:12px; margin-bottom:120px;">Developed in Khorezm</div>
 
 </footer>
+
+<style>
+  /* Softer professional footer contact (light gray tone, no pop-out) */
+  footer .footer-contact {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 10px 14px !important;
+    border-radius: 10px !important;
+    background: #f4f7fa !important; /* soft gray */
+    color: #072033 !important; /* deep navy text */
+    border: 1px solid rgba(7,20,39,0.06) !important;
+    box-shadow: none !important; /* flat look */
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    text-decoration: none !important;
+    transition: background .12s ease !important;
+  }
+
+  /* subtle hover: slightly darker gray (no lift) */
+  footer .footer-contact:hover {
+    background: #e9eef4 !important;
+  }
+
+  /* Accessible focus ring */
+  footer .footer-contact:focus {
+    outline: none !important;
+    box-shadow: 0 0 0 4px rgba(7,20,39,0.08) !important;
+  }
+
+  /* Keep icons on both sides if markup includes them */
+  /* (removed rule that hid right-side duplicate icons so both left/right icons remain visible) */
+
+  /* Icons: subtle monochrome, consistent size */
+  footer .footer-contact img {
+    width: 18px !important;
+    height: 18px !important;
+    display: inline-block !important;
+    object-fit: contain !important;
+    filter: grayscale(90%) contrast(.95) !important;
+    opacity: 0.95 !important;
+  }
+
+  /* Keep link labels high-contrast against light background */
+  footer .footer-contact .fc-text { color: #072033 !important; }
+
+  /* Admin label color accents */
+  .admin-label { margin-left: 6px; padding: 2px 6px; border-radius: 6px; font-weight:800; }
+  .admin-1 { background: rgba(3,103,126,0.08); color: #036776 !important; }
+  /* Make Admin 2 blue as requested */
+  .admin-2 { background: rgba(3,103,126,0.06); color: #036776 !important; }
+
+  /* Dark mode adjustments: keep readable but slightly toned */
+  body[data-theme="dark"] footer .footer-contact {
+    background: #0b1b26 !important;
+    border-color: rgba(255,255,255,0.04) !important;
+    color: #e6eef6 !important;
+  }
+
+  body[data-theme="dark"] footer .footer-contact img { filter: grayscale(80%) brightness(.9) !important; }
+
+  @media (max-width: 650px) {
+    footer .footer-contact { padding: 8px 10px !important; font-size: 13px !important; }
+  }
+</style>
 
   </div>
 
@@ -6251,28 +6372,80 @@ document.addEventListener('keydown', function (e) {
       
       // Use simple iframe embed — no complex player initialization, no timeouts
       try { Array.from(modalContent.querySelectorAll('iframe')).forEach(f=>f.remove()); } catch(e){}
-      modalContent.innerHTML = `<iframe 
+      // Use enablejsapi=1 so we can detect end events via YT Player API
+      const iframeId = 'resourcePlayerIframe';
+      const src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(videoId) + '?autoplay=1&controls=1&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&enablejsapi=1';
+      modalContent.innerHTML = `<iframe id="${iframeId}" 
         width="100%" 
         height="100%" 
-        src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}?autoplay=1&controls=1&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3" 
+        src="${src}" 
         frameborder="0" 
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" 
         allowfullscreen 
         style="border:none;border-radius:8px;width:100%;height:100%;display:block;">
       </iframe>`;
       try { document.getElementById('resourceModalBg').style.display = 'flex'; } catch(e){};
-      
-  // Video modal ochilganini belgilash - orqaga tugmasi video yopsin
-  window.videoModalActive = true;
 
-  // push video state so back button will close modal first
-  try { safePush({ view: 'video', section: currentSection, id: videoId }, `#video-${videoId}`); } catch (e) {}
+      // Video modal ochilganini belgilash - orqaga tugmasi video yopsin
+      window.videoModalActive = true;
+
+      // push video state so back button will close modal first
+      try { safePush({ view: 'video', section: currentSection, id: videoId }, `#video-${videoId}`); } catch (e) {}
 
       // show controls when opening
       try { showControls(); } catch (e) {}
 
       // update prev/next UI based on current index/list
       try { updateNavigationButtons(); } catch (e) {}
+
+      // Setup YT player to auto-close when video ends and to clean up history
+      function setupResourceYTPlayer() {
+        try {
+          // destroy previous if exists
+          if (window._resourceYTPlayer && window._resourceYTPlayer.destroy) {
+            try { window._resourceYTPlayer.destroy(); } catch(e){}
+            window._resourceYTPlayer = null;
+          }
+          if (!window.YT || !window.YT.Player) return;
+          window._resourceYTPlayer = new YT.Player(iframeId, {
+            events: {
+              'onStateChange': function(e) {
+                // YT.PlayerState.ENDED === 0
+                if (e && e.data === 0) {
+                  try {
+                    // Close modal UI
+                    closeResourceModal();
+                  } catch (err) {}
+                  try { window.videoModalActive = false; } catch(e){}
+                  // Replace current history entry (video) so Back won't reopen it
+                  try {
+                    if (history && history.state && history.state.view === 'video') {
+                      history.replaceState({ view: 'resources' }, '', '#resources');
+                    }
+                  } catch (er) {}
+                }
+              }
+            }
+          });
+        } catch (err) { console.error('YT setup', err); }
+      }
+
+      // Load YT API if needed, then setup player
+      try {
+        if (window.YT && window.YT.Player) {
+          setupResourceYTPlayer();
+        } else {
+          // preserve existing onYouTubeIframeAPIReady if present
+          var prevYTReady = window.onYouTubeIframeAPIReady;
+          window.onYouTubeIframeAPIReady = function() {
+            try { if (typeof prevYTReady === 'function') prevYTReady(); } catch(e){}
+            try { setupResourceYTPlayer(); } catch(e){}
+          };
+          if (!document.getElementById('yt-iframe-api')) {
+            var tag = document.createElement('script'); tag.id = 'yt-iframe-api'; tag.src = 'https://www.youtube.com/iframe_api'; document.head.appendChild(tag);
+          }
+        }
+      } catch (err) { console.error(err); }
     }
 
     // back button for resource window (guarded)
@@ -6998,11 +7171,17 @@ document.addEventListener('keydown', function (e) {
 
 
 
-
+document.addEventListener("DOMContentLoaded", function () {
+  const btn = document.querySelector(".close-video");
+  if (btn) {
+    btn.remove();
+  }
+});
 
 
 
   </script>
+  
 
   <!-- Restore preferred modal implementation in case duplicates overwrote it -->
   <script>
